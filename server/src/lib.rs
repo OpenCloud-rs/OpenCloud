@@ -3,7 +3,7 @@ pub mod file {
 
     pub fn dir_content(path: &str) -> Vec<String> {
         let mut vec: Vec<String> = Vec::new();
-        let _paths = match fs::read_dir(path) {
+        let _paths = match fs::read_dir("/home".to_string() + path.to_string().as_ref()) {
             Ok(_f) => {
                 for path in _f {
                     vec.push(path.unwrap().path().display().to_string());

@@ -1,15 +1,6 @@
 use actix_web::{Responder, get};
 use serde_json::json;
-use serde::{Serialize, Deserialize};
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Folder {
-    pub result : bool,
-    pub lenght : i64,
-    pub content : Vec<String>
-
-}
-
+use shared::Folder as Folder;
 
 #[get("/hello")]
 async fn greet() -> impl Responder {
