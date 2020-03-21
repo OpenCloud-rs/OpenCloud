@@ -11,9 +11,7 @@ async fn main() -> std::io::Result<()> {
 	println!("Running on {}",ip);
     HttpServer::new(|| {
         App::new()
-            .service(greet)
             .service(cli)
-            .service(json)
     })
         .bind(ip)?
         .run()
