@@ -2,42 +2,26 @@
 
 use seed::{browser::service::fetch, prelude::*, *};
 use serde::{Deserialize, Serialize};
-
+use shared::Folder;
 const REPOSITORY_URL: &str = "http://127.0.0.1:8080/cli/";
-
-#[derive(Serialize)]
-struct SendMessageRequestBody {
-    pub name: String,
-    pub email: String,
-    pub message: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct SendMessageResponseBody {
-    pub success: bool,
-}
 
 // ------ ------
 //     Model
 // ------ ------
 
-#[derive(Debug, Serialize, Deserialize)]
-struct API {
-    pub result: String,
-    pub length: String
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Model {
-    api: API,
+    api: Folder,
 }
 
 impl Default for Model {
     fn default() -> Self {
         Self {
-            api: API {
-                result: "Loading...".into(),
-                length: "Loading...".into()
+            api: Folder {
+                result: false ,
+                lenght: 0,
+                content: vec![]
             },
         }
     }
@@ -57,12 +41,12 @@ fn after_mount(_: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
 // ------ ------
 
 enum Msg {
-    RepositoryInfoFetched(fetch::ResponseDataResult<API>),
+    RepositoryInfoFetched(fetch::ResponseDataResult<Folder>),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::RepositoryInfoFetched(Ok(API)) => model.api = API,
+        Msg::RepositoryInfoFetched(Ok(Folder)) => model.api = Folder,
 
         Msg::RepositoryInfoFetched(Err(fail_reason)) => {
             error!(format!(
@@ -89,7 +73,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
         md!["# Folder Info"],
         div![format!(
             "Result: {}, Lenght: {}",
-            model.api.result, model.api.length
+            model.api.result, model.api.lenght
         )],
     ]
 }
