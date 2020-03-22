@@ -2,7 +2,7 @@ pub mod component {
     use seed::{*, prelude::*};
     use crate::Msg;
 
-    pub fn a_component() -> Node<Msg> {
+    pub fn test_component() -> Node<Msg> {
         let item_style = style!{
         St::MarginTop => px(10);
         St::FontSize => unit!(1.2, em)

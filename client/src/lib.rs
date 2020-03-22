@@ -24,7 +24,7 @@ struct SendMessageResponseBody {
 #[derive(Debug, Serialize, Deserialize)]
 struct API {
     pub result: String,
-    pub legnth: String
+    pub length: String
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -37,7 +37,7 @@ impl Default for Model {
         Self {
             api: API {
                 result: "Loading...".into(),
-                legnth: "Loading...".into()
+                length: "Loading...".into()
             },
         }
     }
@@ -66,7 +66,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 
         Msg::RepositoryInfoFetched(Err(fail_reason)) => {
             error!(format!(
-                "Fetch error - Fetching repository info failed - {:#?}",
+                "Fetch error - Fetching folder info failed - {:#?}",
                 fail_reason
             ));
             orders.skip();
@@ -86,10 +86,10 @@ async fn fetch_repository_info() -> Result<Msg,Msg> {
 
 fn view(model: &Model) -> Vec<Node<Msg>> {
     nodes![
-        md!["# Repo info"],
+        md!["# Folder Info"],
         div![format!(
-            "Name: {}, SHA: {}",
-            model.api.result, model.api.legnth
+            "Result: {}, Lenght: {}",
+            model.api.result, model.api.length
         )],
     ]
 }
