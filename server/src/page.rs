@@ -17,6 +17,9 @@ async fn cli(req: HttpRequest) -> impl Responder {
         folder.result = false;
     }
 
-    HttpResponse::Ok().content_type("application/json").body(serde_json::to_string(&folder).unwrap())
+    HttpResponse::Ok()
+        .header("Access-Control-Allow-Origin", "*")
+        .content_type("application/json")
+        .body(serde_json::to_string(&folder).unwrap())
 }
 
