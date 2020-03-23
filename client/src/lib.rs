@@ -3,6 +3,7 @@
 use seed::{browser::service::fetch, prelude::*, *};
 use serde::{Deserialize, Serialize};
 use shared::Folder;
+mod component;
 const REPOSITORY_URL: &str = "http://127.0.0.1:8080/cli/";
 
 // ------ ------
@@ -40,13 +41,13 @@ fn after_mount(_: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
 //    Update
 // ------ ------
 
-enum Msg {
+pub enum Msg {
     RepositoryInfoFetched(fetch::ResponseDataResult<Folder>),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::RepositoryInfoFetched(Ok(Folder)) => model.api = Folder,
+        Msg::RepositoryInfoFetched(Ok(folder)) => model.api = folder,
 
         Msg::RepositoryInfoFetched(Err(fail_reason)) => {
             error!(format!(
@@ -69,13 +70,18 @@ async fn fetch_repository_info() -> Result<Msg,Msg> {
 // ------ ------
 
 fn view(model: &Model) -> Vec<Node<Msg>> {
+
     nodes![
         md!["# Folder Info"],
         div![format!(
-            "Result: {}, Lenght: {}",
+            "Result: {}, Lenght: {},",
             model.api.result, model.api.lenght
         )],
+        h4!["Content info"],
+        component::component::folder_list(model.api.content.clone())
+
     ]
+
 }
 
 // ------ ------

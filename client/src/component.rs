@@ -2,18 +2,10 @@ pub mod component {
     use seed::{*, prelude::*};
     use crate::Msg;
 
-    pub fn test_component() -> Node<Msg> {
-        let item_style = style!{
-        St::MarginTop => px(10);
-        St::FontSize => unit!(1.2, em)
-    };
-
+    pub fn folder_list(content: Vec<String>) -> Node<Msg>{
         div![
-        ul![
-            li![ &item_style, "Item 1", ],
-            li![ &item_style, "Item 2", ],
+               content.iter().map(|t| h4![t.to_string()]),
         ]
-    ]
     }
 
 }
