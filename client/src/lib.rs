@@ -42,23 +42,23 @@ fn after_mount(url: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
 // ------ ------
 
 pub enum Msg {
-    RoutePage(String),
-    RepositoryInfoFetched(fetch::ResponseDataResult<Folder>),
+    RoutePage(Url),
+    Fetched(fetch::ResponseDataResult<Folder>),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::RepositoryInfoFetched(Ok(folder)) => model.api = folder,
+        Msg::Fetched(Ok(folder)) => model.api = folder,
 
-        Msg::RepositoryInfoFetched(Err(fail_reason)) => {
+        Msg::Fetched(Err(fail_reason)) => {
             error!(format!(
                 "Fetch error - Fetching folder info failed - {:#?}",
                 fail_reason
             ));
             orders.skip();
         }
-        Msg::RoutePage(url) => {
-            model.uri = (&url).parse().unwrap();
+        Msg::RoutePage(url,) => {
+            orders.skip().perform_cmd(fetch_repository_info(url));
         }
     }
 }
@@ -69,8 +69,9 @@ async fn fetch_repository_info(url: Url) -> Result<Msg,Msg> {
 
     url_string.push_str(&url.path.into_iter().collect::<Vec<String>>().join("/"));
     log!(url_string);
+
     Request::new(url_string)
-        .fetch_json_data(Msg::RepositoryInfoFetched)
+        .fetch_json_data(Msg::Fetched)
         .await
 }
 
@@ -95,14 +96,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
 }
 
 fn routes(url: Url) -> Option<Msg>{
-    if url.path.is_empty() {
-        println!();
-    }
-
-    let url_string =  url.path.into_iter().collect::<Vec<String>>().join("/");
-
-    Some(Msg::RoutePage(url_string))
-
+    Some(Msg::RoutePage(url))
 }
 
 //     Start

@@ -1,3 +1,4 @@
 target/*
 *.lock
-Cargo.lock
+Cargo.lockclient/.project
+client/.project
