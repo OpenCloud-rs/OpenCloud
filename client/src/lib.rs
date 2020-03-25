@@ -1,5 +1,3 @@
-#![allow(clippy::large_enum_variant)]
-
 use seed::{browser::service::fetch, prelude::*, *};
 use serde::{Deserialize, Serialize};
 use shared::Folder;
@@ -34,8 +32,8 @@ impl Default for Model {
 //  After Mount
 // ------ ------
 
-fn after_mount(_: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
-    orders.perform_cmd(fetch_repository_info(REPOSITORY_URL));
+fn after_mount(url: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
+    orders.perform_cmd(fetch_repository_info(url));
     AfterMount::default()
 }
 
@@ -60,14 +58,17 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip();
         }
         Msg::RoutePage(url) => {
-            model.uri = url;
+            model.uri = (&url).parse().unwrap();
         }
     }
 }
 
-async fn fetch_repository_info(add_url: &str) -> Result<Msg,Msg> {
-    let mut url_string : String = REPOSITORY_URL.to_owned();
-    url_string.push_str(add_url);
+
+async fn fetch_repository_info(url: Url) -> Result<Msg,Msg> {
+    let mut url_string : String = REPOSITORY_URL.to_owned() ;
+
+    url_string.push_str(&url.path.into_iter().collect::<Vec<String>>().join("/"));
+    log!(url_string);
     Request::new(url_string)
         .fetch_json_data(Msg::RepositoryInfoFetched)
         .await
@@ -80,7 +81,7 @@ async fn fetch_repository_info(add_url: &str) -> Result<Msg,Msg> {
 fn view(model: &Model) -> Vec<Node<Msg>> {
 
     nodes![
-        h2!["{}", model.uri]
+        h2![model.uri]
         md!["# Folder Info"],
         div![format!(
             "Result: {}, Lenght: {},",
@@ -97,6 +98,7 @@ fn routes(url: Url) -> Option<Msg>{
     if url.path.is_empty() {
         println!();
     }
+
     let url_string =  url.path.into_iter().collect::<Vec<String>>().join("/");
 
     Some(Msg::RoutePage(url_string))
