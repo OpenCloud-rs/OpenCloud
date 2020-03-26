@@ -1,5 +1,7 @@
 use actix_web::{get, Responder};
 use shared::Folder;
+use actix_web::dev::BodyEncoding;
+use actix_web::http::ContentEncoding;
 
 #[get("/cli/{path:.*}")]
 async fn cli(req: HttpRequest) -> impl Responder {
@@ -20,6 +22,7 @@ async fn cli(req: HttpRequest) -> impl Responder {
     HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .content_type("application/json")
+        .encoding(ContentEncoding::Gzip)
         .body(serde_json::to_string(&folder).unwrap())
 }
 
