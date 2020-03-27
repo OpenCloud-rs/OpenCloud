@@ -2,3 +2,4 @@ target/*
 *.lock
 Cargo.lockclient/.project
 client/.project
+server/.idea/

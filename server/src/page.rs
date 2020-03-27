@@ -21,6 +21,7 @@ async fn cli(req: HttpRequest) -> impl Responder {
 
     HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
+        .header("charset","utf-8")
         .content_type("application/json")
         .encoding(ContentEncoding::Gzip)
         .body(serde_json::to_string(&folder).unwrap())
