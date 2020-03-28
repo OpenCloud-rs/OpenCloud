@@ -10,7 +10,7 @@ pub mod file {
                 }
             }
             Err(_e) => {
-                vec.push("Error".parse().unwrap());
+                vec.push(String::from("Error"));
                 println!("Le dossier est inexistant");
             }
 
