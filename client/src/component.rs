@@ -6,7 +6,7 @@ pub mod component {
     pub fn folder_list(content: Vec<String>) -> Node<Msg> {
         div![
           table![
-            tr![td![a!["..",attrs!{At::Href => ".."}]]],
+            tr![td![a![".",attrs!{At::Href => "."}]]],
             content.iter().map(|t| tr![td![a![t.to_string(),attrs!{At::Href => format!["{}",t.to_string()]}]]])
           ]
         ]
