@@ -14,7 +14,7 @@ async fn cli(req: HttpRequest) -> impl Responder {
         lenght: path.len() as i64,
         content: (&mut path).to_owned(),
     };
-    let start: String = "Error".parse().unwrap();
+    let start: String = String::from("Error");
     if path.starts_with(&[start]) {
         folder.result = false;
     }
