@@ -1,5 +1,3 @@
-use std::convert::TryFrom;
-use actix_service::ServiceFactory;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 
@@ -24,7 +22,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(actix_files::Files::new("/pkg/", "./client/pkg/").show_files_listing().index_file("index.html").use_last_modified(true))
             .default_service(web::resource("")
-                                 .route(web::get().to(p404))
+                                 .route(web::get().to(client))
                                  // all requests that are not `GET`
                                  .route(
                                      web::route()
