@@ -13,9 +13,8 @@ pub mod file {
                 vec.push(String::from("Error"));
                 println!("Le dossier est inexistant");
             }
-
         };
-    vec
+        vec
     }
 }
 
@@ -30,7 +29,10 @@ pub mod http {
             .unwrap_or("")
     }
     pub fn log(request: &HttpRequest) {
-        println!("Nouvel utilisateur sur {} , Ip : {}", request.path(), request.connection_info().remote().unwrap())
+        println!(
+            "Nouvel utilisateur sur {} , Ip : {}",
+            request.path(),
+            request.connection_info().remote().unwrap()
+        )
     }
 }
-

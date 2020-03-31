@@ -1,8 +1,8 @@
-use actix_web::{get, Responder};
-use shared::Folder;
 use actix_files as fs;
-use actix_web::http::{StatusCode};
-use actix_web::{guard,web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web::http::StatusCode;
+use actix_web::{get, Responder};
+use actix_web::{guard, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use shared::Folder;
 #[get("/cli/{path:.*}")]
 async fn cli(req: HttpRequest) -> impl Responder {
     crate::lib::http::log(&req);
@@ -21,7 +21,7 @@ async fn cli(req: HttpRequest) -> impl Responder {
 
     HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
-        .header("charset","utf-8")
+        .header("charset", "utf-8")
         .content_type("application/json")
         .encoding(ContentEncoding::Gzip)
         .body(serde_json::to_string(&folder).unwrap())

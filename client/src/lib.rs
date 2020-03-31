@@ -8,22 +8,21 @@ const REPOSITORY_URL: &str = "http://127.0.0.1:8080/cli/";
 //     Model
 // ------ ------
 
-
 #[derive(Debug, Serialize, Deserialize)]
 struct Model {
     api: Folder,
-    uri: String
+    uri: String,
 }
 
 impl Default for Model {
     fn default() -> Self {
         Self {
             api: Folder {
-                result: false ,
+                result: false,
                 lenght: 0,
-                content: vec![]
+                content: vec![],
             },
-            uri: String::from("")
+            uri: String::from(""),
         }
     }
 }
@@ -49,7 +48,6 @@ pub enum Msg {
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::Fetched(Ok(folder)) => model.api = folder,
-
         Msg::Fetched(Err(fail_reason)) => {
             error!(format!(
                 "Fetch error - Fetching folder info failed - {:#?}",
@@ -57,22 +55,19 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             ));
             orders.skip();
         }
-        Msg::RoutePage(url,) => {
+        Msg::RoutePage(url) => {
             orders.skip().perform_cmd(fetch_repository_info(url));
         }
     }
 }
 
-
-async fn fetch_repository_info(url: Url) -> Result<Msg,Msg> {
-    let mut url_string : String = REPOSITORY_URL.to_owned() ;
+async fn fetch_repository_info(url: Url) -> Result<Msg, Msg> {
+    let mut url_string: String = REPOSITORY_URL.to_owned();
 
     url_string.push_str(&url.path.into_iter().collect::<Vec<String>>().join("/"));
     log!(url_string);
 
-    Request::new(url_string)
-        .fetch_json_data(Msg::Fetched)
-        .await
+    Request::new(url_string).fetch_json_data(Msg::Fetched).await
 }
 
 // ------ ------
@@ -80,7 +75,6 @@ async fn fetch_repository_info(url: Url) -> Result<Msg,Msg> {
 // ------ ------
 
 fn view(model: &Model) -> Vec<Node<Msg>> {
-
     nodes![
         h2![model.uri]
         md!["# Folder Info"],
@@ -92,10 +86,9 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
         component::component::folder_list(model.api.content.clone())
 
     ]
-
 }
 
-fn routes(url: Url) -> Option<Msg>{
+fn routes(url: Url) -> Option<Msg> {
     Some(Msg::RoutePage(url))
 }
 
