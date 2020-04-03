@@ -1,17 +1,18 @@
+use crate::component::uploadfile::upload_file;
 use seed::{browser::service::fetch, prelude::*, *};
-use serde::{Deserialize, Serialize};
 use shared::Folder;
-
+use std::default::Default;
 mod component;
 const REPOSITORY_URL: &str = "http://127.0.0.1:8080/cli/";
 // ------ ------
 //     Model
 // ------ ------
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug)]
 struct Model {
-    api: Folder,
-    uri: String,
+    pub api: Folder,
+    pub uri: String,
+    pub upload_toggle: component::uploadfile::State,
 }
 
 impl Default for Model {
@@ -23,6 +24,7 @@ impl Default for Model {
                 content: vec![],
             },
             uri: String::from(""),
+            upload_toggle: component::uploadfile::State::Hidden
         }
     }
 }
@@ -39,10 +41,10 @@ fn after_mount(url: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
 // ------ ------
 //    Update
 // ------ ------
-
 pub enum Msg {
     RoutePage(Url),
     Fetched(fetch::ResponseDataResult<Folder>),
+    Next
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -56,14 +58,18 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip();
         }
         Msg::RoutePage(url) => {
-            orders.skip().perform_cmd(fetch_repository_info(url));
+            orders.skip().perform_cmd(fetch_repository_info(url.clone()));
+            let url_t = url;
+            {model.uri = String::from(&url_t.path.into_iter().collect::<Vec<String>>().join("/"));}
+        }
+        Msg::Next => {
+            model.upload_toggle = model.upload_toggle.next()
         }
     }
 }
 
 async fn fetch_repository_info(url: Url) -> Result<Msg, Msg> {
     let mut url_string: String = REPOSITORY_URL.to_owned();
-
     url_string.push_str(&url.path.into_iter().collect::<Vec<String>>().join("/"));
     log!(url_string);
 
@@ -74,18 +80,21 @@ async fn fetch_repository_info(url: Url) -> Result<Msg, Msg> {
 //     View
 // ------ ------
 
-fn view(model: &Model) -> Vec<Node<Msg>> {
-    nodes![
-        h2![model.uri]
+fn view(model: &Model) -> Node<Msg> {
+
+div![
+        upload_file(model.upload_toggle, &model.uri),
+
+        h2![model.uri],
         md!["# Folder Info"],
         div![format!(
             "Result: {}, Lenght: {},",
             model.api.result, model.api.lenght
-        )],
+            )],
         h4!["Content info"],
-        component::component::folder_list(model.api.content.clone())
+        component::component::folder_list(model.api.content.clone()),
+        ]
 
-    ]
 }
 
 fn routes(url: Url) -> Option<Msg> {
@@ -97,8 +106,9 @@ fn routes(url: Url) -> Option<Msg> {
 
 #[wasm_bindgen(start)]
 pub fn render() {
-    App::builder(update, view)
-        .routes(routes)
-        .after_mount(after_mount)
-        .build_and_start();
+     App::builder(update, view)
+    .routes(routes)
+    .after_mount(after_mount)
+    .build_and_start();
+
 }

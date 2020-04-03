@@ -1,10 +1,16 @@
+use std::io::Write;
+use tokio::stream::StreamExt;
+
+use actix_multipart::Multipart;
 use actix_files as fs;
 use actix_web::http::StatusCode;
-use actix_web::{get, Responder};
+use actix_web::get;
 use actix_web::{guard, web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use shared::Folder;
-#[get("/cli/{path:.*}")]
-async fn cli(req: HttpRequest) -> impl Responder {
+const CLIENT_PAGE: &str = "./client/index.html";
+
+
+async fn cli(req: HttpRequest) -> Result<HttpResponse, Error> {
     crate::lib::http::log(&req);
     let url = crate::lib::http::without_cli(req.path());
 
@@ -19,13 +25,32 @@ async fn cli(req: HttpRequest) -> impl Responder {
         folder.result = false;
     }
 
-    HttpResponse::Ok()
+    Ok(HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .content_type("application/json")
         .encoding(ContentEncoding::Gzip)
-        .body(serde_json::to_string(&folder).unwrap())
+        .body(serde_json::to_string(&folder).unwrap()).into())
 }
 async fn client() -> Result<fs::NamedFile, Error> {
-    Ok(fs::NamedFile::open("./client/index.html")?.set_status_code(StatusCode::NOT_FOUND))
+    Ok(fs::NamedFile::open(CLIENT_PAGE)?.set_status_code(StatusCode::NOT_FOUND))
+}
+async fn save_file(mut payload: Multipart) -> Result<HttpResponse, Error> {
+    // iterate over multipart stream
+    while let Ok(Some(mut field)) = payload.try_next().await {
+        let content_type = field.content_disposition().unwrap();
+        let filename = content_type.get_filename().unwrap();
+        let filepath = format!("{}", filename);
+        // File::create is blocking operation, use threadpool
+        let mut f = web::block(|| std::fs::File::create(filepath))
+            .await
+            .unwrap();
+        // Field in turn is stream of *Bytes* object
+        while let Some(chunk) = field.next().await {
+            let data = chunk.unwrap();
+            // filesystem operations are blocking, we have to use threadpool
+            f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+        }
+    }
+    Ok(HttpResponse::Ok().into())
 }

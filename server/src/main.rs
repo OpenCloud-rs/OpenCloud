@@ -9,10 +9,23 @@ include!("page.rs");
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
+    std::env::set_var("RUST_LOG", "actix_server=info,actix_web=info");
     println!("Running on {} and {}", SERVER_IP, CLIENT_IP);
-    let one = HttpServer::new(move || App::new().service(cli))
-        .bind(SERVER_IP)?
-        .run();
+    let one = HttpServer::new(move || {
+        App::new().service(
+            web::resource("/cli/")
+                .route(actix_web::web::get().to(cli))
+                .route(actix_web::web::post().to(save_file))
+                .route(
+                    web::route()
+                        .guard(guard::Not(guard::Get()))
+                        .to(HttpResponse::MethodNotAllowed),
+                ),
+        )
+    })
+    .bind(SERVER_IP)?
+    .run();
+
     let two = HttpServer::new(move || {
         //
         App::new()
@@ -32,7 +45,6 @@ async fn main() -> std::io::Result<()> {
                             .to(HttpResponse::MethodNotAllowed),
                     ),
             )
-        // .default_service(actix_files::NamedFile::open("./client/index.html"))
     })
     .bind(CLIENT_IP)?
     .run();
