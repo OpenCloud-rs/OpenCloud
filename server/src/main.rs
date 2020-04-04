@@ -16,6 +16,7 @@ async fn main() -> std::io::Result<()> {
             web::resource("/cli/{path:.*}")
                 .route(actix_web::web::get().to(cli))
                 .route(actix_web::web::post().to(save_file))
+                .route(actix_web::web::delete().to(delete))
                 .route(
                     web::route()
                         .guard(guard::Not(guard::Get()))
