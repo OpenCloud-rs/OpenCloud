@@ -92,7 +92,7 @@ div![
             model.api.result, model.api.lenght
             )],
         h4!["Content info"],
-        component::component::folder_list(model.api.content.clone()),
+        component::folder_list::folder_list(model.api.content.clone()),
         ]
 
 }
