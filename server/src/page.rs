@@ -1,14 +1,12 @@
 use std::io::Write;
 use tokio::stream::StreamExt;
 
-use actix_multipart::Multipart;
 use actix_files as fs;
+use actix_multipart::Multipart;
 use actix_web::http::StatusCode;
-use actix_web::get;
 use actix_web::{guard, web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use shared::Folder;
 const CLIENT_PAGE: &str = "./client/index.html";
-
 
 async fn cli(req: HttpRequest) -> Result<HttpResponse, Error> {
     crate::lib::http::log(&req);
@@ -30,17 +28,19 @@ async fn cli(req: HttpRequest) -> Result<HttpResponse, Error> {
         .header("charset", "utf-8")
         .content_type("application/json")
         .encoding(ContentEncoding::Gzip)
-        .body(serde_json::to_string(&folder).unwrap()).into())
+        .body(serde_json::to_string(&folder).unwrap())
+        .into())
 }
 async fn client() -> Result<fs::NamedFile, Error> {
     Ok(fs::NamedFile::open(CLIENT_PAGE)?.set_status_code(StatusCode::NOT_FOUND))
 }
-async fn save_file(mut payload: Multipart) -> Result<HttpResponse, Error> {
+async fn save_file(mut payload: Multipart, req: HttpRequest) -> Result<HttpResponse, Error> {
     // iterate over multipart stream
+    let url = crate::lib::http::without_cli(req.path());
     while let Ok(Some(mut field)) = payload.try_next().await {
         let content_type = field.content_disposition().unwrap();
         let filename = content_type.get_filename().unwrap();
-        let filepath = format!("{}", filename);
+        let filepath = format!("{}/{}", url, filename);
         // File::create is blocking operation, use threadpool
         let mut f = web::block(|| std::fs::File::create(filepath))
             .await

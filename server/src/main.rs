@@ -13,7 +13,7 @@ async fn main() -> std::io::Result<()> {
     println!("Running on {} and {}", SERVER_IP, CLIENT_IP);
     let one = HttpServer::new(move || {
         App::new().service(
-            web::resource("/cli/")
+            web::resource("/cli/{path:.*}")
                 .route(actix_web::web::get().to(cli))
                 .route(actix_web::web::post().to(save_file))
                 .route(

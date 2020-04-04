@@ -62,7 +62,7 @@ pub mod uploadfile {
                   attrs!{
                       At::from("method") => "post",
                       At::from("enctype") => "multipart/form-data",
-                      At::from("action") => "http://127.0.0.1:8080/cli/",
+                      At::from("action") => format!["http://127.0.0.1:8080/cli/{}", url],
                   },
                     input![
                         attrs!{
