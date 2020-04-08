@@ -57,13 +57,23 @@ async fn save_file(mut payload: Multipart, req: HttpRequest) -> Result<HttpRespo
 
 async fn delete(req: HttpRequest) -> Result<HttpResponse, Error> {
     let to_delete = crate::lib::http::without_cli(req.path());
-    let matched = match std::fs::remove_dir(to_delete) {
-        Ok(_o) => {
-            String::from("Ok it's delete")
-        }
-        Err(_e) => {
-            String::from("Error")
-        }
+    let mut result = Folder{
+        result: false,
+        lenght: 0,
+        content: vec![String::new()],
+
     };
-    Ok(HttpResponse::Ok().body(matched))
+    match std::fs::remove_dir(to_delete) {
+        Ok(_o) => {
+            result.result = true;
+            result.content = vec!["Works".to_string()]
+        },
+        Err(_e) => {
+            result.content = vec!["Error".to_string()]
+        },
+    };
+    Ok(HttpResponse::Ok()
+        .header("charset", "utf-8")
+        .header("Access-Control-Allow-Origin", "*")
+        .body(serde_json::to_string(&result).unwrap()))
 }

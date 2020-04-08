@@ -1,9 +1,11 @@
 
 use crate::component::uploadfile::upload_file;
-use seed::{browser::service::fetch, prelude::*, *};
 use shared::Folder;
-use std::default::Default;
 mod component;
+mod library;
+use seed::{browser::service::fetch, prelude::*, *};
+use crate::library::lib::delete;
+
 const REPOSITORY_URL: &str = "http://127.0.0.1:8080/cli/";
 // ------ ------
 //     Model
@@ -25,7 +27,7 @@ impl Default for Model {
                 content: vec![],
             },
             uri: String::from(""),
-            upload_toggle: component::uploadfile::State::Hidden
+            upload_toggle: component::uploadfile::State::Hidden,
         }
     }
 }
@@ -45,7 +47,8 @@ fn after_mount(url: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
 pub enum Msg {
     RoutePage(Url),
     Fetched(fetch::ResponseDataResult<Folder>),
-    Next
+    Next,
+    Delete(String),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -59,13 +62,17 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip();
         }
         Msg::RoutePage(url) => {
-            orders.skip().perform_cmd(fetch_repository_info(url.clone()));
+            orders
+                .skip()
+                .perform_cmd(fetch_repository_info(url.clone()));
             let url_t = url;
-            {model.uri = String::from(&url_t.path.into_iter().collect::<Vec<String>>().join("/"));}
+            {
+                model.uri =
+                    String::from(&url_t.path.into_iter().collect::<Vec<String>>().join("/"));
+            }
         }
-        Msg::Next => {
-            model.upload_toggle = model.upload_toggle.next()
-        }
+        Msg::Next => model.upload_toggle = model.upload_toggle.next(),
+        Msg::Delete(url) => {orders.skip().perform_cmd(delete(url));},
     }
 }
 
@@ -82,20 +89,17 @@ async fn fetch_repository_info(url: Url) -> Result<Msg, Msg> {
 // ------ ------
 
 fn view(model: &Model) -> Node<Msg> {
-
-div![
+    div![
         upload_file(model.upload_toggle, &model.uri),
-
         h2![model.uri],
         md!["# Folder Info"],
         div![format!(
             "Result: {}, Lenght: {},",
             model.api.result, model.api.lenght
-            )],
+        )],
         h4!["Content info"],
         component::folder_list::folder_list(model.api.content.clone()),
-        ]
-
+    ]
 }
 
 fn routes(url: Url) -> Option<Msg> {
@@ -107,9 +111,8 @@ fn routes(url: Url) -> Option<Msg> {
 
 #[wasm_bindgen(start)]
 pub fn render() {
-     App::builder(update, view)
-    .routes(routes)
-    .after_mount(after_mount)
-    .build_and_start();
-
+    App::builder(update, view)
+        .routes(routes)
+        .after_mount(after_mount)
+        .build_and_start();
 }
