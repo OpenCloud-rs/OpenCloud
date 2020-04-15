@@ -25,6 +25,6 @@ shared =  {path = "../shared"}
 wasm-bindgen-test = "0.2.50" # NOTE: keep in sync with wasm-bindgen version
 
 
-[profile.release]  # Attempts to minimize file size
+[profile.release]
 lto = true
 opt-level = 'z'

@@ -4,3 +4,4 @@ Cargo.lockclient/.project
 client/.project
 server/.idea/
 OpenCloud/
+.buildconfig
