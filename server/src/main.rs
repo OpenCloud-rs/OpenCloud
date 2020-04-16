@@ -1,11 +1,19 @@
-use actix_web::dev::BodyEncoding;
-use actix_web::http::ContentEncoding;
+
+use actix_web::{App, guard, HttpResponse, HttpServer, web};
+
+
+
+
+use crate::page::post::save_file;
+use crate::page::delete::deletef;
+use crate::page::get::cli;
+use crate::page::client::client;
 
 const SERVER_IP: &str = "0.0.0.0:8080";
 const CLIENT_IP: &str = "0.0.0.0:8000";
 
 mod lib;
-include!("page.rs");
+mod page;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -16,7 +24,7 @@ async fn main() -> std::io::Result<()> {
             web::resource("/cli/{path:.*}")
                 .route(actix_web::web::get().to(cli))
                 .route(actix_web::web::post().to(save_file))
-                .route(actix_web::web::delete().to(delete))
+                .route(actix_web::web::delete().to(deletef))
                 .route(
                     web::route()
                         .guard(guard::Not(guard::Get()))
