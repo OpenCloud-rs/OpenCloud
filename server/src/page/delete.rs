@@ -1,8 +1,4 @@
-
-
 use actix_web::{Error, HttpRequest, HttpResponse};
-
-
 use shared::Folder;
 
 pub async fn deletef(req: HttpRequest) -> Result<HttpResponse, Error> {

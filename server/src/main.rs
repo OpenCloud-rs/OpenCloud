@@ -1,14 +1,8 @@
-
 use actix_web::{App, guard, HttpResponse, HttpServer, web};
-
-
-
-
 use crate::page::post::save_file;
 use crate::page::delete::deletef;
 use crate::page::get::cli;
 use crate::page::client::client;
-
 const SERVER_IP: &str = "0.0.0.0:8080";
 const CLIENT_IP: &str = "0.0.0.0:8000";
 
