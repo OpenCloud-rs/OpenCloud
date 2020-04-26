@@ -1,8 +1,11 @@
-use actix_web::{App, guard, HttpResponse, HttpServer, web};
+use actix_web::{http, App, guard, HttpResponse, HttpServer, web};
 use crate::page::post::save_file;
 use crate::page::delete::deletef;
 use crate::page::get::cli;
 use crate::page::client::client;
+use actix_web::middleware::errhandlers::ErrorHandlers;
+use crate::page::p500::p500;
+
 const SERVER_IP: &str = "0.0.0.0:8080";
 const CLIENT_IP: &str = "0.0.0.0:8000";
 
@@ -24,6 +27,8 @@ async fn main() -> std::io::Result<()> {
                         .guard(guard::Not(guard::Get()))
                         .to(HttpResponse::MethodNotAllowed),
                 ),
+        ).wrap(
+            ErrorHandlers::new().handler(http::StatusCode::INTERNAL_SERVER_ERROR, p500)
         )
     })
     .bind(SERVER_IP)?
@@ -41,7 +46,6 @@ async fn main() -> std::io::Result<()> {
             .default_service(
                 web::resource("")
                     .route(web::get().to(client))
-                    // all requests that are not `GET`
                     .route(
                         web::route()
                             .guard(guard::Not(guard::Get()))

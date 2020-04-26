@@ -1,6 +1,6 @@
 
 use crate::component::uploadfile::upload_file;
-use shared::Folder;
+use shared::JsonStruct;
 mod component;
 mod library;
 use seed::{browser::service::fetch, prelude::*, *};
@@ -13,7 +13,7 @@ const REPOSITORY_URL: &str = "http://127.0.0.1:8080/cli/";
 
 #[derive(Debug)]
 struct Model {
-    pub api: Folder,
+    pub api: JsonStruct,
     pub uri: String,
     pub upload_toggle: component::uploadfile::State,
 }
@@ -21,7 +21,7 @@ struct Model {
 impl Default for Model {
     fn default() -> Self {
         Self {
-            api: Folder {
+            api: JsonStruct {
                 result: false,
                 lenght: 0,
                 content: vec![],
@@ -46,7 +46,7 @@ fn after_mount(url: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
 // ------ ------
 pub enum Msg {
     RoutePage(Url),
-    Fetched(fetch::ResponseDataResult<Folder>),
+    Fetched(fetch::ResponseDataResult<JsonStruct>),
     Next,
     Delete(String),
 }

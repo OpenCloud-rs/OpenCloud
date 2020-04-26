@@ -1,20 +1,28 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Folder {
+pub struct JsonStruct {
     pub result: bool,
     pub lenght: i64,
     pub content: Vec<String>,
 }
 
-pub struct FolderB {
+#[derive(Serialize, Deserialize, Debug)]
+pub struct JsonStructB {
 	pub result : bool,
 	pub lenght : i64,
-	pub ftype : Type,
-	pub content : Vec<Vec<(String, Type)>>
+	pub rtype: FType,
+	pub content : Vec<Folder>
 }
-
-pub enum Type {
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Folder {
+	pub result: bool,
+	pub name: String,
+	pub ftype: FType,
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub enum FType {
 	File,
-	Folder
+	Folder,
+	Error
 }

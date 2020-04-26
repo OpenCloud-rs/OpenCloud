@@ -14,4 +14,7 @@ actix-multipart = "0.2.0"
 actix-service = "1.0.5"
 futures = "0.3.4"
 tokio = "0.2.13"
+actix-http = "1.0.1"
 shared = {path = "../shared"}
+zip = "0.5.5"
+zip-extensions = "0.4.0"
