@@ -89,7 +89,7 @@ pub fn dir_contentb(req: &HttpRequest) -> String {
     let mut folder = JsonStructB {
         result: true,
         lenght: vec.len() as i64,
-        rtype: FType::File,
+        rtype: FType::Folder,
         content: vec
     };
    /* if vec.starts_with(&[String::from("Error")]) {
