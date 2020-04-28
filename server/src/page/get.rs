@@ -1,9 +1,7 @@
-use crate::lib::file::compress;
-use actix_web::dev::{BodyEncoding, PayloadStream};
+use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 use actix_web::{web, Error, HttpRequest, HttpResponse as Response};
 use futures::StreamExt;
-use actix_http::body::BodyStream;
 
 pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, Error> {
     crate::lib::http::log(&req);
@@ -33,7 +31,7 @@ pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, E
                                 .header("charset", "utf-8")
                                 .content_type("application/json")
                                 .encoding(ContentEncoding::Gzip)
-                                .body(crate::lib::file::dir_contentb(&req)));
+                                .body(crate::lib::file::dir_content(&req)));
                         }
 
                         _ => {
@@ -42,7 +40,7 @@ pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, E
                                 .header("charset", "utf-8")
                                 .content_type("application/json")
                                 .encoding(ContentEncoding::Gzip)
-                                .body(crate::lib::file::dir_contentb(&req)));
+                                .body(crate::lib::file::dir_content(&req)));
                         }
                     };
                 }

@@ -1,7 +1,9 @@
 use crate::REPOSITORY_URL;
 use crate::Msg;
 use seed::{prelude::*, *};
-pub fn folder_list(content: Vec<String>) -> Node<Msg> {
+use shared::Folder;
+
+pub fn folder_list(content: Vec<Folder>) -> Node<Msg> {
     div![table![
         tr![
             td![
@@ -13,10 +15,10 @@ pub fn folder_list(content: Vec<String>) -> Node<Msg> {
 
                     tr![
                         td![
-                            a![format!["{}/", &t.to_string()], attrs! {At::Href => format!["{}/",t.to_string()]}]
+                            a![format!["{}/", &t.name.to_string()], attrs! {At::Href => format!["{}/",t.name.to_string()]}]
                             ],
                         td![
-                            button![format!["Delete : {}", t.to_string()], ev(Ev::Click, |t| Msg::Delete(String::from(REPOSITORY_URL.to_owned() + &String::from(&t.to_string()))))]
+                            button![format!["Delete : {}", t.name.to_string()], ev(Ev::Click, |t| Msg::Delete(String::from(REPOSITORY_URL.to_owned() + &String::from(&t.to_string()))))]
                         ]
                         ])
     ]]

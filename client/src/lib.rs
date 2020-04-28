@@ -1,6 +1,6 @@
 
 use crate::component::uploadfile::upload_file;
-use shared::JsonStruct;
+use shared::{JsonStruct, FType};
 mod component;
 mod library;
 use seed::{browser::service::fetch, prelude::*, *};
@@ -24,6 +24,7 @@ impl Default for Model {
             api: JsonStruct {
                 result: false,
                 lenght: 0,
+                ftype: FType::File,
                 content: vec![],
             },
             uri: String::from(""),
