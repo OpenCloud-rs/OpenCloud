@@ -2,6 +2,7 @@ use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 use actix_web::{web, Error, HttpRequest, HttpResponse as Response};
 use futures::StreamExt;
+use crate::lib::http::last_cli;
 
 pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, Error> {
     crate::lib::http::log(&req);
@@ -19,19 +20,19 @@ pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, E
                 if vec[0] == "type" {
                     match vec[1] {
                         "download" => {
-                            /*result = Ok(Response::Ok()
+                            result = Ok(Response::Ok()
                                 .header("Access-Control-Allow-Origin", "*")
                                 .header("charset", "utf-8")
                                 .content_type(
-                                    "Content-Disposition: attachment; filename=\"MyFileName.ext\"",
+                                    format!("Content-Disposition: attachment; filename={}", last_cli(req.clone())),
                                 )
-                                .encoding(ContentEncoding::Gzip).streaming());*/
-                            result = Ok(Response::Ok()
+                                .encoding(ContentEncoding::Gzip).body("Hey"));
+                            /*result = Ok(Response::Ok()
                                 .header("Access-Control-Allow-Origin", "*")
                                 .header("charset", "utf-8")
                                 .content_type("application/json")
                                 .encoding(ContentEncoding::Gzip)
-                                .body(crate::lib::file::dir_content(&req)));
+                                .body(crate::lib::file::dir_content(&req)));*/
                         }
 
                         _ => {

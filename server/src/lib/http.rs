@@ -16,3 +16,13 @@
         )
     }
 
+    pub fn last_cli(req: HttpRequest) -> String {
+        let split: Vec<&str> = without_cli(req.path()).split("/").collect();
+        let mut result = String::from("");
+        if split.last().unwrap().is_empty() {
+            result = String::from(split[split.len() - 2].to_owned())
+        } else {
+            result = String::from(split.last().take().unwrap().to_owned())
+        }
+        result
+    }

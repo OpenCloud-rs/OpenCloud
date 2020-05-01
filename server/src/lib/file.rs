@@ -3,9 +3,9 @@ use shared::{Folder, FType, JsonStruct};
 use std::fs;
 use std::fs::File;
 use std::path::PathBuf;
-use zip::result::ZipResult;
-use zip::ZipWriter;
-use zip_extensions::ZipWriterExtensions;
+use zip::*;
+use zip_extensions::*;
+use tar::Builder;
 
 pub fn dir_content(req: &HttpRequest) -> String {
     let mut content: Vec<Folder> = Vec::new();
@@ -96,9 +96,17 @@ pub fn dir_content(req: &HttpRequest) -> String {
         Err(_e) => String::from("Not Work"),
     }
 }
-pub fn _compress(folder: String, _type_compress: &String) -> ZipResult<()> {
-    let file = File::create(&folder).unwrap();
-    let buf = PathBuf::from(&folder);
-    let mut zip = ZipWriter::new(file);
-    zip.create_from_directory(&buf)
+
+pub fn compress(folder: String, type_compress: String) {
+    let dd : String = String::from("tar");
+    match type_compress {
+        dd => {
+
+        }
+        _ => {
+            let archive_file: PathBuf = PathBuf::from(&folder);
+            let source_dir: PathBuf = PathBuf::from(&folder);
+            zip_create_from_directory(&archive_file, &source_dir).unwrap()
+        }
+    }
 }
