@@ -1,14 +1,14 @@
 use actix_web::HttpRequest;
-use shared::{Folder, FType, JsonStruct};
+use shared::{FolderB, FType, JsonStruct, JsonStructB};
 use std::fs;
-use std::fs::File;
 use std::path::PathBuf;
-use zip::*;
 use zip_extensions::*;
-use tar::Builder;
+use actix_files::file_extension_to_mime;
+use crate::lib::http::without_cli;
 
 pub fn dir_content(req: &HttpRequest) -> String {
-    let mut content: Vec<Folder> = Vec::new();
+    let path = without_cli(req.path());
+    let mut content: Vec<FolderB> = Vec::new();
     let mut result: bool = false;
     let mut ftype: FType = FType::Error;
     match fs::metadata(crate::lib::http::without_cli(req.path())) {
@@ -16,62 +16,63 @@ pub fn dir_content(req: &HttpRequest) -> String {
             if e.is_file() == true {
                 result = true;
                 ftype = FType::File;
-                content.push(Folder{
+                content.push(FolderB{
                     result: true,
-                    name: String::from(crate::lib::http::without_cli(req.path()).split("/").last().unwrap()),
-                    ftype: FType::File
+                    name: String::from(path.split("/").last().unwrap()),
+                    ftype: file_extension_to_mime(path.split("/").last().unwrap()).to_string()
                 });
             } else if e.is_dir() == true {
-                match fs::read_dir(crate::lib::http::without_cli(req.path())) {
+                match fs::read_dir(path) {
                     Ok(e) => {
-                        for path in e {
-                            match path {
+                        for Dpath in e {
+                            match Dpath {
                                 Ok(f) => {
                                     result = true;
                                     ftype = FType::Folder;
                                     match f.metadata() {
                                         Ok(e) => {
                                             if e.is_file() == true {
-                                                content.push(Folder{
+                                                content.push(FolderB{
                                                     result: true,
                                                     name: f.file_name().to_str().unwrap().parse().unwrap(),
-                                                    ftype: FType::File
+                                                    ftype: file_extension_to_mime(f.file_name().to_str().unwrap()).to_string()
                                                 });
+                                                println!("{} => {:?}",format!["{}{}", path, f.file_name().to_str().unwrap()].to_string(), file_extension_to_mime(format!["{}{}", path, f.file_name().to_str().unwrap()].to_string().as_ref()))
                                             } else {
-                                                content.push(Folder{
+                                                content.push(FolderB{
                                                     result: true,
                                                     name: f.file_name().to_str().unwrap().parse().unwrap(),
-                                                    ftype: FType::Folder
+                                                    ftype: String::from("Folder")
                                                 });
                                             }
 
                                         }
                                         Err(_e) => {
                                             content.push(
-                                                Folder{
+                                                FolderB{
                                                     result: false,
                                                     name: "Error".to_string(),
-                                                    ftype: FType::Error
+                                                    ftype: String::from("Error")
                                                 }
                                             )
                                         }
                                     }
                                 }
                                 Err(_e) => {
-                                    content.push(Folder{
+                                    content.push(FolderB{
                                         result: false,
                                         name: "Error".to_string(),
-                                        ftype: FType::Error
+                                        ftype: String::from("Error")
                                     });
                                 }
                             }
                         }
                     }
                     Err(_e) => {
-                        content.push(Folder{
+                        content.push(FolderB{
                             result: false,
                             name: "Folder Not Work".to_string(),
-                            ftype: FType::Error
+                            ftype: String::from("Error")
                         });
                         println!("Le dossier est inexistant");
                     }
@@ -82,13 +83,13 @@ pub fn dir_content(req: &HttpRequest) -> String {
 
         }
     }
-    let folder = JsonStruct {
+    let folder = JsonStructB {
         result,
         lenght: content.len() as i64,
         ftype,
         content
     };
-   /*if content.starts_with(&[Folder {result: false, name: "Error".to_string(), ftype: FType::Error }]) {
+   /*if content.starts_with(&[FolderB {result: false, name: "Error".to_string(), ftype: FType::Error }]) {
         folder.result = false;
     }*/
     match serde_json::to_string(&folder) {

@@ -3,7 +3,8 @@ use actix_files::file_extension_to_mime;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 use actix_web::{web, Error, HttpRequest, HttpResponse as Response};
-use futures::StreamExt;
+use futures::{StreamExt, AsyncReadExt};
+use actix_web::body::BodyStream;
 
 pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, Error> {
     crate::lib::http::log(&req);
@@ -23,7 +24,11 @@ pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, E
                     match vec[1] {
                         "download" => {
                             if vec[3] == "zip" {
-                                result = Ok(Response::Ok()
+                                let mut b = "dsdqqsd qsdf df".as_bytes();
+                                let mut buffer = [0; 10];
+                              //  let d : Result<u8, _> = Ok(1);
+                                b.read(&mut buffer);
+/*                                result = Ok(Response::Ok()
                                     .header("Access-Control-Allow-Origin", "*")
                                     .header("charset", "utf-8")
                                     .header("Content-Disposition", "attachment")
@@ -32,8 +37,15 @@ pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, E
                                         file_extension_to_mime(without_cli(req.clone().path()))
                                             .essence_str(),
                                     )
-                                    .encoding(ContentEncoding::Gzip)
-                                    .body("dd"));
+                                    .encoding(ContentEncoding::Gzip).streaming(BodyStream::new())
+                                );*/
+                            result = Ok(Response::Ok()
+                                .header("Access-Control-Allow-Origin", "*")
+                                .header("charset", "utf-8")
+                                .header("Content-Disposition", "attachment")
+                                .header("filename", format!("{}{}",last_cli(req.clone()), ".tar.gz"))
+                                .content_type(file_extension_to_mime(without_cli(req.clone().path())).essence_str())
+                                .encoding(ContentEncoding::Gzip).body("dd"))
                             } else {
                                 result = Ok(Response::Ok()
                                     .header("Access-Control-Allow-Origin", "*")
@@ -41,7 +53,7 @@ pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, E
                                     .header("Content-Disposition", "attachment")
                                     .header("filename", format!("{}{}",last_cli(req.clone()), ".tar.gz"))
                                     .content_type(file_extension_to_mime(without_cli(req.clone().path())).essence_str())
-                                    .encoding(ContentEncoding::Gzip).body("dd"));
+                                    .encoding(ContentEncoding::Gzip).body("dd"))
                             }
                         }
 
@@ -59,7 +71,7 @@ pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, E
             Err(_t) => {
                 println!("Error");
             }
-        };
+        }
     }
     result
 }
