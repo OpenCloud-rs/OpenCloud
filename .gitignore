@@ -5,3 +5,4 @@ client/.project
 server/.idea/
 OpenCloud/
 .buildconfig
+.idea/

@@ -1,18 +1,113 @@
+use actix_web::HttpRequest;
+use shared::{FolderB, FType, JsonStruct, JsonStructB};
+use std::fs;
+use std::path::PathBuf;
+use zip_extensions::*;
+use actix_files::file_extension_to_mime;
+use crate::lib::http::without_cli;
 
-    use std::fs;
+pub fn dir_content(req: &HttpRequest) -> String {
+    let path = without_cli(req.path());
+    let mut content: Vec<FolderB> = Vec::new();
+    let mut result: bool = false;
+    let mut ftype: FType = FType::Error;
+    match fs::metadata(crate::lib::http::without_cli(req.path())) {
+        Ok(e) => {
+            if e.is_file() == true {
+                result = true;
+                ftype = FType::File;
+                content.push(FolderB{
+                    result: true,
+                    name: String::from(path.split("/").last().unwrap()),
+                    ftype: file_extension_to_mime(path.split("/").last().unwrap()).to_string()
+                });
+            } else if e.is_dir() == true {
+                match fs::read_dir(path) {
+                    Ok(e) => {
+                        for Dpath in e {
+                            match Dpath {
+                                Ok(f) => {
+                                    result = true;
+                                    ftype = FType::Folder;
+                                    match f.metadata() {
+                                        Ok(e) => {
+                                            if e.is_file() == true {
+                                                content.push(FolderB{
+                                                    result: true,
+                                                    name: f.file_name().to_str().unwrap().parse().unwrap(),
+                                                    ftype: file_extension_to_mime(f.file_name().to_str().unwrap()).to_string()
+                                                });
+                                                println!("{} => {:?}",format!["{}{}", path, f.file_name().to_str().unwrap()].to_string(), file_extension_to_mime(format!["{}{}", path, f.file_name().to_str().unwrap()].to_string().as_ref()))
+                                            } else {
+                                                content.push(FolderB{
+                                                    result: true,
+                                                    name: f.file_name().to_str().unwrap().parse().unwrap(),
+                                                    ftype: String::from("Folder")
+                                                });
+                                            }
 
-    pub fn dir_content(path: &str) -> Vec<String> {
-        let mut vec: Vec<String> = Vec::new();
-        match fs::read_dir(path) {
-            Ok(_f) => {
-                for path in _f {
-                    vec.push(path.unwrap().path().display().to_string());
+                                        }
+                                        Err(_e) => {
+                                            content.push(
+                                                FolderB{
+                                                    result: false,
+                                                    name: "Error".to_string(),
+                                                    ftype: String::from("Error")
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                                Err(_e) => {
+                                    content.push(FolderB{
+                                        result: false,
+                                        name: "Error".to_string(),
+                                        ftype: String::from("Error")
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    Err(_e) => {
+                        content.push(FolderB{
+                            result: false,
+                            name: "Folder Not Work".to_string(),
+                            ftype: String::from("Error")
+                        });
+                        println!("Le dossier est inexistant");
+                    }
                 }
             }
-            Err(_e) => {
-                vec.push(String::from("Error"));
-                println!("Le dossier est inexistant");
-            }
-        };
-        vec
+        }
+        Err(_e) => {
+
+        }
     }
+    let folder = JsonStructB {
+        result,
+        lenght: content.len() as i64,
+        ftype,
+        content
+    };
+   /*if content.starts_with(&[FolderB {result: false, name: "Error".to_string(), ftype: FType::Error }]) {
+        folder.result = false;
+    }*/
+    match serde_json::to_string(&folder) {
+        Ok(e) => e,
+        Err(_e) => String::from("Not Work"),
+    }
+}
+
+pub fn compress(folder: String, type_compress: String) {
+    let dd : String = String::from("tar");
+    match type_compress {
+        dd => {
+
+        }
+        _ => {
+            let archive_file: PathBuf = PathBuf::from(&folder);
+            let source_dir: PathBuf = PathBuf::from(&folder);
+            zip_create_from_directory(&archive_file, &source_dir).unwrap()
+        }
+    }
+}
