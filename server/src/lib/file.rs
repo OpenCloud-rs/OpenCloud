@@ -5,6 +5,8 @@ use std::path::PathBuf;
 use zip_extensions::*;
 use actix_files::file_extension_to_mime;
 use crate::lib::http::without_cli;
+use std::fs::File;
+use std::io::Read;
 
 pub fn dir_content(req: &HttpRequest) -> String {
     let path = without_cli(req.path());
@@ -24,8 +26,8 @@ pub fn dir_content(req: &HttpRequest) -> String {
             } else if e.is_dir() == true {
                 match fs::read_dir(path) {
                     Ok(e) => {
-                        for Dpath in e {
-                            match Dpath {
+                        for dpath in e {
+                            match dpath {
                                 Ok(f) => {
                                     result = true;
                                     ftype = FType::Folder;
@@ -37,7 +39,7 @@ pub fn dir_content(req: &HttpRequest) -> String {
                                                     name: f.file_name().to_str().unwrap().parse().unwrap(),
                                                     ftype: file_extension_to_mime(f.file_name().to_str().unwrap()).to_string()
                                                 });
-                                                println!("{} => {:?}",format!["{}{}", path, f.file_name().to_str().unwrap()].to_string(), file_extension_to_mime(format!["{}{}", path, f.file_name().to_str().unwrap()].to_string().as_ref()))
+                                                //println!("{} => {:?}",format!["{}{}", path, f.file_name().to_str().unwrap()].to_string(), file_extension_to_mime(format!["{}{}", path, f.file_name().to_str().unwrap()].to_string().as_ref()))
                                             } else {
                                                 content.push(FolderB{
                                                     result: true,
@@ -110,4 +112,13 @@ pub fn compress(folder: String, type_compress: String) {
             zip_create_from_directory(&archive_file, &source_dir).unwrap()
         }
     }
+}
+
+pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
+    let mut f = File::open(&filename).expect("no file found");
+    let metadata = fs::metadata(&filename).expect("unable to read metadata");
+    let mut buffer = vec![0; metadata.len() as usize];
+    f.read(&mut buffer).expect("buffer overflow");
+
+    buffer
 }

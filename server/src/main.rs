@@ -5,9 +5,10 @@ use crate::page::get::cli;
 use crate::page::client::client;
 use actix_web::middleware::errhandlers::ErrorHandlers;
 use crate::page::p500::p500;
+use actix_web::middleware::Logger;
 
-const SERVER_IP: &str = "0.0.0.0:8080";
-const CLIENT_IP: &str = "0.0.0.0:8000";
+const SERVER_IP: &str = "0.0.0.0:8081";
+const CLIENT_IP: &str = "0.0.0.0:8001";
 
 mod lib;
 mod page;
@@ -29,6 +30,10 @@ async fn main() -> std::io::Result<()> {
                 ),
         ).wrap(
             ErrorHandlers::new().handler(http::StatusCode::INTERNAL_SERVER_ERROR, p500)
+        ).wrap(
+            Logger::default()
+         ).wrap(
+            Logger::new("%a %{User-Agent}i")
         )
     })
     .bind(SERVER_IP)?
