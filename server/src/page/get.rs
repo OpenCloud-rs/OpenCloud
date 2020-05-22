@@ -31,7 +31,7 @@ pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, E
                         "download" => {
                             if vec[3] == "zip" {
                                 let (tx, rx_body) = mpsc::channel();
-                                let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec("./Makefile.toml"))));
+                                let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(without_cli(String::from(req.path()).as_ref()).parse().unwrap()))));
                              result = Ok(Response::Ok()
                                     .header("Access-Control-Allow-Origin", "*")
                                     .header("charset", "utf-8")

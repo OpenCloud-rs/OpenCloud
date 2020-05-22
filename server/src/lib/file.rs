@@ -1,11 +1,11 @@
-use actix_web::HttpRequest;
+use actix_web::{HttpRequest, web};
 use shared::{FolderB, FType, JsonStruct, JsonStructB};
 use std::fs;
 use std::path::PathBuf;
 use zip_extensions::*;
 use actix_files::file_extension_to_mime;
 use crate::lib::http::without_cli;
-use std::fs::File;
+use std::fs::{File, metadata};
 use std::io::Read;
 
 pub fn dir_content(req: &HttpRequest) -> String {
@@ -114,11 +114,38 @@ pub fn compress(folder: String, type_compress: String) {
     }
 }
 
-pub fn get_file_as_byte_vec(filename: &str) -> Vec<u8> {
-    let mut f = File::open(&filename).expect("no file found");
-    let metadata = fs::metadata(&filename).expect("unable to read metadata");
-    let mut buffer = vec![0; metadata.len() as usize];
-    f.read(&mut buffer).expect("buffer overflow");
+pub fn get_file_as_byte_vec(filename: String) -> Vec<u8> {
+
+    let buffer = match metadata(&filename) {
+        Ok(e) => {
+
+           if e.is_file() {
+               let mut buf : Vec<u8> = vec![0; e.len() as usize];
+               File::open(filename).expect("no file found").read(&mut buf).expect("Buffer overflow");
+               buf
+           }
+           else if e.is_dir() {
+               File::create("./folder.zip").unwrap();
+               zip_create_from_directory(&PathBuf::from("./folder.zip"), &PathBuf::from(filename));
+               let mut file = File::open("./folder.zip").expect("no file found");
+               let mut buf : Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
+               file.read(&mut buf).expect("Buffer overflow");
+               buf
+           } else {
+               let file = File::open("Error.txt").expect("Error");
+               let mut buf : Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
+               File::open("Error.txt").expect("Error").read(&mut buf);
+               buf
+           }
+
+        },
+        Err(e) => {
+            let file = File::open("Error.txt").expect("Error");
+            let mut buf : Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
+            File::open("Error.txt").expect("Error").read(&mut buf);
+            buf
+        }
+    };
 
     buffer
 }
