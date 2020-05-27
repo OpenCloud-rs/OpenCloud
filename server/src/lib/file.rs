@@ -1,10 +1,12 @@
 use actix_web::HttpRequest;
-use shared::{FolderB, FType, JsonStruct, JsonStructB};
+use shared::{FolderB, FType,JsonStructB};
 use std::fs;
 use std::path::PathBuf;
 use zip_extensions::*;
 use actix_files::file_extension_to_mime;
 use crate::lib::http::without_cli;
+use std::fs::{File, metadata};
+use std::io::Read;
 
 pub fn dir_content(req: &HttpRequest) -> String {
     let path = without_cli(req.path());
@@ -24,8 +26,8 @@ pub fn dir_content(req: &HttpRequest) -> String {
             } else if e.is_dir() == true {
                 match fs::read_dir(path) {
                     Ok(e) => {
-                        for Dpath in e {
-                            match Dpath {
+                        for dpath in e {
+                            match dpath {
                                 Ok(f) => {
                                     result = true;
                                     ftype = FType::Folder;
@@ -37,7 +39,7 @@ pub fn dir_content(req: &HttpRequest) -> String {
                                                     name: f.file_name().to_str().unwrap().parse().unwrap(),
                                                     ftype: file_extension_to_mime(f.file_name().to_str().unwrap()).to_string()
                                                 });
-                                                println!("{} => {:?}",format!["{}{}", path, f.file_name().to_str().unwrap()].to_string(), file_extension_to_mime(format!["{}{}", path, f.file_name().to_str().unwrap()].to_string().as_ref()))
+                                                //println!("{} => {:?}",format!["{}{}", path, f.file_name().to_str().unwrap()].to_string(), file_extension_to_mime(format!["{}{}", path, f.file_name().to_str().unwrap()].to_string().as_ref()))
                                             } else {
                                                 content.push(FolderB{
                                                     result: true,
@@ -98,16 +100,38 @@ pub fn dir_content(req: &HttpRequest) -> String {
     }
 }
 
-pub fn compress(folder: String, type_compress: String) {
-    let dd : String = String::from("tar");
-    match type_compress {
-        dd => {
+pub fn get_file_as_byte_vec(filename: String) -> Vec<u8> {
 
+    let buffer = match metadata(&filename) {
+        Ok(e) => {
+
+           if e.is_file() {
+               let mut buf : Vec<u8> = vec![0; e.len() as usize];
+               File::open(filename).expect("no file found").read(&mut buf).expect("Buffer overflow");
+               buf
+           }
+           else if e.is_dir() {
+               File::create("./folder.zip").unwrap();
+               zip_create_from_directory(&PathBuf::from("./folder.zip"), &PathBuf::from(filename));
+               let mut file = File::open("./folder.zip").expect("no file found");
+               let mut buf : Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
+               file.read(&mut buf).expect("Buffer overflow");
+               buf
+           } else {
+               let file = File::open("Error.txt").expect("Error");
+               let mut buf : Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
+               File::open("Error.txt").expect("Error").read(&mut buf);
+               buf
+           }
+
+        },
+        Err(_e) => {
+            let file = File::open("Error.txt").expect("Error");
+            let mut buf : Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
+            File::open("Error.txt").expect("Error").read(&mut buf);
+            buf
         }
-        _ => {
-            let archive_file: PathBuf = PathBuf::from(&folder);
-            let source_dir: PathBuf = PathBuf::from(&folder);
-            zip_create_from_directory(&archive_file, &source_dir).unwrap()
-        }
-    }
+    };
+
+    buffer
 }

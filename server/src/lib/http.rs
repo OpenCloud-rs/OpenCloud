@@ -18,7 +18,7 @@
 
     pub fn last_cli(req: HttpRequest) -> String {
         let split: Vec<&str> = without_cli(req.path()).split("/").collect();
-        let mut result = String::from("");
+        let mut result = String::new();
         if split.last().unwrap().is_empty() {
             result = String::from(split[split.len() - 2].to_owned())
         } else {
