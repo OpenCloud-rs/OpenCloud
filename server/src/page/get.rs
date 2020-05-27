@@ -3,13 +3,10 @@ use actix_files::file_extension_to_mime;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 use actix_web::{web, Error, HttpRequest, HttpResponse as Response};
-use futures::{StreamExt, AsyncReadExt};
-use actix_web::body::BodyStream;
-use futures::future::IntoStream;
+use futures::StreamExt;
 use crate::lib::file::get_file_as_byte_vec;
 use actix_utils::mpsc;
 use bytes::Bytes;
-use std::collections::HashMap;
 
 pub async fn cli(req: HttpRequest, mut body: web::Payload) -> Result<Response, Error> {
     crate::lib::http::log(&req);

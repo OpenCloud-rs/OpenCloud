@@ -1,5 +1,5 @@
-use actix_web::{HttpRequest, web};
-use shared::{FolderB, FType, JsonStruct, JsonStructB};
+use actix_web::HttpRequest;
+use shared::{FolderB, FType,JsonStructB};
 use std::fs;
 use std::path::PathBuf;
 use zip_extensions::*;
@@ -100,20 +100,6 @@ pub fn dir_content(req: &HttpRequest) -> String {
     }
 }
 
-pub fn compress(folder: String, type_compress: String) {
-    let dd : String = String::from("tar");
-    match type_compress {
-        dd => {
-
-        }
-        _ => {
-            let archive_file: PathBuf = PathBuf::from(&folder);
-            let source_dir: PathBuf = PathBuf::from(&folder);
-            zip_create_from_directory(&archive_file, &source_dir).unwrap()
-        }
-    }
-}
-
 pub fn get_file_as_byte_vec(filename: String) -> Vec<u8> {
 
     let buffer = match metadata(&filename) {
@@ -139,7 +125,7 @@ pub fn get_file_as_byte_vec(filename: String) -> Vec<u8> {
            }
 
         },
-        Err(e) => {
+        Err(_e) => {
             let file = File::open("Error.txt").expect("Error");
             let mut buf : Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
             File::open("Error.txt").expect("Error").read(&mut buf);
