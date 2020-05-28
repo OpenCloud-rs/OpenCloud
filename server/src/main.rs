@@ -6,6 +6,7 @@ use crate::page::client::client;
 use actix_web::middleware::errhandlers::ErrorHandlers;
 use crate::page::p500::p500;
 use actix_web::middleware::Logger;
+use crate::lib::default::default;
 
 const SERVER_IP: &str = "0.0.0.0:8081";
 const CLIENT_IP: &str = "0.0.0.0:8001";
@@ -17,6 +18,7 @@ mod page;
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_server=info,actix_web=info");
     println!("Running on {} and {}", SERVER_IP, CLIENT_IP);
+    default();
     let one = HttpServer::new(move || {
         App::new().service(
             web::resource("/cli/{path:.*}")
