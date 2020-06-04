@@ -5,3 +5,9 @@ pub struct Config {
     pub port: i64,
     pub folder_root: String,
 }
+
+impl Config {
+    pub(crate) fn get_server_ip(&self) -> String {
+        format!("{}:{}",self.ip, self.port)
+    }
+}

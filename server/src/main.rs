@@ -7,18 +7,20 @@ use actix_web::middleware::errhandlers::ErrorHandlers;
 use crate::page::p500::p500;
 use actix_web::middleware::Logger;
 use crate::lib::default::default;
-
-const SERVER_IP: &str = "0.0.0.0:8081";
-const CLIENT_IP: &str = "0.0.0.0:8001";
+use crate::lib::config::Config;
 
 mod lib;
 mod page;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "actix_server=info,actix_web=info");
-    println!("Running on {} and {}", SERVER_IP, CLIENT_IP);
-    default();
+    let config : Config = default();
+
+    let server_ip : &str = &config.get_server_ip();
+    let client_ip : &str = "0.0.0.0:8001";
+
+    println!("Running on {} and {}", &server_ip, client_ip);
+
     let one = HttpServer::new(move || {
         App::new().service(
             web::resource("/cli/{path:.*}")
@@ -38,7 +40,7 @@ async fn main() -> std::io::Result<()> {
             Logger::new("%a %{User-Agent}i")
         )
     })
-    .bind(SERVER_IP)?
+    .bind(server_ip)?
     .run();
 
     let two = HttpServer::new(move || {
@@ -60,7 +62,7 @@ async fn main() -> std::io::Result<()> {
                     ),
             )
     })
-    .bind(CLIENT_IP)?
+    .bind(client_ip)?
     .run();
     futures::future::try_join(one, two).await?;
     Ok(())

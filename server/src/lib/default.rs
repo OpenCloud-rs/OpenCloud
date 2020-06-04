@@ -1,11 +1,11 @@
- use std::fs::{File, read_dir, DirEntry};
-use std::io::Write;
+ use std::fs::{File, read_dir};
+use std::io::{Write, Read};
 use std::path::PathBuf;
 
 use crate::lib::config::Config;
-use std::error::Error;
+ use std::process::exit;
 
-pub fn default() {
+ pub fn default() -> Config{
     let mut vec : Vec<String> = Vec::new();
     match read_dir(PathBuf::from("./")) {
         Ok(O) => {
@@ -37,5 +37,20 @@ pub fn default() {
             Err(why) => panic!("couldn't write to config : {}",why.to_string()),
             Ok(_) => println!("successfully wrote to config"),
         }
+        config
+    } else {
+        let mut buf = String::new();
+        File::open("./config.yaml").unwrap().read_to_string(&mut buf).unwrap();
+        match serde_yaml::from_str(&buf) {
+            Ok(O) => {
+                O
+            }
+            Err(_e) => {
+                println!("Config Error");
+                exit(1);
+            }
+        }
+        /*let result : Config = serde_yaml::from_str(&buf).unwrap();
+        result*/
     }
 }
