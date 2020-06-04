@@ -17,7 +17,7 @@ async fn main() -> std::io::Result<()> {
     let config : Config = default();
 
     let server_ip : &str = &config.get_server_ip();
-    let client_ip : &str = "0.0.0.0:8001";
+    let client_ip : &str = &config.get_client_ip();
 
     println!("Running on {} and {}", &server_ip, client_ip);
 
