@@ -5,7 +5,6 @@ use crate::page::get::cli;
 use crate::page::client::client;
 use actix_web::middleware::errhandlers::ErrorHandlers;
 use crate::page::p500::p500;
-use actix_web::middleware::Logger;
 use crate::lib::default::default;
 use crate::lib::config::Config;
 
@@ -34,10 +33,6 @@ async fn main() -> std::io::Result<()> {
                 ),
         ).wrap(
             ErrorHandlers::new().handler(http::StatusCode::INTERNAL_SERVER_ERROR, p500)
-        ).wrap(
-            Logger::default()
-         ).wrap(
-            Logger::new("%a %{User-Agent}i")
         )
     })
     .bind(server_ip)?
