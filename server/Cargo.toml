@@ -5,8 +5,6 @@ authors = ["Rheydskey <matgag02@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-sse-actix-web="0.8.1"
-
 actix-web = "2.0.0"
 actix-rt = "1.1.1"
 actix-files = "0.2.1"
@@ -18,6 +16,7 @@ actix-utils = "1.0.6"
 zip = "0.5.5"
 zip-extensions = "0.4.0"
 tar = "0.4"
+mime_guess = "2.0.3"
 
 serde = {version = "1.0.110", features = ['derive']}
 serde_json = "1.0.53"

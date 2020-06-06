@@ -37,7 +37,7 @@ pub fn dir_content(req: &HttpRequest) -> String {
                                                 content.push(FolderB{
                                                     result: true,
                                                     name: f.file_name().to_str().unwrap().parse().unwrap(),
-                                                    ftype: file_extension_to_mime(f.file_name().to_str().unwrap()).to_string()
+                                                    ftype: get_mime(f.file_name().to_str().unwrap())
                                                 });
                                                 //println!("{} => {:?}",format!["{}{}", path, f.file_name().to_str().unwrap()].to_string(), file_extension_to_mime(format!["{}{}", path, f.file_name().to_str().unwrap()].to_string().as_ref()))
                                             } else {
@@ -112,7 +112,7 @@ pub fn get_file_as_byte_vec(filename: String) -> Vec<u8> {
            }
            else if e.is_dir() {
                File::create("./folder.zip").unwrap();
-               zip_create_from_directory(&PathBuf::from("./folder.zip"), &PathBuf::from(filename));
+               zip_create_from_directory(&PathBuf::from("./folder.zip"), &PathBuf::from(filename)).unwrap();
                let mut file = File::open("./folder.zip").expect("no file found");
                let mut buf : Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
                file.read(&mut buf).expect("Buffer overflow");
@@ -134,4 +134,8 @@ pub fn get_file_as_byte_vec(filename: String) -> Vec<u8> {
     };
 
     buffer
+}
+
+pub fn get_mime<'a>(file:  &'a str) -> String {
+    String::from(mime_guess::from_path(file.clone()).first_raw().unwrap())
 }
