@@ -136,6 +136,6 @@ pub fn get_file_as_byte_vec(filename: String) -> Vec<u8> {
     buffer
 }
 
-pub fn get_mime<'a>(file:  &'a str) -> String {
-    String::from(mime_guess::from_path(file.clone()).first_raw().unwrap())
+pub fn get_mime(file: &str) -> String {
+    mime_guess::from_path(file.clone()).first_or_octet_stream().to_string()
 }
