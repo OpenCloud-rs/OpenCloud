@@ -8,8 +8,8 @@ use crate::lib::config::Config;
  pub fn default() -> Config{
     let mut vec : Vec<String> = Vec::new();
     match read_dir(PathBuf::from("./")) {
-        Ok(O) => {
-            for epath in O{
+        Ok(o) => {
+            for epath in o{
                 match epath {
                     Ok(e) => {
                         match e.file_name().into_string() {
@@ -44,8 +44,8 @@ use crate::lib::config::Config;
         let mut buf = String::new();
         File::open("./config.yaml").unwrap().read_to_string(&mut buf).unwrap();
         match serde_yaml::from_str(&buf) {
-            Ok(O) => {
-                O
+            Ok(o) => {
+                o
             }
             Err(_e) => {
                 println!("Config Error");
