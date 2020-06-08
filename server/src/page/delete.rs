@@ -1,5 +1,5 @@
 use actix_web::{Error, HttpRequest, HttpResponse};
-use shared::{JsonStruct, Folder, FType};
+use shared::{FType, JsonStruct, Folder};
 
 pub async fn deletef(req: HttpRequest) -> Result<HttpResponse, Error> {
     let to_delete = crate::lib::http::without_cli(req.path());
@@ -15,13 +15,13 @@ pub async fn deletef(req: HttpRequest) -> Result<HttpResponse, Error> {
             result.content = vec![Folder{
                 result: true,
                 name: "Work".to_string(),
-                ftype: FType::File
+                ftype: "File".to_string()
             }]
         }
         Err(_e) => result.content = vec![Folder{
             result: false,
             name: "Error".to_string(),
-            ftype: FType::Error
+            ftype: "Error".to_string()
         }],
     };
     Ok(HttpResponse::Ok()

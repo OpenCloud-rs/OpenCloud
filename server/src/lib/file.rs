@@ -1,5 +1,5 @@
 use actix_web::HttpRequest;
-use shared::{FolderB, FType,JsonStructB};
+use shared::{Folder, FType,JsonStruct};
 use std::fs;
 use std::path::PathBuf;
 use zip_extensions::*;
@@ -10,15 +10,17 @@ use std::io::Read;
 
 pub fn dir_content(req: &HttpRequest) -> String {
     let path = without_cli(req.path());
-    let mut content: Vec<FolderB> = Vec::new();
+
+    let mut content: Vec<Folder> = Vec::new();
     let mut result: bool = false;
     let mut ftype: FType = FType::Error;
-    match fs::metadata(crate::lib::http::without_cli(req.path())) {
+
+    match fs::metadata(path) {
         Ok(e) => {
             if e.is_file() == true {
                 result = true;
                 ftype = FType::File;
-                content.push(FolderB{
+                content.push(Folder{
                     result: true,
                     name: String::from(path.split("/").last().unwrap()),
                     ftype: file_extension_to_mime(path.split("/").last().unwrap()).to_string()
@@ -34,14 +36,14 @@ pub fn dir_content(req: &HttpRequest) -> String {
                                     match f.metadata() {
                                         Ok(e) => {
                                             if e.is_file() == true {
-                                                content.push(FolderB{
+                                                content.push(Folder{
                                                     result: true,
                                                     name: f.file_name().to_str().unwrap().parse().unwrap(),
                                                     ftype: get_mime(f.file_name().to_str().unwrap())
                                                 });
                                                 //println!("{} => {:?}",format!["{}{}", path, f.file_name().to_str().unwrap()].to_string(), file_extension_to_mime(format!["{}{}", path, f.file_name().to_str().unwrap()].to_string().as_ref()))
                                             } else {
-                                                content.push(FolderB{
+                                                content.push(Folder{
                                                     result: true,
                                                     name: f.file_name().to_str().unwrap().parse().unwrap(),
                                                     ftype: String::from("Folder")
@@ -51,7 +53,7 @@ pub fn dir_content(req: &HttpRequest) -> String {
                                         }
                                         Err(_e) => {
                                             content.push(
-                                                FolderB{
+                                                Folder{
                                                     result: false,
                                                     name: "Error".to_string(),
                                                     ftype: String::from("Error")
@@ -61,7 +63,7 @@ pub fn dir_content(req: &HttpRequest) -> String {
                                     }
                                 }
                                 Err(_e) => {
-                                    content.push(FolderB{
+                                    content.push(Folder{
                                         result: false,
                                         name: "Error".to_string(),
                                         ftype: String::from("Error")
@@ -71,7 +73,7 @@ pub fn dir_content(req: &HttpRequest) -> String {
                         }
                     }
                     Err(_e) => {
-                        content.push(FolderB{
+                        content.push(Folder{
                             result: false,
                             name: "Folder Not Work".to_string(),
                             ftype: String::from("Error")
@@ -85,13 +87,13 @@ pub fn dir_content(req: &HttpRequest) -> String {
 
         }
     }
-    let folder = JsonStructB {
+    let folder = JsonStruct {
         result,
         lenght: content.len() as i64,
         ftype,
         content
     };
-   /*if content.starts_with(&[FolderB {result: false, name: "Error".to_string(), ftype: FType::Error }]) {
+   /*if content.starts_with(&[Folder {result: false, name: "Error".to_string(), ftype: FType::Error }]) {
         folder.result = false;
     }*/
     match serde_json::to_string(&folder) {
