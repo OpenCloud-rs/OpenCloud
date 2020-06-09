@@ -1,10 +1,9 @@
-
 use crate::component::uploadfile::upload_file;
-use shared::{JsonStruct, FType};
+use shared::{FType, JsonStruct};
 mod component;
 mod library;
-use seed::{browser::service::fetch, prelude::*, *};
 use crate::library::lib::delete;
+use seed::{browser::service::fetch, prelude::*, *};
 
 const REPOSITORY_URL: &str = "http://127.0.0.1:8080/cli/";
 // ------ ------
@@ -73,7 +72,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::Next => model.upload_toggle = model.upload_toggle.next(),
-        Msg::Delete(url) => {orders.skip().perform_cmd(delete(url));},
+        Msg::Delete(url) => {
+            orders.skip().perform_cmd(delete(url));
+        }
     }
 }
 
