@@ -1,4 +1,3 @@
-
 use actix_web::HttpRequest;
 
 pub fn _without_cli(string: &str) -> &str {
