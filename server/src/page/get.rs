@@ -23,7 +23,7 @@ pub async fn cli(req: HttpRequest) -> Result<Response, Error> {
     let vec: Vec<&str> = req.query_string().split(|c| c == '&').collect();
 
     for i in 0..vec.len() {
-        if let Some(u) = vec[i].rfind("=") {
+        if let Some(_u) = vec[i].rfind("=") {
             let e: Vec<&str> = vec[i].split("=").collect();
             if e[0].is_empty() {
                 continue;
@@ -36,15 +36,12 @@ pub async fn cli(req: HttpRequest) -> Result<Response, Error> {
         }
         bvec.insert(vec[i], &"");
     }
-
-    if bvec.contains_key("type") {
-        if bvec.get("type").unwrap() == &"download" {
-            if bvec.contains_key("download_type") {
-                match bvec.get("download_type").unwrap().as_ref() {
-                    "zip" => {
+            if bvec.contains_key("download") {
+                match bvec.get("download").unwrap().as_ref() {
+                    "tar.gz" => {
                         let (tx, rx_body) = mpsc::channel();
                         let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
-                            req.path().parse().unwrap(),
+                            req.path().parse().unwrap(), &""
                         ))));
                         result = Ok(Response::Ok()
                             .header("Access-Control-Allow-Origin", "*")
@@ -63,22 +60,23 @@ pub async fn cli(req: HttpRequest) -> Result<Response, Error> {
                     _ => {
                         let (tx, rx_body) = mpsc::channel();
                         let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
-                            req.path().parse().unwrap(),
+                            req.path().parse().unwrap(), &""
                         ))));
                         result = Ok(Response::Ok()
                             .header("Access-Control-Allow-Origin", "*")
                             .header("charset", "utf-8")
                             .header(
                                 "Content-Disposition",
-                                format!("attachment;filename=\"{}.zip\"", last_cli(req.clone())),
+                                format!(
+                                    "\"attachment\";filename=\"{}.zip\"",
+                                    last_cli(req.clone())
+                                ),
                             )
                             .content_type(file_extension_to_mime(req.clone().path()).essence_str())
                             .encoding(ContentEncoding::Gzip)
                             .streaming(rx_body));
                     }
                 }
-            }
-        }
     }
     result
 }

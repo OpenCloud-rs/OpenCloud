@@ -106,8 +106,8 @@ pub fn dir_content(req: &HttpRequest) -> String {
     }
 }
 
-pub fn get_file_as_byte_vec(filename: String) -> Vec<u8> {
-    let buffer = match metadata(&filename) {
+pub fn get_file_as_byte_vec(filename: String, compress: &str,) -> Vec<u8> {
+    match metadata(&filename) {
         Ok(e) => {
             if e.is_file() {
                 let mut buf: Vec<u8> = vec![0; e.len() as usize];
@@ -117,35 +117,31 @@ pub fn get_file_as_byte_vec(filename: String) -> Vec<u8> {
                     .expect("Buffer overflow");
                 buf
             } else if e.is_dir() {
-                File::create("./folder.zip").unwrap();
-                zip_create_from_directory(&PathBuf::from("./folder.zip"), &PathBuf::from(filename))
-                    .unwrap();
-                let mut file = File::open("./folder.zip").expect("no file found");
+                let mut file = match compress.to_lowercase().as_str() {
+                    "tar" => {
+                        File::create("./folder.tar").unwrap();
+                        tar::Archive::new(File::open("./folder.tar").unwrap());
+                        File::open("./folder.tar").expect("no file found")
+                    }
+                    _ => {
+                        File::create("./folder.zip").unwrap();
+                        zip_create_from_directory(&PathBuf::from("./folder.zip"), &PathBuf::from(filename)).unwrap();
+                        File::open("./folder.zip").expect("no file found")
+                    }
+                };
                 let mut buf: Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
                 file.read(&mut buf).expect("Buffer overflow");
                 buf
             } else {
-                let file = File::open("Error.txt").expect("Error");
-                let mut buf: Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
-                File::open("Error.txt")
-                    .expect("Error")
-                    .read(&mut buf)
-                    .unwrap();
+                let buf: Vec<u8> = String::from("Error").as_bytes().to_vec();
                 buf
             }
         }
         Err(_e) => {
-            let file = File::open("Error.txt").expect("Error");
-            let mut buf: Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
-            File::open("Error.txt")
-                .expect("Error")
-                .read(&mut buf)
-                .unwrap();
+            let buf: Vec<u8> = String::from("Error").as_bytes().to_vec();
             buf
         }
-    };
-
-    buffer
+    }
 }
 
 pub fn get_mime(file: &str) -> String {
