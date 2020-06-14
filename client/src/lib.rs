@@ -5,7 +5,7 @@ mod library;
 use crate::library::lib::delete;
 use seed::{browser::service::fetch, prelude::*, *};
 
-const REPOSITORY_URL: &str = "http://127.0.0.1:8080/cli/";
+const REPOSITORY_URL: &str = "http://127.0.0.1:8081/";
 // ------ ------
 //     Model
 // ------ ------
