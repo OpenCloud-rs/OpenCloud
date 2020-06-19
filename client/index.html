@@ -1,6 +1,27 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/pkg/bulma.min.css">
+    <script src="/pkg/bulma.js"></script>
+    <link rel="stylesheet" href="/pkg/index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenCloud</title>
+    <style type="text/css" media="screen">
+        body {
+          display: flex;
+          min-height: 100vh;
+          flex-direction: column;
+        }
 
-<section id="app"></section>
-<script type="module">
+        #wrapper {
+          flex: 1;
+        }
+      </style>
+    <script type="module">
     import init from '/pkg/package.js';
     init('/pkg/package_bg.wasm');
 </script>
+</head>
+<body id="app">
+</body>
+</html>

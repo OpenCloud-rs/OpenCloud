@@ -26,3 +26,14 @@ pub struct HTTPQuery {
     pub rtype: String,
     pub download: String,
 }
+
+impl JsonStruct {
+    pub fn new() -> JsonStruct{
+        JsonStruct {
+            result: false,
+            lenght: 0,
+            ftype: FType::Error,
+            content: vec![]
+        }
+    }
+}
