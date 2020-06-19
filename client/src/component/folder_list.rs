@@ -17,9 +17,9 @@ pub fn folder_list(content: Vec<Folder>) -> Node<Msg> {
             tr![
                 th![
                 if t.ftype.to_string() == "Folder".to_string() {
-                img![attrs!{At::Src => format!["/pkg/folder.svg"]}]
+                img![attrs!{At::Src => format!["/pkg/obj/folder.svg"]}]
                 } else {
-                img![attrs!{At::Src => format!["/pkg/file.svg"]}]
+                img![attrs!{At::Src => format!["/pkg/obj/file.svg"]}]
                 }
                 ],
                 th![
