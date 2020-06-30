@@ -8,7 +8,7 @@ pub struct JsonStruct {
     pub content: Vec<Folder>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Folder {
     pub result: bool,
     pub name: String,

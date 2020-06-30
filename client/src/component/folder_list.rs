@@ -2,7 +2,8 @@ use crate::Msg;
 use seed::{prelude::*, *};
 use shared::Folder;
 
-pub fn folder_list(content: Vec<Folder>) -> Node<Msg> {
+pub fn folder_list(mut content: Vec<Folder>) -> Node<Msg> {
+    content.sort();
     div![table![C!["table is-hoverable is-fullwidth"],
         thead![
             tr![

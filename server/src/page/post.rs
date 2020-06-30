@@ -2,10 +2,11 @@ use actix_multipart::Multipart;
 use actix_web::{web, Error, HttpRequest, HttpResponse};
 use std::io::Write;
 use tokio::stream::StreamExt;
+use crate::lib::http::without_api;
 
 pub async fn save_file(mut payload: Multipart, req: HttpRequest) -> Result<HttpResponse, Error> {
     // iterate over multipart stream
-    let url = req.path();
+    let url = without_api(req.path());
     while let Ok(Some(mut field)) = tokio::stream::StreamExt::try_next(&mut payload).await {
         let content_type = field.content_disposition().unwrap();
         let filename = content_type.get_filename().unwrap();

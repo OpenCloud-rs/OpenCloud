@@ -39,12 +39,11 @@ async fn main() -> std::io::Result<()> {
     .run();
 
     let two = HttpServer::new(move || {
-        //
         App::new()
             .service(
                 actix_files::Files::new("/pkg/", "./client/pkg/")
                     .show_files_listing()
-                    .index_file("index.html")
+                    .index_file(format!("index.html?server_ip={}", default().get_server_ip()))
                     .use_last_modified(true),
             )
             .default_service(
@@ -57,6 +56,29 @@ async fn main() -> std::io::Result<()> {
     })
     .bind(client_ip)?
     .run();
-    futures::future::try_join(one, two).await?;
+    let three = HttpServer::new(move || {
+        App::new().
+            default_service(
+            web::resource("").route(
+                web::get().to(client)
+            )
+        ).service(
+            actix_files::Files::new("/pkg/", "./client/pkg/")
+                .show_files_listing()
+                .index_file(format!("index.html?server_ip={}", default().get_server_ip()))
+                .use_last_modified(true),
+        ).service(
+            web::resource("/api/{path:.*}")
+                .route(actix_web::web::get().to(cli))
+                .route(actix_web::web::post().to(save_file))
+                .route(actix_web::web::delete().to(deletef))
+                .route(
+                    web::route()
+                        .guard(guard::Not(guard::Get()))
+                        .to(HttpResponse::MethodNotAllowed),
+                ),
+        )
+    }).bind("127.0.0.1:2000")?.run();
+    futures::future::try_join(one, three).await?;
     Ok(())
 }

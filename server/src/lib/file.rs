@@ -6,9 +6,10 @@ use std::fs::{metadata, File};
 use std::io::Read;
 use std::path::PathBuf;
 use zip_extensions::*;
+use crate::lib::http::without_api;
 
 pub fn dir_content(req: &HttpRequest) -> String {
-    let path = req.path();
+    let path = without_api(req.path());
 
     let mut content: Vec<Folder> = Vec::new();
     let mut result: bool = false;
@@ -107,7 +108,7 @@ pub fn dir_content(req: &HttpRequest) -> String {
 }
 
 pub fn get_file_as_byte_vec(filename: String, compress: &str,) -> Vec<u8> {
-    match metadata(&filename) {
+    match metadata(without_api(filename.as_ref())) {
         Ok(e) => {
             if e.is_file() {
                 let mut buf: Vec<u8> = vec![0; e.len() as usize];

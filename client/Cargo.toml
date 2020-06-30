@@ -21,6 +21,7 @@ serde_json = {version = "1.0.48"}
 futures = "^0.3.4"
 shared =  {path = "../shared"}
 reqwest = "0.10.6"
+
 [profile.release]
 lto = true
 opt-level = 'z'

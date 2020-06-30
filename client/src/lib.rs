@@ -8,7 +8,7 @@ use seed::{prelude::*, *};
 use seed::browser::Url;
 use crate::component::breadcrumb::breadcrumb;
 
-const REPOSITORY_URL: &str = "http://127.0.0.1:8081/";
+const REPOSITORY_URL: &str = "http://127.0.0.1:2000/api/";
 
 // ------ ------
 //     Model

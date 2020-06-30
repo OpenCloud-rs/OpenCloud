@@ -1,11 +1,10 @@
 use actix_web::HttpRequest;
 
-pub fn _without_cli(string: &str) -> &str {
-    string
-        .char_indices()
-        .next()
-        .and_then(|(i, _)| string.get(i + 4..))
-        .unwrap_or("")
+pub fn without_api(string: &str) -> &str {
+      string.char_indices()
+            .next()
+            .and_then(|(i, _)| string.get(i + 4..))
+            .unwrap_or(&"")
 }
 pub fn log(request: &HttpRequest) {
     println!(
