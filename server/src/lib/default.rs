@@ -25,8 +25,6 @@ pub fn default() -> Config {
         let config = Config {
             server_ip: "0.0.0.0".to_string(),
             server_port: 8081,
-            client_ip: "0.0.0.0".to_string(),
-            client_port: 8001,
             folder_root: "/".to_string(),
         };
         let mut ff = File::create("./config.yaml").unwrap();

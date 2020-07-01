@@ -1,7 +1,7 @@
-use crate::{REPOSITORY_URL, Msg};
+use crate::Msg;
 use seed::browser::fetch::{Method, Request, Response};
 use seed::prelude::Header;
-use seed::Url;
+use seed::{Url, window};
 use shared::JsonStruct;
 
 pub async fn delete(repo: String) -> Response {
@@ -19,7 +19,8 @@ pub async fn delete(repo: String) -> Response {
 }
 
 pub async fn fetch_repository_info(url: Url) -> Msg {
-    let mut url_string: String = String::from(REPOSITORY_URL);
+    let mut url_string: String = String::from("http://".to_owned() + &window().location().host().expect("127.0.0.1:2000") + "/api/");
+
     for d in url.path().iter() {
        url_string.push_str(format!["{}/", d].as_ref())
     }

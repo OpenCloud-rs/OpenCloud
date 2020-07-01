@@ -8,8 +8,6 @@ use seed::{prelude::*, *};
 use seed::browser::Url;
 use crate::component::breadcrumb::breadcrumb;
 
-const REPOSITORY_URL: &str = "http://127.0.0.1:2000/api/";
-
 // ------ ------
 //     Model
 // ------ ------
@@ -91,11 +89,6 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                     C!["column"],
                     breadcrumb((&model.uri).parse().unwrap()),
                     component::folder_list::folder_list(model.api.content.clone()),
-                    div![
-                       format!(
-                            "Result: {}, Lenght: {},",
-                            model.api.result, model.api.lenght
-                        )],
                 ]
               ]
         ],
