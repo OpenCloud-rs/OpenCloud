@@ -6,3 +6,4 @@ server/.idea/
 OpenCloud/
 .buildconfig
 .idea/
+rustup.sh
