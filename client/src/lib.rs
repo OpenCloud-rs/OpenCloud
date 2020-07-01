@@ -1,12 +1,13 @@
-
-use crate::component::uploadfile::upload_file;
-use shared::{JsonStruct, FType};
+use crate::component::footer::footer;
+use shared::{FType, JsonStruct};
 mod component;
 mod library;
-use seed::{browser::service::fetch, prelude::*, *};
-use crate::library::lib::delete;
+use library::lib::delete;
+use library::lib::fetch_repository_info;
+use seed::{prelude::*, *};
+use seed::browser::Url;
+use crate::component::breadcrumb::breadcrumb;
 
-const REPOSITORY_URL: &str = "http://127.0.0.1:8080/cli/";
 // ------ ------
 //     Model
 // ------ ------
@@ -27,7 +28,7 @@ impl Default for Model {
                 ftype: FType::File,
                 content: vec![],
             },
-            uri: String::from(""),
+            uri: String::new(),
             upload_toggle: component::uploadfile::State::Hidden,
         }
     }
@@ -47,18 +48,17 @@ fn after_mount(url: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
 // ------ ------
 pub enum Msg {
     RoutePage(Url),
-    Fetched(fetch::ResponseDataResult<JsonStruct>),
+    Fetched(Option<JsonStruct>),
     Next,
     Delete(String),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::Fetched(Ok(folder)) => model.api = folder,
-        Msg::Fetched(Err(fail_reason)) => {
+        Msg::Fetched(Some(folder)) => model.api = folder,
+        Msg::Fetched(_) => {
             error!(format!(
-                "Fetch error - Fetching folder info failed - {:#?}",
-                fail_reason
+                "Fetch error - Fetching folder info failed",
             ));
             orders.skip();
         }
@@ -66,41 +66,35 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders
                 .skip()
                 .perform_cmd(fetch_repository_info(url.clone()));
-            let url_t = url;
-            {
-                model.uri =
-                    String::from(&url_t.path.into_iter().collect::<Vec<String>>().join("/"));
-            }
+                 model.uri = url.path().to_vec().join("/").clone()
         }
         Msg::Next => model.upload_toggle = model.upload_toggle.next(),
-        Msg::Delete(url) => {orders.skip().perform_cmd(delete(url));},
+        Msg::Delete(url) => {
+            orders.skip().perform_cmd(delete(url));
+        }
     }
-}
-
-async fn fetch_repository_info(url: Url) -> Result<Msg, Msg> {
-    let mut url_string: String = REPOSITORY_URL.to_owned();
-    url_string.push_str(&url.path.into_iter().collect::<Vec<String>>().join("/"));
-    log!(url_string);
-
-    Request::new(url_string).fetch_json_data(Msg::Fetched).await
 }
 
 // ------ ------
 //     View
 // ------ ------
 
-fn view(model: &Model) -> Node<Msg> {
-    div![
-        upload_file(model.upload_toggle, &model.uri),
-        h2![model.uri],
-        md!["# Folder Info"],
-        div![format!(
-            "Result: {}, Lenght: {},",
-            model.api.result, model.api.lenght
-        )],
-        h4!["Content info"],
-        component::folder_list::folder_list(model.api.content.clone()),
+fn view(model: &Model) -> Vec<Node<Msg>> {
+    vec![
+        div![
+        attrs!{At::Id => format!["wrapper"]},
+            div![
+                C!["container"],
+                div![
+                    C!["column"],
+                    breadcrumb((&model.uri).parse().unwrap()),
+                    component::folder_list::folder_list(model.api.content.clone()),
+                ]
+              ]
+        ],
+        footer()
     ]
+
 }
 
 fn routes(url: Url) -> Option<Msg> {
