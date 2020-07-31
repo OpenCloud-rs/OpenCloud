@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
         ).service(
             actix_files::Files::new("/pkg/", "./client/pkg/")
                 .show_files_listing()
-                .index_file(format!("index.html?server_ip={}", default().get_server_ip()))
+                .index_file("index.html")
                 .use_last_modified(true),
         ).service(
             web::resource("/api/{path:.*}")
