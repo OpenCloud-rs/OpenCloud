@@ -19,12 +19,12 @@ pub async fn delete(repo: String) -> Response {
 }
 
 pub async fn fetch_repository_info(url: Url) -> Msg {
-    let mut url_string: String = String::from("http://".to_owned() + &window().location().host().expect("127.0.0.1:2000") + "/api/");
+    let mut url_string: String = String::from("http://".to_owned() + &window().location().host().expect("127.0.0.1:8081") + "/api/");
 
     for d in url.path().iter() {
        url_string.push_str(format!["{}/", d].as_ref())
     }
-
+    println!("Fetched on {}", &url_string);
     let body = reqwest::get(url_string.as_str())
         .await
         .ok().unwrap()
