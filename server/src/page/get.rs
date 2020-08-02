@@ -9,15 +9,12 @@ use bytes::Bytes;
 
 use crate::lib::file::get_file_as_byte_vec;
 use crate::lib::http::last_cli;
+use actix_http::ResponseBuilder;
+use actix_http::body::Body;
 
-pub async fn cli(req: HttpRequest) -> Result<Response, Error> {
+pub async fn cli(req: HttpRequest) -> std::io::Result<Response<Body>> {
     crate::lib::http::log(&req);
-    let mut result = Ok(Response::Ok()
-        .header("Access-Control-Allow-Origin", "*")
-        .header("charset", "utf-8")
-        .content_type("application/json")
-        .encoding(ContentEncoding::Gzip)
-        .body(crate::lib::file::dir_content(&req)));
+    let mut result = get_dir(&req);
 
     let mut bvec: BTreeMap<&str, &str> = BTreeMap::new();
     let vec: Vec<&str> = req.query_string().split(|c| c == '&').collect();
@@ -36,47 +33,65 @@ pub async fn cli(req: HttpRequest) -> Result<Response, Error> {
         }
         bvec.insert(vec[i], &"");
     }
-            if bvec.contains_key("download") {
-                match bvec.get("download").unwrap().as_ref() {
-                    "tar.gz" => {
-                        let (tx, rx_body) = mpsc::channel();
-                        let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
-                            req.path().parse().unwrap(), &""
-                        ))));
-                        result = Ok(Response::Ok()
-                            .header("Access-Control-Allow-Origin", "*")
-                            .header("charset", "utf-8")
-                            .header(
-                                "Content-Disposition",
-                                format!(
-                                    "\"attachment\";filename=\"{}.zip\"",
-                                    last_cli(req.clone())
-                                ),
-                            )
-                            .content_type(file_extension_to_mime(req.clone().path()).essence_str())
-                            .encoding(ContentEncoding::Gzip)
-                            .streaming(rx_body));
-                    }
-                    _ => {
-                        let (tx, rx_body) = mpsc::channel();
-                        let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
-                            req.path().parse().unwrap(), &""
-                        ))));
-                        result = Ok(Response::Ok()
-                            .header("Access-Control-Allow-Origin", "*")
-                            .header("charset", "utf-8")
-                            .header(
-                                "Content-Disposition",
-                                format!(
-                                    "\"attachment\";filename=\"{}.zip\"",
-                                    last_cli(req.clone())
-                                ),
-                            )
-                            .content_type(file_extension_to_mime(req.clone().path()).essence_str())
-                            .encoding(ContentEncoding::Gzip)
-                            .streaming(rx_body));
-                    }
-                }
+    if bvec.contains_key("download") {
+        match bvec.get("download").unwrap().as_ref() {
+            "tar.gz" => {
+                result = get_tar(&req);
+            }
+            _ => {
+                result = get_zip(&req);
+            }
+
+        }
     }
     result
+}
+
+fn get_zip(req: &HttpRequest) -> std::io::Result<Response> {
+    let (tx, rx_body) = mpsc::channel();
+    let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
+        req.path().parse().unwrap(), &"",
+    ))));
+    Ok(Response::Ok()
+        .header("Access-Control-Allow-Origin", "*")
+        .header("charset", "utf-8")
+        .header(
+            "Content-Disposition",
+            format!(
+                "\"attachment\";filename=\"{}.zip\"",
+                last_cli(req.clone())
+            ),
+        )
+        .content_type(file_extension_to_mime(req.clone().path()).essence_str())
+        .encoding(ContentEncoding::Gzip)
+        .streaming(rx_body))
+}
+
+fn get_tar(req: &HttpRequest) -> std::io::Result<Response> {
+    let (tx, rx_body) = mpsc::channel();
+    let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
+        req.path().parse().unwrap(), &"",
+    ))));
+    Ok(Response::Ok()
+        .header("Access-Control-Allow-Origin", "*")
+        .header("charset", "utf-8")
+        .header(
+            "Content-Disposition",
+            format!(
+                "\"attachment\";filename=\"{}.zip\"",
+                last_cli(req.clone())
+            ),
+        )
+        .content_type(file_extension_to_mime(req.clone().path()).essence_str())
+        .encoding(ContentEncoding::Gzip)
+        .streaming(rx_body))
+}
+
+fn get_dir(req: &HttpRequest) -> std::io::Result<Response<Body>> {
+    Ok(Response::Ok()
+        .header("Access-Control-Allow-Origin", "*")
+        .header("charset", "utf-8")
+        .content_type("application/json")
+        .encoding(ContentEncoding::Gzip)
+        .body(crate::lib::file::dir_content(&req)))
 }
