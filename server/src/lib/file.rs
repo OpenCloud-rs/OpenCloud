@@ -121,12 +121,20 @@ pub fn get_file_as_byte_vec(filename: String, compress: &str,) -> Vec<u8> {
                 let mut file = match compress.to_lowercase().as_str() {
                     "tar" => {
                         File::create("./folder.tar").unwrap();
-                        tar::Archive::new(File::open("./folder.tar").unwrap());
+                        tar::Builder::new(File::open("./folder.tar").expect("no file found")).append_dir_all("./folder.tar",without_api(filename.as_str()));
                         File::open("./folder.tar").expect("no file found")
                     }
                     _ => {
                         File::create("./folder.zip").unwrap();
-                        zip_create_from_directory(&PathBuf::from("./folder.zip"), &PathBuf::from(filename)).unwrap();
+                        println!("filename => {}", without_api(filename.as_ref()));
+                        match zip_create_from_directory(&PathBuf::from("./folder.zip"), &PathBuf::from(without_api(filename.as_ref()))) {
+                            Ok(n) => {
+                                println!("Zip is Ok");
+                            }
+                            Err(e) => {
+                                println!("Error : {}", e)
+                            }
+                        }
                         File::open("./folder.zip").expect("no file found")
                     }
                 };
