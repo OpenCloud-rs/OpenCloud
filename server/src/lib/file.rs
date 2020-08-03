@@ -8,6 +8,7 @@ use std::path::PathBuf;
 use zip_extensions::*;
 use crate::lib::http::without_api;
 
+
 pub fn dir_content(req: &HttpRequest) -> String {
     let path = without_api(req.path());
 
@@ -120,22 +121,10 @@ pub fn get_file_as_byte_vec(filename: String, compress: &str,) -> Vec<u8> {
             } else if e.is_dir() {
                 let mut file = match compress.to_lowercase().as_str() {
                     "tar" => {
-                        File::create("./folder.tar").unwrap();
-                        tar::Builder::new(File::open("./folder.tar").expect("no file found")).append_dir_all("./folder.tar",without_api(filename.as_str()));
-                        File::open("./folder.tar").expect("no file found")
+                        random_archive("tar.gz".to_string(), filename)
                     }
                     _ => {
-                        File::create("./folder.zip").unwrap();
-                        println!("filename => {}", without_api(filename.as_ref()));
-                        match zip_create_from_directory(&PathBuf::from("./folder.zip"), &PathBuf::from(without_api(filename.as_ref()))) {
-                            Ok(n) => {
-                                println!("Zip is Ok");
-                            }
-                            Err(e) => {
-                                println!("Error : {}", e)
-                            }
-                        }
-                        File::open("./folder.zip").expect("no file found")
+                        random_archive("zip".to_string(), filename)
                     }
                 };
                 let mut buf: Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
@@ -151,6 +140,46 @@ pub fn get_file_as_byte_vec(filename: String, compress: &str,) -> Vec<u8> {
             buf
         }
     }
+}
+fn tar_archive(name: String, dir: String) -> File {
+    let file_name = format!("./{}.tar.gz", name);
+    File::create(&file_name).unwrap();
+    tar::Builder::new(File::open(&file_name).expect("no file found")).append_dir_all(&file_name,dir.as_str());
+    File::open(&file_name).expect("no file found")
+}
+fn zip_archive(name: String, dir: String) -> File {
+    let file_name = format!("./{}.zip", name);
+    File::create(&file_name).unwrap();
+    println!("filename => {}", dir);
+    match zip_create_from_directory(&PathBuf::from(&file_name), &PathBuf::from(dir)) {
+        Ok(n) => {
+            println!("Zip is Ok");
+        }
+        Err(e) => {
+            println!("Error : {}", e)
+        }
+    }
+    File::open(file_name).expect("no file found")
+}
+fn random_archive(extention: String, dir: String) -> File {
+    let name :String = random_name();
+    let dir :&str = without_api(dir.as_ref());
+    if extention == String::from("tar.gz") {
+        tar_archive(name, dir.to_string())
+    } else {
+        zip_archive(name, dir.to_string())
+    }
+}
+
+fn random_name() -> String {
+    use rand::Rng;
+    let charset: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
+    let mut rng = rand::thread_rng();
+    (0..30).map(|_| {
+            let idx = rng.gen_range(0, charset.len());
+            charset[idx] as char
+        })
+        .collect()
 }
 
 pub fn get_mime(file: &str) -> String {

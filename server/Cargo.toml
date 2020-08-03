@@ -13,9 +13,11 @@ actix-service = "1.0.5"
 actix-http = "1.0.1"
 actix-utils = "1.0.6"
 
+rand = "0.7.3"
 zip = "0.5.6"
 zip-extensions = "0.5.0"
 tar = "0.4"
+
 mime_guess = "2.0.3"
 
 serde = {version = "1.0.114", features = ['derive']}
