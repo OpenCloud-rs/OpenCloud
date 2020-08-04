@@ -6,7 +6,7 @@
             <strong>OpenCloud</strong> is another <strong>self-hosted cloud</strong> like <a href="https://github.com/nextcloud/server">nextcloud</a> or <a href="https://github.com/owncloud/core">owncloud</a>
         </p>
         <hr>
-        <h2>Feature</h2>
+        <h3>Feature</h3>
         <li>
             No superfluous functionality
         </li>
