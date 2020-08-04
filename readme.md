@@ -23,5 +23,5 @@
             Mobile app (IOS/ Android)
         </li>
         <hr>
-        <p>Made by Rheydskey</p>
+        <p><strong>Made by Rheydskey<strong></p>
 </div>
