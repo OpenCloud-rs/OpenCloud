@@ -7,10 +7,10 @@ pub fn breadcrumb(url: String) -> Node<Msg> {
         C!["breadcrumb is-centered bd-snippet notification has-text-black has-background-link-light"],
             ul![
                 vec.iter().map( |t|
-                    li![
+                                    li![
                         a![
-                            attrs![At::Href => format!["{}", t]],
-                            format!["{}", t]
+                            attrs![At::Href => format!["{}/", t]],
+                            format!["{}/", t]
                           ]
                         ]
                     )
