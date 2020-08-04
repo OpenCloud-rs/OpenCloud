@@ -1,6 +1,7 @@
 use crate::Msg;
 use seed::{prelude::*, *};
 use std::fmt;
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum State {
     Show,
@@ -23,44 +24,74 @@ impl Default for State {
 impl fmt::Display for State {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let state = match self {
-            Self::Show => "hidden",
-            Self::Hidden => "visible",
+            Self::Show => "visible",
+            Self::Hidden => "hidden",
         };
         write!(f, "{}", state)
     }
 }
 pub fn upload_file(state: State, url: &String) -> Node<Msg> {
+    println!("{}", url);
     div![
+    div![
+    C!["mt-2 is-centered is-mobile columns"],
         button![
+            C!["columns button is-centered"],
             format![
                 "{}",
                 match state {
-                    self::State::Show => {
-                        "Show to upload"
-                    }
                     self::State::Hidden => {
+                        "Show the upload menu"
+                    }
+                    self::State::Show => {
                         "Hidden the upload menu"
                     }
                 }
             ],
             ev(Ev::Click, |_| Msg::Next)
         ],
-        div![
+    ],
+    div![
+
             attrs! {At::from("style") => format!["visibility: {}", state]},
-            form![
+            div![
+            C!["file columns is-centered"],
+              label![
+              C!["file-label"],
+                input![
+                    C!["file-input"],
+                    attrs! {
+                        At::from("name") => "file",
+                        At::from("type") => "file",
+                    },
+                ],
+                span![
+                    C!["file-cta"],
+                    span![
+                        C!["file-label"],
+                        "Choose a file"
+                    ]
+                ]
+          ]
+        ]
+            /*form![
                 attrs! {
                     At::from("method") => "post",
                     At::from("enctype") => "multipart/form-data",
-                    At::from("action") => format!["http://127.0.0.1:8080/cli/{}", url],
+                    At::from("action") => format!["{}", url],
                 },
-                input![attrs! {
+                input![
+                C!["button"],
+                attrs! {
                     At::from("name") => "file",
                     At::from("type") => "file",
                 }],
-                input![attrs! {
+                input![
+                C!["button"],
+                attrs! {
                     At::from("type") => "submit",
                 }]
-            ]
+            ]*/
         ]
     ]
 }

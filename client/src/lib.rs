@@ -7,6 +7,7 @@ use library::lib::fetch_repository_info;
 use seed::{prelude::*, *};
 use seed::browser::Url;
 use crate::component::breadcrumb::breadcrumb;
+use crate::component::uploadfile::{upload_file, State};
 
 // ------ ------
 //     Model
@@ -80,7 +81,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 
 fn view(model: &Model) -> Vec<Node<Msg>> {
+    println!("{}", model.uri);
     vec![
+
         div![
         attrs!{At::Id => format!["wrapper"]},
             div![
@@ -88,6 +91,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                 div![
                     C!["column"],
                     breadcrumb((&model.uri).parse().unwrap()),
+                    upload_file(model.upload_toggle,&model.uri),
                     component::folder_list::folder_list(model.api.content.clone()),
                 ]
               ]
