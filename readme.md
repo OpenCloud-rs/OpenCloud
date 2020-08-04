@@ -11,7 +11,7 @@
             No superfluous functionality
         </li>
 		        <li>
-           Folder downloading in Archive 
+           Folder downloading in Archive (Zip / Tar)
         </li>
 		        <li>
             Web Client
@@ -20,7 +20,7 @@
             RESTAPI 
         </li>
 		<li>
-            Mobile app (IOS/ Android)
+            <a href="https://github.com/OpenCloud-rs/OpenCloud-Flutter">Mobile app (IOS/ Android)</a>
         </li>
         <hr>
         <p><strong>Made by Rheydskey<strong></p>

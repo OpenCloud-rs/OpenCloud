@@ -6,3 +6,5 @@ server/.idea/
 OpenCloud/
 .buildconfig
 .idea/
+*config.yaml
+temp/*
