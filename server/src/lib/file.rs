@@ -49,7 +49,6 @@ pub fn dir_content(req: &HttpRequest) -> String {
                                                         f.file_name().to_str().unwrap(),
                                                     ),
                                                 });
-                                            //println!("{} => {:?}",format!["{}{}", path, f.file_name().to_str().unwrap()].to_string(), file_extension_to_mime(format!["{}{}", path, f.file_name().to_str().unwrap()].to_string().as_ref()))
                                             } else {
                                                 content.push(Folder {
                                                     result: true,
@@ -99,16 +98,13 @@ pub fn dir_content(req: &HttpRequest) -> String {
         ftype,
         content,
     };
-    /*if content.starts_with(&[Folder {result: false, name: "Error".to_string(), ftype: FType::Error }]) {
-        folder.result = false;
-    }*/
     match serde_json::to_string(&folder) {
         Ok(e) => e,
         Err(_e) => String::from("Not Work"),
     }
 }
 
-pub fn get_file_as_byte_vec(filename: String, compress: &str,) -> Vec<u8> {
+pub fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
     match metadata(without_api(filename.as_ref())) {
         Ok(e) => {
             if e.is_file() {
@@ -141,14 +137,16 @@ pub fn get_file_as_byte_vec(filename: String, compress: &str,) -> Vec<u8> {
         }
     }
 }
+
 fn tar_archive(name: String, dir: String) -> File {
-    let file_name = format!("./{}.tar.gz", name);
+    let file_name = format!("./temp/{}.tar.gz", name);
     File::create(&file_name).unwrap();
     tar::Builder::new(File::open(&file_name).expect("no file found")).append_dir_all(&file_name,dir.as_str());
     File::open(&file_name).expect("no file found")
 }
+
 fn zip_archive(name: String, dir: String) -> File {
-    let file_name = format!("./{}.zip", name);
+    let file_name = format!("./temp/{}.zip", name);
     File::create(&file_name).unwrap();
     println!("filename => {}", dir);
     match zip_create_from_directory(&PathBuf::from(&file_name), &PathBuf::from(dir)) {
@@ -161,6 +159,7 @@ fn zip_archive(name: String, dir: String) -> File {
     }
     File::open(file_name).expect("no file found")
 }
+
 fn random_archive(extention: String, dir: String) -> File {
     let name :String = random_name();
     let dir :&str = without_api(dir.as_ref());
@@ -173,7 +172,9 @@ fn random_archive(extention: String, dir: String) -> File {
 
 fn random_name() -> String {
     use rand::Rng;
-    let charset: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
+    let charset: &[u8] = b"abcdefghijklmnopqrstuvwxyz\
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    ";
     let mut rng = rand::thread_rng();
     (0..30).map(|_| {
             let idx = rng.gen_range(0, charset.len());

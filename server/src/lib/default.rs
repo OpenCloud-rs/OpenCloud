@@ -21,6 +21,9 @@ pub fn default() -> Config {
         }
         Err(_e) => {}
     };
+    if !vec.contains(&String::from("temp")) {
+            std::fs::create_dir("./temp");
+    }
     if !vec.contains(&String::from("config.yaml")) {
         let config = Config {
             server_ip: "0.0.0.0".to_string(),
