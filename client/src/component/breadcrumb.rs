@@ -9,8 +9,8 @@ pub fn breadcrumb(url: String) -> Node<Msg> {
                 vec.iter().map( |t|
                                     li![
                         a![
-                            attrs![At::Href => format!["{}/", t]],
-                            format!["{}/", t]
+                            attrs![At::Href => format!["{}", t]],
+                            format!["{}", t]
                           ]
                         ]
                     )
