@@ -11,7 +11,7 @@ pub fn folder_list(mut content: Vec<Folder>) -> Node<Msg> {
             tr![
                 th![],
                 th![a!["..", attrs! {At::Href => ".."}]],
-                th!["Folder"]
+                th!["Folder"],
             ],
             content.iter().map(|t| tr![
                 th![if t.ftype.to_string() == "Folder".to_string() {
@@ -30,7 +30,7 @@ pub fn folder_list(mut content: Vec<Folder>) -> Node<Msg> {
                         attrs! {At::Href => format!["{}",t.name.to_string()]}
                     ]
                 }],
-                th![&t.ftype]
+                th![&t.ftype],
             ])
         ]
     ]]

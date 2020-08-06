@@ -4,8 +4,15 @@ use seed::prelude::Header;
 use seed::{window, Url};
 use shared::JsonStruct;
 
-pub async fn delete(repo: String) -> Response {
-    Request::new(repo)
+pub async fn delete(url: Url) {
+    let mut url_string: String = String::from(
+        "http://".to_owned() + &window().location().host().expect("127.0.0.1:8081") + "/api/",
+    );
+    for d in url.path().iter() {
+        url_string.push_str(format!["{}/", d].as_ref())
+    }
+    println!("{}", url_string);
+    Request::new(url_string.as_str())
         .header(Header::custom("Access-Control-Allow-Credentials", "true"))
         .header(Header::custom(
             "Access-Control-Allow-Origin",
@@ -15,7 +22,7 @@ pub async fn delete(repo: String) -> Response {
         .method(Method::Delete)
         .fetch()
         .await
-        .unwrap()
+        .unwrap();
 }
 
 pub async fn fetch_repository_info(url: Url) -> Msg {

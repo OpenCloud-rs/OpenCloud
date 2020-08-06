@@ -66,24 +66,7 @@ pub fn upload_file(state: State, url: &String) -> Node<Msg> {
                     ],
                     span![C!["file-cta"], span![C!["file-label"], "Choose a file"]]
                 ]
-            ] /*form![
-                  attrs! {
-                      At::from("method") => "post",
-                      At::from("enctype") => "multipart/form-data",
-                      At::from("action") => format!["{}", url],
-                  },
-                  input![
-                  C!["button"],
-                  attrs! {
-                      At::from("name") => "file",
-                      At::from("type") => "file",
-                  }],
-                  input![
-                  C!["button"],
-                  attrs! {
-                      At::from("type") => "submit",
-                  }]
-              ]*/
+            ]
         ]
     ]
 }

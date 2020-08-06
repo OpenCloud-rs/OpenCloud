@@ -18,8 +18,10 @@ use seed::{prelude::*, *};
 struct Model {
     pub api: JsonStruct,
     pub uri: String,
+    pub url: Url,
     pub upload_toggle: component::uploadfile::State,
     pub dropdown: component::dropdown::State,
+    pub modal_toggle: component::delete::State,
 }
 
 impl Default for Model {
@@ -32,8 +34,10 @@ impl Default for Model {
                 content: vec![],
             },
             uri: String::new(),
+            url: Url::current(),
             upload_toggle: component::uploadfile::State::Hidden,
             dropdown: component::dropdown::State::NotActive,
+            modal_toggle: component::delete::State::NotActive,
         }
     }
 }
@@ -55,7 +59,8 @@ pub enum Msg {
     Fetched(Option<JsonStruct>),
     UploadNext,
     DropdownNext,
-    Delete(String),
+    ModalToggle,
+    Delete(Url),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -73,6 +78,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::UploadNext => model.upload_toggle = model.upload_toggle.next(),
         Msg::DropdownNext => model.dropdown = model.dropdown.next(),
+        Msg::ModalToggle => model.modal_toggle = model.modal_toggle.next(),
         Msg::Delete(url) => {
             orders.skip().perform_cmd(delete(url));
         }
@@ -84,18 +90,23 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 
 fn view(model: &Model) -> Vec<Node<Msg>> {
-    println!("{}", model.uri);
-    //breadcrumb(String::from(&model.uri));
+    println!("{}", model.url);
     vec![
-        dropdown(model.dropdown),
         div![
-            attrs! {At::Id => format!["wrapper"]},
+            attrs! {At::Id => "wrapper"},
             div![
                 C!["container"],
                 div![
                     C!["column"],
                     breadcrumb((&model.uri).parse().unwrap()),
-                    upload_file(model.upload_toggle, &model.uri),
+                    div![
+                        C!["columns has-text-centered"],
+                        div![C!["column"], upload_file(model.upload_toggle, &model.uri),],
+                        div![
+                            C!["column"],
+                            component::delete::delete(model.modal_toggle, model.url.clone()),
+                        ],
+                    ],
                     component::folder_list::folder_list(model.api.content.clone()),
                 ]
             ]
