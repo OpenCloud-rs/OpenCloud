@@ -10,7 +10,8 @@ pub async fn deletef(req: HttpRequest) -> Result<HttpResponse, Error> {
         ftype: FType::File,
         content: vec![],
     };
-    match std::fs::remove_dir(to_delete) {
+
+    match std::fs::remove_dir_all(to_delete) {
         Ok(_o) => {
             result.result = true;
             result.content = vec![Folder {
