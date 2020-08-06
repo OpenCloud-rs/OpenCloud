@@ -9,8 +9,8 @@ use bytes::Bytes;
 
 use crate::lib::file::get_file_as_byte_vec;
 use crate::lib::http::last_cli;
-use actix_http::ResponseBuilder;
 use actix_http::body::Body;
+use actix_http::ResponseBuilder;
 
 pub async fn cli(req: HttpRequest) -> std::io::Result<Response<Body>> {
     crate::lib::http::log(&req);
@@ -41,7 +41,6 @@ pub async fn cli(req: HttpRequest) -> std::io::Result<Response<Body>> {
             _ => {
                 result = get_zip(&req);
             }
-
         }
     }
     result
@@ -50,17 +49,15 @@ pub async fn cli(req: HttpRequest) -> std::io::Result<Response<Body>> {
 fn get_zip(req: &HttpRequest) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
-        req.path().parse().unwrap(), &"",
+        req.path().parse().unwrap(),
+        &"",
     ))));
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .header(
             "Content-Disposition",
-            format!(
-                "\"attachment\";filename=\"{}.zip\"",
-                last_cli(req.clone())
-            ),
+            format!("\"attachment\";filename=\"{}.zip\"", last_cli(req.clone())),
         )
         .content_type(file_extension_to_mime(req.clone().path()).essence_str())
         .encoding(ContentEncoding::Gzip)
@@ -70,17 +67,15 @@ fn get_zip(req: &HttpRequest) -> std::io::Result<Response> {
 fn get_tar(req: &HttpRequest) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
-        req.path().parse().unwrap(), &"",
+        req.path().parse().unwrap(),
+        &"",
     ))));
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .header(
             "Content-Disposition",
-            format!(
-                "\"attachment\";filename=\"{}.zip\"",
-                last_cli(req.clone())
-            ),
+            format!("\"attachment\";filename=\"{}.zip\"", last_cli(req.clone())),
         )
         .content_type(file_extension_to_mime(req.clone().path()).essence_str())
         .encoding(ContentEncoding::Gzip)

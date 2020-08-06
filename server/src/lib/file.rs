@@ -1,3 +1,4 @@
+use crate::lib::http::without_api;
 use actix_files::file_extension_to_mime;
 use actix_web::HttpRequest;
 use shared::{FType, Folder, JsonStruct};
@@ -6,8 +7,6 @@ use std::fs::{metadata, File};
 use std::io::Read;
 use std::path::PathBuf;
 use zip_extensions::*;
-use crate::lib::http::without_api;
-
 
 pub fn dir_content(req: &HttpRequest) -> String {
     let path = without_api(req.path());
@@ -116,12 +115,8 @@ pub fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                 buf
             } else if e.is_dir() {
                 let mut file = match compress.to_lowercase().as_str() {
-                    "tar" => {
-                        random_archive("tar.gz".to_string(), filename)
-                    }
-                    _ => {
-                        random_archive("zip".to_string(), filename)
-                    }
+                    "tar" => random_archive("tar.gz".to_string(), filename),
+                    _ => random_archive("zip".to_string(), filename),
                 };
                 let mut buf: Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
                 file.read(&mut buf).expect("Buffer overflow");
@@ -141,7 +136,8 @@ pub fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
 fn tar_archive(name: String, dir: String) -> File {
     let file_name = format!("./temp/{}.tar.gz", name);
     File::create(&file_name).unwrap();
-    tar::Builder::new(File::open(&file_name).expect("no file found")).append_dir_all(&file_name,dir.as_str());
+    tar::Builder::new(File::open(&file_name).expect("no file found"))
+        .append_dir_all(&file_name, dir.as_str());
     File::open(&file_name).expect("no file found")
 }
 
@@ -153,16 +149,14 @@ fn zip_archive(name: String, dir: String) -> File {
         Ok(n) => {
             println!("Zip is Ok");
         }
-        Err(e) => {
-            println!("Error : {}", e)
-        }
+        Err(e) => println!("Error : {}", e),
     }
     File::open(file_name).expect("no file found")
 }
 
 fn random_archive(extention: String, dir: String) -> File {
-    let name :String = random_name();
-    let dir :&str = without_api(dir.as_ref());
+    let name: String = random_name();
+    let dir: &str = without_api(dir.as_ref());
     if extention == String::from("tar.gz") {
         tar_archive(name, dir.to_string())
     } else {
@@ -176,7 +170,8 @@ fn random_name() -> String {
     ABCDEFGHIJKLMNOPQRSTUVWXYZ
     ";
     let mut rng = rand::thread_rng();
-    (0..30).map(|_| {
+    (0..30)
+        .map(|_| {
             let idx = rng.gen_range(0, charset.len());
             charset[idx] as char
         })

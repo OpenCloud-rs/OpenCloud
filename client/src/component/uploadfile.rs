@@ -33,65 +33,57 @@ impl fmt::Display for State {
 pub fn upload_file(state: State, url: &String) -> Node<Msg> {
     println!("{}", url);
     div![
-    div![
-    C!["mt-2 is-centered is-mobile columns"],
-        button![
-            C!["columns button is-centered"],
-            format![
-                "{}",
-                match state {
-                    self::State::Hidden => {
-                        "Show the upload menu"
+        div![
+            C!["mt-2 is-centered is-mobile columns"],
+            button![
+                C!["columns button is-centered"],
+                format![
+                    "{}",
+                    match state {
+                        self::State::Hidden => {
+                            "Show the upload menu"
+                        }
+                        self::State::Show => {
+                            "Hidden the upload menu"
+                        }
                     }
-                    self::State::Show => {
-                        "Hidden the upload menu"
-                    }
-                }
+                ],
+                ev(Ev::Click, |_| Msg::UploadNext)
             ],
-            ev(Ev::Click, |_| Msg::Next)
         ],
-    ],
-    div![
-
+        div![
             attrs! {At::from("style") => format!["visibility: {}", state]},
             div![
-            C!["file columns is-centered"],
-              label![
-              C!["file-label"],
-                input![
-                    C!["file-input"],
-                    attrs! {
-                        At::from("name") => "file",
-                        At::from("type") => "file",
-                    },
-                ],
-                span![
-                    C!["file-cta"],
-                    span![
-                        C!["file-label"],
-                        "Choose a file"
-                    ]
+                C!["file columns is-centered"],
+                label![
+                    C!["file-label"],
+                    input![
+                        C!["file-input"],
+                        attrs! {
+                            At::from("name") => "file",
+                            At::from("type") => "file",
+                        },
+                    ],
+                    span![C!["file-cta"], span![C!["file-label"], "Choose a file"]]
                 ]
-          ]
-        ]
-            /*form![
-                attrs! {
-                    At::from("method") => "post",
-                    At::from("enctype") => "multipart/form-data",
-                    At::from("action") => format!["{}", url],
-                },
-                input![
-                C!["button"],
-                attrs! {
-                    At::from("name") => "file",
-                    At::from("type") => "file",
-                }],
-                input![
-                C!["button"],
-                attrs! {
-                    At::from("type") => "submit",
-                }]
-            ]*/
+            ] /*form![
+                  attrs! {
+                      At::from("method") => "post",
+                      At::from("enctype") => "multipart/form-data",
+                      At::from("action") => format!["{}", url],
+                  },
+                  input![
+                  C!["button"],
+                  attrs! {
+                      At::from("name") => "file",
+                      At::from("type") => "file",
+                  }],
+                  input![
+                  C!["button"],
+                  attrs! {
+                      At::from("type") => "submit",
+                  }]
+              ]*/
         ]
     ]
 }
