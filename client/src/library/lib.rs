@@ -1,5 +1,5 @@
 use crate::Msg;
-use seed::browser::fetch::{Method, Request, Response};
+use seed::browser::fetch::{Method, Request};
 use seed::prelude::Header;
 use seed::{window, Url};
 use shared::JsonStruct;

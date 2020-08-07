@@ -10,7 +10,6 @@ use bytes::Bytes;
 use crate::lib::file::get_file_as_byte_vec;
 use crate::lib::http::last_cli;
 use actix_http::body::Body;
-use actix_http::ResponseBuilder;
 
 pub async fn cli(req: HttpRequest) -> std::io::Result<Response<Body>> {
     crate::lib::http::log(&req);

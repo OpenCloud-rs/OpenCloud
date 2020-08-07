@@ -137,7 +137,7 @@ fn tar_archive(name: String, dir: String) -> File {
     let file_name = format!("./temp/{}.tar.gz", name);
     File::create(&file_name).unwrap();
     tar::Builder::new(File::open(&file_name).expect("no file found"))
-        .append_dir_all(&file_name, dir.as_str());
+        .append_dir_all(&file_name, dir.as_str()).expect("Error");
     File::open(&file_name).expect("no file found")
 }
 
@@ -146,7 +146,7 @@ fn zip_archive(name: String, dir: String) -> File {
     File::create(&file_name).unwrap();
     println!("filename => {}", dir);
     match zip_create_from_directory(&PathBuf::from(&file_name), &PathBuf::from(dir)) {
-        Ok(n) => {
+        Ok(_n) => {
             println!("Zip is Ok");
         }
         Err(e) => println!("Error : {}", e),

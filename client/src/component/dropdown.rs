@@ -30,7 +30,7 @@ impl fmt::Display for State {
         write!(f, "{}", state)
     }
 }
-pub fn dropdown(state: State) -> Node<Msg> {
+pub fn _dropdown(state: State) -> Node<Msg> {
     div![
         C![format![
             "dropdown is-right {}",
