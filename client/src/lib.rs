@@ -4,6 +4,7 @@ mod component;
 mod library;
 use crate::component::breadcrumb::breadcrumb;
 use crate::component::uploadfile::upload_file;
+use crate::library::lib::download;
 use library::lib::delete;
 use library::lib::fetch_repository_info;
 use seed::browser::Url;
@@ -19,7 +20,7 @@ struct Model {
     pub uri: String,
     pub url: Url,
     pub upload_toggle: component::uploadfile::State,
-    pub dropdown: component::dropdown::State,
+    pub dropdown: component::download::State,
     pub modal_toggle: component::delete::State,
 }
 
@@ -35,7 +36,7 @@ impl Default for Model {
             uri: String::new(),
             url: Url::current(),
             upload_toggle: component::uploadfile::State::Hidden,
-            dropdown: component::dropdown::State::NotActive,
+            dropdown: component::download::State::NotActive,
             modal_toggle: component::delete::State::NotActive,
         }
     }
@@ -59,6 +60,7 @@ pub enum Msg {
     UploadNext,
     DropdownNext,
     ModalToggle,
+    Download(String),
     Delete(Url),
 }
 
@@ -78,6 +80,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::UploadNext => model.upload_toggle = model.upload_toggle.next(),
         Msg::DropdownNext => model.dropdown = model.dropdown.next(),
         Msg::ModalToggle => model.modal_toggle = model.modal_toggle.next(),
+        Msg::Download(dtype) => {
+            orders.skip().perform_cmd(download(model.url.clone(), dtype));
+        }
         Msg::Delete(url) => {
             orders.skip().perform_cmd(delete(url));
         }
@@ -105,6 +110,10 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                             C!["column"],
                             component::delete::delete(model.modal_toggle, model.url.clone()),
                         ],
+                        div![
+                            C!["column"],
+                            component::download::download(model.dropdown)
+                        ]
                     ],
                     component::folder_list::folder_list(model.api.content.clone()),
                 ]

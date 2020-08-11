@@ -137,7 +137,8 @@ fn tar_archive(name: String, dir: String) -> File {
     let file_name = format!("./temp/{}.tar.gz", name);
     File::create(&file_name).unwrap();
     tar::Builder::new(File::open(&file_name).expect("no file found"))
-        .append_dir_all(&file_name, dir.as_str()).expect("Error");
+        .append_dir_all(&file_name, dir.as_str())
+        .expect("Error");
     File::open(&file_name).expect("no file found")
 }
 
@@ -170,7 +171,7 @@ fn random_name() -> String {
     ABCDEFGHIJKLMNOPQRSTUVWXYZ
     ";
     let mut rng = rand::thread_rng();
-    (0..30)
+    (0..10)
         .map(|_| {
             let idx = rng.gen_range(0, charset.len());
             charset[idx] as char
