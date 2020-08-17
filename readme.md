@@ -11,7 +11,7 @@
             No superfluous functionality
         </li>
 		        <li>
-           Folder downloading in Archive (Zip / Tar)
+           Folder downloading as Archive (Zip / Tar)
         </li>
 		        <li>
             Web Client
