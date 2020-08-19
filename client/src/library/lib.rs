@@ -39,7 +39,7 @@ pub async fn download(url: Url, dtype: String) {
         url_string.push_str("?download");
     }
     println!("{}", url_string);
-    fetch(url_string.as_str()).await?.status();
+    fetch(url_string.as_str()).await.expect("Error").status();
     //Request::new(url_string.as_str()).redirect(RequestRedirect::Follow);
    /* Request::new(url_string.as_str())
         .header(Header::custom("Access-Control-Allow-Credentials", "true"))
