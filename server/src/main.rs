@@ -7,6 +7,8 @@ use crate::page::p500::p500;
 use crate::page::post::save_file;
 use actix_web::middleware::errhandlers::ErrorHandlers;
 use actix_web::{guard, http, web, App, HttpResponse, HttpServer};
+use env_logger::Env;
+use actix_web::middleware::Logger;
 
 mod lib;
 mod page;
@@ -17,7 +19,7 @@ async fn main() -> std::io::Result<()> {
 
     let server_ip: &str = &config.get_server_ip();
 
-    println!("Running on {}", &server_ip);
+    env_logger::from_env(Env::default().default_filter_or("info")).init();
 
     HttpServer::new(move || {
         App::new()
@@ -39,6 +41,7 @@ async fn main() -> std::io::Result<()> {
                             .to(HttpResponse::MethodNotAllowed),
                     ),
             )
+            .wrap(Logger::new("%s : %r in %T"))
             .wrap(ErrorHandlers::new().handler(http::StatusCode::INTERNAL_SERVER_ERROR, p500))
     })
     .bind(server_ip)?
