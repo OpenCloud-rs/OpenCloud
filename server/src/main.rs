@@ -1,5 +1,5 @@
-use crate::lib::config::Config;
-use crate::lib::default::default;
+use crate::lib::config::config::Config;
+use crate::lib::default::default::default;
 use crate::page::client::client;
 use crate::page::delete::deletef;
 use crate::page::get::cli;

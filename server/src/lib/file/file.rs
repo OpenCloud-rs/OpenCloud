@@ -1,4 +1,4 @@
-use crate::lib::http::without_api;
+use crate::lib::http::http::without_api;
 use actix_files::file_extension_to_mime;
 use actix_web::HttpRequest;
 use shared::{FType, Folder, JsonStruct};
@@ -7,7 +7,8 @@ use std::fs::{metadata, File};
 use std::io::Read;
 use std::path::PathBuf;
 use zip_extensions::*;
-
+use tokio::fs::File as afs;
+use tokio::io::{self, AsyncReadExt};
 pub fn dir_content(req: &HttpRequest) -> String {
     let path = without_api(req.path());
 
@@ -103,15 +104,21 @@ pub fn dir_content(req: &HttpRequest) -> String {
     }
 }
 
-pub fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
-    match metadata(without_api(filename.as_ref())) {
+pub async fn get_file_as_byte_vec(mut filename: String, compress: &str) -> Vec<u8> {
+    filename = without_api(filename.as_str()).to_string();
+    println!("{}", filename);
+    match metadata(filename.clone()) {
         Ok(e) => {
             if e.is_file() {
                 let mut buf: Vec<u8> = vec![0; e.len() as usize];
-                File::open(filename)
-                    .expect("no file found")
-                    .read(&mut buf)
-                    .expect("Buffer overflow");
+                match afs::open(filename.clone()).await {
+                    Ok(mut o) => {
+                       o.read(&mut buf).await;
+                    }
+                    Err(e) => {
+                        println!("{} => {}",filename.clone(), e);
+                    }
+                }
                 buf
             } else if e.is_dir() {
                 let mut file = match compress.to_lowercase().as_str() {
@@ -119,7 +126,7 @@ pub fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                     _ => random_archive("zip".to_string(), filename),
                 };
                 let mut buf: Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
-                file.read(&mut buf).expect("Buffer overflow");
+                file.read(&mut buf);
                 buf
             } else {
                 let buf: Vec<u8> = String::from("Error").as_bytes().to_vec();
@@ -167,9 +174,7 @@ fn random_archive(extention: String, dir: String) -> File {
 
 fn random_name() -> String {
     use rand::Rng;
-    let charset: &[u8] = b"abcdefghijklmnopqrstuvwxyz\
-    ABCDEFGHIJKLMNOPQRSTUVWXYZ
-    ";
+    let charset: &[u8] = b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     let mut rng = rand::thread_rng();
     (0..10)
         .map(|_| {

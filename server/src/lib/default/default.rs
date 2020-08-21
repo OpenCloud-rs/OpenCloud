@@ -2,7 +2,7 @@ use std::fs::{read_dir, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
-use crate::lib::config::Config;
+use crate::lib::config::config::Config;
 use std::process::exit;
 
 pub fn default() -> Config {

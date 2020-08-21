@@ -6,13 +6,12 @@ use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 use actix_web::{Error, HttpRequest, HttpResponse as Response};
 use bytes::Bytes;
-
-use crate::lib::file::get_file_as_byte_vec;
-use crate::lib::http::last_cli;
+use crate::lib::file::file::get_file_as_byte_vec;
+use crate::lib::http::http::{last_cli, without_api};
 use actix_http::body::Body;
 
 pub async fn cli(req: HttpRequest) -> std::io::Result<Response<Body>> {
-    crate::lib::http::log(&req);
+    println!("{:?} ---",req.query_string());
     let mut result = get_dir(&req);
 
     let mut bvec: BTreeMap<&str, &str> = BTreeMap::new();
@@ -35,22 +34,22 @@ pub async fn cli(req: HttpRequest) -> std::io::Result<Response<Body>> {
     if bvec.contains_key("download") {
         match bvec.get("download").unwrap().as_ref() {
             "tar.gz" => {
-                result = get_tar(&req);
+                result = get_tar(&req).await;
             }
             _ => {
-                result = get_zip(&req);
+                result = get_zip(&req).await;
             }
         }
     }
     result
 }
 
-fn get_zip(req: &HttpRequest) -> std::io::Result<Response> {
+async fn get_zip(req: &HttpRequest) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
         req.path().parse().unwrap(),
-        &"",
-    ))));
+        &"zip",
+    ).await)));
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
@@ -63,12 +62,12 @@ fn get_zip(req: &HttpRequest) -> std::io::Result<Response> {
         .streaming(rx_body))
 }
 
-fn get_tar(req: &HttpRequest) -> std::io::Result<Response> {
+async fn get_tar(req: &HttpRequest) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
         req.path().parse().unwrap(),
-        &"",
-    ))));
+        &"tar",
+    ).await)));
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
@@ -87,5 +86,5 @@ fn get_dir(req: &HttpRequest) -> std::io::Result<Response<Body>> {
         .header("charset", "utf-8")
         .content_type("application/json")
         .encoding(ContentEncoding::Gzip)
-        .body(crate::lib::file::dir_content(&req)))
+        .body(crate::lib::file::file::dir_content(&req)))
 }
