@@ -3,7 +3,7 @@ use seed::browser::fetch::{Method, Request, fetch};
 use seed::prelude::Header;
 use seed::{window, Url};
 use shared::JsonStruct;
-use seed::prelude::web_sys::{RequestRedirect, RequestMode};
+
 
 pub async fn delete(url: Url) {
     let mut url_string: String = String::from(

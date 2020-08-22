@@ -3,12 +3,14 @@ use actix_files::file_extension_to_mime;
 use actix_web::HttpRequest;
 use shared::{FType, Folder, JsonStruct};
 use std::fs;
-use std::fs::{metadata, File};
-use std::io::Read;
-use std::path::PathBuf;
-use zip_extensions::*;
-use tokio::fs::File as afs;
-use tokio::io::{self, AsyncReadExt};
+use std::fs::metadata;
+use tokio::io::{AsyncReadExt};
+use actix_http::Response;
+use actix_web::dev::BodyEncoding;
+use actix_web::http::ContentEncoding;
+use actix_web::body::Body;
+use crate::lib::archive::archive::random_archive;
+
 pub fn dir_content(req: &HttpRequest) -> String {
     let path = without_api(req.path());
 
@@ -111,9 +113,9 @@ pub async fn get_file_as_byte_vec(mut filename: String, compress: &str) -> Vec<u
         Ok(e) => {
             if e.is_file() {
                 let mut buf: Vec<u8> = vec![0; e.len() as usize];
-                match afs::open(filename.clone()).await {
+                match tokio::fs::File::open(filename.clone()).await {
                     Ok(mut o) => {
-                       o.read(&mut buf).await;
+                       o.read(&mut buf).await.expect("Error");
                     }
                     Err(e) => {
                         println!("{} => {}",filename.clone(), e);
@@ -124,68 +126,40 @@ pub async fn get_file_as_byte_vec(mut filename: String, compress: &str) -> Vec<u
                 let mut file = match compress.to_lowercase().as_str() {
                     "tar" => random_archive("tar.gz".to_string(), filename),
                     _ => random_archive("zip".to_string(), filename),
+                }.await;
+                println!("{}", file.metadata().await.unwrap().len());
+
+                let mut buf: Vec<u8> = vec![0; file.metadata().await.unwrap().len() as usize];
+                match file.read(&mut buf[..]).await {
+                    Ok(e) => { println!("{}",e);}
+                    Err(e) => {println!("{:?}", e)}
                 };
-                let mut buf: Vec<u8> = vec![0; file.metadata().unwrap().len() as usize];
-                file.read(&mut buf);
                 buf
             } else {
                 let buf: Vec<u8> = String::from("Error").as_bytes().to_vec();
                 buf
             }
         }
-        Err(_e) => {
+        Err(e) => {
+            println!("{:?}", e);
             let buf: Vec<u8> = String::from("Error").as_bytes().to_vec();
             buf
         }
     }
 }
 
-fn tar_archive(name: String, dir: String) -> File {
-    let file_name = format!("./temp/{}.tar.gz", name);
-    File::create(&file_name).unwrap();
-    tar::Builder::new(File::open(&file_name).expect("no file found"))
-        .append_dir_all(&file_name, dir.as_str())
-        .expect("Error");
-    File::open(&file_name).expect("no file found")
-}
-
-fn zip_archive(name: String, dir: String) -> File {
-    let file_name = format!("./temp/{}.zip", name);
-    File::create(&file_name).unwrap();
-    println!("filename => {}", dir);
-    match zip_create_from_directory(&PathBuf::from(&file_name), &PathBuf::from(dir)) {
-        Ok(_n) => {
-            println!("Zip is Ok");
-        }
-        Err(e) => println!("Error : {}", e),
-    }
-    File::open(file_name).expect("no file found")
-}
-
-fn random_archive(extention: String, dir: String) -> File {
-    let name: String = random_name();
-    let dir: &str = without_api(dir.as_ref());
-    if extention == String::from("tar.gz") {
-        tar_archive(name, dir.to_string())
-    } else {
-        zip_archive(name, dir.to_string())
-    }
-}
-
-fn random_name() -> String {
-    use rand::Rng;
-    let charset: &[u8] = b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    let mut rng = rand::thread_rng();
-    (0..10)
-        .map(|_| {
-            let idx = rng.gen_range(0, charset.len());
-            charset[idx] as char
-        })
-        .collect()
-}
-
 pub fn get_mime(file: &str) -> String {
     mime_guess::from_path(file.clone())
         .first_or_octet_stream()
         .to_string()
+}
+
+
+pub fn get_dir(req: &HttpRequest) -> std::io::Result<Response<Body>> {
+    Ok(Response::Ok()
+        .header("Access-Control-Allow-Origin", "*")
+        .header("charset", "utf-8")
+        .content_type("application/json")
+        .encoding(ContentEncoding::Gzip)
+        .body(crate::lib::file::file::dir_content(&req)))
 }

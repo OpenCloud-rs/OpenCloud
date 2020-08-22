@@ -1,0 +1,95 @@
+use actix_web::HttpRequest;
+use actix_http::Response;
+use crate::lib::file::file::get_file_as_byte_vec;
+use bytes::Bytes;
+use actix_files::file_extension_to_mime;
+use actix_utils::mpsc;
+use std::io::Error;
+use crate::lib::http::http::last_cli;
+use actix_web::http::ContentEncoding;
+use actix_web::dev::BodyEncoding;
+use std::fs::File;
+use zip_extensions::{zip_create_from_directory, zip_create_from_directory_with_options};
+use tokio::fs as afs;
+use std::path::PathBuf;
+use zip::CompressionMethod;
+use zip::write::FileOptions;
+
+pub async fn get_zip(req: &HttpRequest) -> std::io::Result<Response> {
+    let (tx, rx_body) = mpsc::channel();
+    let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
+        req.path().parse().unwrap(),
+        &"zip",
+    ).await)));
+    Ok(Response::Ok()
+        .header("Access-Control-Allow-Origin", "*")
+        .header("charset", "utf-8")
+        .header(
+            "Content-Disposition",
+            format!("\"attachment\";filename=\"{}.zip\"", last_cli(req.clone())),
+        )
+        .content_type(file_extension_to_mime(req.clone().path()).essence_str())
+        .encoding(ContentEncoding::Gzip)
+        .streaming(rx_body))
+}
+
+pub async fn get_tar(req: &HttpRequest) -> std::io::Result<Response> {
+    let (tx, rx_body) = mpsc::channel();
+    let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
+        req.path().parse().unwrap(),
+        &"tar",
+    ).await)));
+    Ok(Response::Ok()
+        .header("Access-Control-Allow-Origin", "*")
+        .header("charset", "utf-8")
+        .header(
+            "Content-Disposition",
+            format!("\"attachment\";filename=\"{}.zip\"", last_cli(req.clone())),
+        )
+        .content_type(file_extension_to_mime(req.clone().path()).essence_str())
+        .encoding(ContentEncoding::Gzip)
+        .streaming(rx_body))
+}
+
+
+async fn async_zip_archive(name: String, dir: String) -> afs::File {
+    let file_name = format!("./temp/{}.zip", name);
+    File::create(&file_name).unwrap();
+    println!("filename => {}", dir);
+    match zip_create_from_directory_with_options(&PathBuf::from(&file_name), &PathBuf::from(dir), FileOptions::default().compression_method(CompressionMethod::Bzip2)) {
+        Ok(e) => println!("Ok"),
+        Err(e) => println!("{}", e)
+    }
+    afs::File::open(file_name).await.expect("Error")
+}
+
+async fn async_tar_archive(name: String, dir: String) -> afs::File {
+    let file_name = format!("./temp/{}.tar.gz", name);
+    File::create(&file_name).expect("Error");
+    tar::Builder::new(File::open(&file_name).expect("no file found"))
+        .append_dir_all(&file_name, dir.as_str())
+        .expect("Error");
+    afs::File::open(&file_name).await.expect("Error")
+}
+
+pub async fn random_archive(extention: String, dir: String) -> afs::File {
+    let name: String = random_name();
+    let dir: &str = dir.as_ref();
+    if extention == String::from("tar.gz") {
+        async_tar_archive(name, dir.to_string()).await
+    } else {
+        async_zip_archive(name, dir.to_string()).await
+    }
+}
+
+fn random_name() -> String {
+    use rand::Rng;
+    let charset: &[u8] = b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let mut rng = rand::thread_rng();
+    (0..10)
+        .map(|_| {
+            let idx = rng.gen_range(0, charset.len());
+            charset[idx] as char
+        })
+        .collect()
+}

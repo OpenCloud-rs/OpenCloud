@@ -7,13 +7,13 @@ pub fn without_api(string: &str) -> &str {
         .and_then(|(i, _)| string.get(i + 4..))
         .unwrap_or(&"")
 }
-pub fn log(request: &HttpRequest) {
+/*pub fn log(request: &HttpRequest) {
     println!(
         "Nouvel utilisateur sur {} , Ip : {}",
         request.path(),
         request.connection_info().remote().unwrap()
     )
-}
+}*/
 
 pub fn last_cli(req: HttpRequest) -> String {
     let split: Vec<&str> = req.path().split("/").collect();
