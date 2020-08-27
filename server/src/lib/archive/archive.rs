@@ -33,7 +33,7 @@ pub async fn get_zip(req: &HttpRequest) -> std::io::Result<Response> {
         .streaming(rx_body))
 }
 
-pub async fn get_tar(req: &HttpRequest) -> std::io::Result<Response> {
+pub async fn get_tar(req: HttpRequest) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
         req.path().parse().unwrap(),
@@ -54,13 +54,13 @@ pub async fn get_tar(req: &HttpRequest) -> std::io::Result<Response> {
 
 async fn async_zip_archive(name: String, dir: String) -> afs::File {
     let file_name = format!("./temp/{}.zip", name);
-    File::create(&file_name).unwrap();
+    File::create(file_name.clone()).unwrap();
     println!("filename => {}", dir);
     match zip_create_from_directory_with_options(&PathBuf::from(&file_name), &PathBuf::from(dir), FileOptions::default().compression_method(CompressionMethod::Bzip2)) {
-        Ok(e) => println!("Ok"),
+        Ok(_e) => println!("Ok"),
         Err(e) => println!("{}", e)
     }
-    afs::File::open(file_name).await.expect("Error")
+    afs::File::open(format!("./temp/{}.zip", name)).await.expect("Error")
 }
 
 async fn async_tar_archive(name: String, dir: String) -> afs::File {
