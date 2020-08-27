@@ -8,7 +8,7 @@ pub enum State {
     NotActive,
 }
 impl State {
-    pub fn next(self) -> Self {
+    pub fn _next(self) -> Self {
         match self {
             Self::Active => Self::NotActive,
             Self::NotActive => Self::Active,
