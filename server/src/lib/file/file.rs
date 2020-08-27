@@ -139,7 +139,7 @@ pub async fn get_file_as_byte_vec(mut filename: String, compress: &str) -> Vec<u
 }
 
 pub fn get_mime(file: &str) -> String {
-    mime_guess::from_path(file.clone())
+    mime_guess::from_path(file)
         .first_or_octet_stream()
         .to_string()
 }
