@@ -9,13 +9,13 @@ use crate::lib::http::http::last_cli;
 use actix_web::http::ContentEncoding;
 use actix_web::dev::BodyEncoding;
 use std::fs::File;
-use zip_extensions::{zip_create_from_directory, zip_create_from_directory_with_options};
+use zip_extensions::zip_create_from_directory_with_options;
 use tokio::fs as afs;
 use std::path::PathBuf;
 use zip::CompressionMethod;
 use zip::write::FileOptions;
 
-pub async fn get_zip(req: &HttpRequest) -> std::io::Result<Response> {
+pub async fn get_zip(req: HttpRequest) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
         req.path().parse().unwrap(),
