@@ -41,32 +41,22 @@ pub fn dir_content(req: &HttpRequest) -> String {
                                             if e.is_file() == true {
                                                 content.push(Folder {
                                                     result: true,
-                                                    name: f
-                                                        .file_name()
-                                                        .to_str()
-                                                        .unwrap()
-                                                        .parse()
-                                                        .unwrap(),
+                                                    name: String::from(f.file_name().to_str().expect("Error")),
                                                     ftype: get_mime(
-                                                        f.file_name().to_str().unwrap(),
+                                                        f.file_name().to_str().expect("Error"),
                                                     ),
                                                 });
                                             } else {
                                                 content.push(Folder {
                                                     result: true,
-                                                    name: f
-                                                        .file_name()
-                                                        .to_str()
-                                                        .unwrap()
-                                                        .parse()
-                                                        .unwrap(),
+                                                    name: String::from(f.file_name().to_str().expect("Error")),
                                                     ftype: String::from("Folder"),
                                                 });
                                             }
                                         }
                                         Err(_e) => content.push(Folder {
                                             result: false,
-                                            name: "Error".to_string(),
+                                            name: String::from("Error"),
                                             ftype: String::from("Error"),
                                         }),
                                     }
@@ -74,7 +64,7 @@ pub fn dir_content(req: &HttpRequest) -> String {
                                 Err(_e) => {
                                     content.push(Folder {
                                         result: false,
-                                        name: "Error".to_string(),
+                                        name: String::from("Error"),
                                         ftype: String::from("Error"),
                                     });
                                 }
@@ -84,7 +74,7 @@ pub fn dir_content(req: &HttpRequest) -> String {
                     Err(_e) => {
                         content.push(Folder {
                             result: false,
-                            name: "Folder Not Work".to_string(),
+                            name: String::from("Folder Not Work"),
                             ftype: String::from("Error"),
                         });
                         println!("Le dossier est inexistant");
@@ -130,7 +120,7 @@ pub async fn get_file_as_byte_vec(mut filename: String, compress: &str) -> Vec<u
                 println!("{}", file.metadata().await.unwrap().len());
 
                 let mut buf: Vec<u8> = vec![0; file.metadata().await.unwrap().len() as usize];
-                match file.read(&mut buf[..]).await {
+                match file.read_to_end(&mut buf).await {
                     Ok(e) => { println!("{}",e);}
                     Err(e) => {println!("{:?}", e)}
                 };
@@ -155,7 +145,7 @@ pub fn get_mime(file: &str) -> String {
 }
 
 
-pub fn get_dir(req: &HttpRequest) -> std::io::Result<Response<Body>> {
+pub fn get_dir(req: HttpRequest) -> std::io::Result<Response<Body>> {
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
