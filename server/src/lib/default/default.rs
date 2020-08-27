@@ -7,20 +7,12 @@ use std::process::exit;
 
 pub fn default() -> Config {
     let mut vec: Vec<String> = Vec::new();
-    match read_dir(PathBuf::from("./")) {
-        Ok(o) => {
-            for epath in o {
-                match epath {
-                    Ok(e) => match e.file_name().into_string() {
-                        Ok(e) => vec.push(e),
-                        _ => {}
-                    },
-                    Err(_e) => {}
-                }
-            }
-        }
-        Err(_e) => {}
-    };
+    let rd = read_dir(PathBuf::from("./")).expect("Error: Can't read the folder");
+    for rde in rd {
+        let de = rde.expect("Error: Can't read Dir Entry");
+        vec.push(de.file_name().into_string().expect("Error: Bad name"));
+    } 
+
     if !vec.contains(&String::from("temp")) {
         std::fs::create_dir("./temp").expect("Error");
     }
@@ -39,9 +31,9 @@ pub fn default() -> Config {
     } else {
         let mut buf = String::new();
         File::open("./config.yaml")
-            .unwrap()
+            .expect("Can't found the config")
             .read_to_string(&mut buf)
-            .unwrap();
+            .expect("Can't read the config");
         match serde_yaml::from_str(&buf) {
             Ok(o) => o,
             Err(_e) => {
