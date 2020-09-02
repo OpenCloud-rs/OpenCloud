@@ -24,7 +24,7 @@
         </li>
         <hr>
         <h3>Screenshot<h3/>
-        <img src="https://raw.githubusercontent.com/OpenCloud-rs/OpenCloud/restruct/asset/OpenCloud.gif">
+        <img src="https://raw.githubusercontent.com/OpenCloud-rs/OpenCloud/restruct/asset/OpenCloud-UI.gif">
         <hr>
         <p><strong>Made by Rheydskey<strong></p>
 </div>
