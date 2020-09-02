@@ -23,5 +23,8 @@
             <a href="https://github.com/OpenCloud-rs/OpenCloud-Flutter">Mobile app (IOS/ Android)</a>
         </li>
         <hr>
+        <h3>Screenshot<h3/>
+        <img src="https://raw.githubusercontent.com/OpenCloud-rs/OpenCloud/dev/asset/OpenCloud.gif">
+        <hr>
         <p><strong>Made by Rheydskey<strong></p>
 </div>
