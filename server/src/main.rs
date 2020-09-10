@@ -1,3 +1,4 @@
+use crate::lib::db::user::create::create;
 use crate::lib::config::config::Config;
 use crate::lib::default::default::default;
 use crate::page::client::client;
@@ -16,11 +17,14 @@ mod page;
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     let config: Config = default();
-
+    create();
     let server_ip: &str = &config.get_server_ip();
 
     env_logger::from_env(Env::default().default_filter_or("info")).init();
 
+    lib::db::user::get::get_user();
+    lib::db::user::create::create();
+    
     HttpServer::new(move || {
         App::new()
             .default_service(web::resource("").route(web::get().to(client)))
