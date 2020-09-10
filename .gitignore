@@ -7,4 +7,4 @@ OpenCloud/
 .buildconfig
 .idea/
 *config.yaml
-temp/*
+db.sql
