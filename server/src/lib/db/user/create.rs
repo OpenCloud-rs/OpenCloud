@@ -6,7 +6,9 @@ pub fn create() {
         "CREATE TABLE IF NOT EXISTS User (
                   id              INTEGER PRIMARY KEY,
                   name            TEXT NOT NULL,
-                  password            BLOB
+                  password        TEXT NOT NULL,
+                  token           TEXT,
+                  email           TEXT
                   )",
 		"".bytes()
     ).expect("Error");
