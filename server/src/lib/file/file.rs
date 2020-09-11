@@ -11,14 +11,13 @@ use actix_web::http::ContentEncoding;
 use actix_web::body::Body;
 use crate::lib::archive::archive::random_archive;
 
-pub fn dir_content(req: &HttpRequest) -> String {
-    let path = without_api(req.path());
+pub fn dir_content(path: String) -> String {
 
     let mut content: Vec<Folder> = Vec::new();
     let mut result: bool = false;
     let mut ftype: FType = FType::Error;
 
-    match fs::metadata(path) {
+    match fs::metadata(path.clone()) {
         Ok(e) => {
             if e.is_file() == true {
                 result = true;
@@ -145,11 +144,11 @@ pub fn get_mime(file: &str) -> String {
 }
 
 
-pub fn get_dir(req: HttpRequest) -> std::io::Result<Response<Body>> {
+pub fn get_dir(path: String) -> std::io::Result<Response<Body>> {
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .content_type("application/json")
         .encoding(ContentEncoding::Gzip)
-        .body(crate::lib::file::file::dir_content(&req)))
+        .body(crate::lib::file::file::dir_content(path)))
 }

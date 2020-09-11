@@ -1,10 +1,10 @@
-use actix_web::{HttpRequest, HttpResponse as Response};
+use actix_web::{HttpRequest, HttpResponse as Response,get, web};
 use crate::lib::file::file::{get_dir};
 use crate::lib::{http::http::get_args, archive::archive::*};
 use actix_http::body::Body;
-
-pub async fn cli(req: HttpRequest) -> std::io::Result<Response<Body>> {
-    println!("{:?} ---",req.query_string());
+#[get("/api/file/{tokio:.*}/{path:.*}")]
+pub async fn cli(req: HttpRequest, path: web::Path<(String, String)>) -> std::io::Result<Response<Body>> {
+    println!("/{}",path.1);
     let result;
 
     let bvec = get_args(req.clone());
@@ -19,7 +19,7 @@ pub async fn cli(req: HttpRequest) -> std::io::Result<Response<Body>> {
             }
         }
     } else {
-        result = get_dir(req.clone());
+        result = get_dir(format!("/{}",path.1));
     }
     result
 }

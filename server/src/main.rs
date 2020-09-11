@@ -7,9 +7,10 @@ use crate::page::get::cli;
 use crate::page::p500::p500;
 use crate::page::post::save_file;
 use actix_web::middleware::errhandlers::ErrorHandlers;
-use actix_web::{guard, http, web, App, HttpResponse, HttpServer};
+use actix_web::{http, web, App, HttpServer};
 use env_logger::Env;
 use actix_web::middleware::Logger;
+use page::post::create_user;
 
 mod lib;
 mod page;
@@ -34,17 +35,19 @@ async fn main() -> std::io::Result<()> {
                     .index_file("index.html")
                     .use_last_modified(true),
             )
-            .service(
+            .service(cli)
+            .service(create_user)
+            .service(save_file)
+            .service(deletef)
+            /*.service(
                 web::resource("/api/{path:.*}")
-                    .route(actix_web::web::get().to(cli))
-                    .route(actix_web::web::post().to(save_file))
-                    .route(actix_web::web::delete().to(deletef))
+                    .route(actix_web::web::delete().to())
                     .route(
                         web::route()
                             .guard(guard::Not(guard::Get()))
                             .to(HttpResponse::MethodNotAllowed),
                     ),
-            )
+            )*/
             .wrap(Logger::new("%s : %r in %T"))
             .wrap(ErrorHandlers::new().handler(http::StatusCode::INTERNAL_SERVER_ERROR, p500))
     })
