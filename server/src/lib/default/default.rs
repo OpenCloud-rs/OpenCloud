@@ -11,7 +11,7 @@ pub fn default() -> Config {
     for rde in rd {
         let de = rde.expect("Error: Can't read Dir Entry");
         vec.push(de.file_name().into_string().expect("Error: Bad name"));
-    } 
+    }
 
     if !vec.contains(&String::from("temp")) {
         std::fs::create_dir("./temp").expect("Error");

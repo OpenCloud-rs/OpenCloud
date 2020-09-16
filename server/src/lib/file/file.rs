@@ -1,18 +1,17 @@
+use crate::lib::archive::archive::random_archive;
 use crate::lib::http::http::without_api;
 use actix_files::file_extension_to_mime;
+use actix_http::Response;
+use actix_web::body::Body;
+use actix_web::dev::BodyEncoding;
+use actix_web::http::ContentEncoding;
 use actix_web::HttpRequest;
 use shared::{FType, Folder, JsonStruct};
 use std::fs;
 use std::fs::metadata;
-use tokio::io::{AsyncReadExt};
-use actix_http::Response;
-use actix_web::dev::BodyEncoding;
-use actix_web::http::ContentEncoding;
-use actix_web::body::Body;
-use crate::lib::archive::archive::random_archive;
+use tokio::io::AsyncReadExt;
 
 pub fn dir_content(path: String) -> String {
-
     let mut content: Vec<Folder> = Vec::new();
     let mut result: bool = false;
     let mut ftype: FType = FType::Error;
@@ -40,7 +39,9 @@ pub fn dir_content(path: String) -> String {
                                             if e.is_file() == true {
                                                 content.push(Folder {
                                                     result: true,
-                                                    name: String::from(f.file_name().to_str().expect("Error")),
+                                                    name: String::from(
+                                                        f.file_name().to_str().expect("Error"),
+                                                    ),
                                                     ftype: get_mime(
                                                         f.file_name().to_str().expect("Error"),
                                                     ),
@@ -48,7 +49,9 @@ pub fn dir_content(path: String) -> String {
                                             } else {
                                                 content.push(Folder {
                                                     result: true,
-                                                    name: String::from(f.file_name().to_str().expect("Error")),
+                                                    name: String::from(
+                                                        f.file_name().to_str().expect("Error"),
+                                                    ),
                                                     ftype: String::from("Folder"),
                                                 });
                                             }
@@ -104,10 +107,10 @@ pub async fn get_file_as_byte_vec(mut filename: String, compress: &str) -> Vec<u
                 let mut buf: Vec<u8> = vec![0; e.len() as usize];
                 match tokio::fs::File::open(filename.clone()).await {
                     Ok(mut o) => {
-                       o.read(&mut buf).await.expect("Error");
+                        o.read(&mut buf).await.expect("Error");
                     }
                     Err(e) => {
-                        println!("{} => {}",filename.clone(), e);
+                        println!("{} => {}", filename.clone(), e);
                     }
                 }
                 buf
@@ -115,13 +118,16 @@ pub async fn get_file_as_byte_vec(mut filename: String, compress: &str) -> Vec<u
                 let mut file = match compress.to_lowercase().as_str() {
                     "tar" => random_archive("tar.gz".to_string(), filename),
                     _ => random_archive("zip".to_string(), filename),
-                }.await;
+                }
+                .await;
                 println!("{}", file.metadata().await.unwrap().len());
 
                 let mut buf: Vec<u8> = vec![0; file.metadata().await.unwrap().len() as usize];
                 match file.read_to_end(&mut buf).await {
-                    Ok(e) => { println!("{}",e);}
-                    Err(e) => {println!("{:?}", e)}
+                    Ok(e) => {
+                        println!("{}", e);
+                    }
+                    Err(e) => println!("{:?}", e),
                 };
                 buf
             } else {
@@ -142,7 +148,6 @@ pub fn get_mime(file: &str) -> String {
         .first_or_octet_stream()
         .to_string()
 }
-
 
 pub fn get_dir(path: String) -> std::io::Result<Response<Body>> {
     Ok(Response::Ok()

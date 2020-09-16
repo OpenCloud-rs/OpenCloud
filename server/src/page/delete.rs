@@ -1,5 +1,5 @@
 use crate::lib::http::http::without_api;
-use actix_web::{Error, HttpRequest, HttpResponse, delete};
+use actix_web::{delete, Error, HttpRequest, HttpResponse};
 use shared::{FType, Folder, JsonStruct};
 
 #[delete("/api/file/{path:.*}")]

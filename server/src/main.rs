@@ -1,15 +1,15 @@
-use crate::lib::db::user::create::create;
 use crate::lib::config::config::Config;
+use crate::lib::db::user::create::create;
 use crate::lib::default::default::default;
 use crate::page::client::client;
 use crate::page::delete::deletef;
-use crate::page::get::cli;
+use crate::page::get::{cli, login_user};
 use crate::page::p500::p500;
 use crate::page::post::save_file;
 use actix_web::middleware::errhandlers::ErrorHandlers;
+use actix_web::middleware::Logger;
 use actix_web::{http, web, App, HttpServer};
 use env_logger::Env;
-use actix_web::middleware::Logger;
 use page::post::create_user;
 
 mod lib;
@@ -25,7 +25,7 @@ async fn main() -> std::io::Result<()> {
 
     lib::db::user::get::get_user();
     lib::db::user::create::create();
-    
+
     HttpServer::new(move || {
         App::new()
             .default_service(web::resource("").route(web::get().to(client)))
@@ -39,6 +39,7 @@ async fn main() -> std::io::Result<()> {
             .service(create_user)
             .service(save_file)
             .service(deletef)
+            .service(login_user)
             /*.service(
                 web::resource("/api/{path:.*}")
                     .route(actix_web::web::delete().to())

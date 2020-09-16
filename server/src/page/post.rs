@@ -1,11 +1,14 @@
-use crate::lib::{db::user::insert::insert_user};
+use crate::lib::db::user::insert::insert_user;
+use crate::lib::db::user::model::MinimalUser;
 use actix_multipart::Multipart;
-use actix_web::{web, Error, HttpResponse, post};
+use actix_web::{post, web, Error, HttpResponse};
 use std::io::Write;
 use tokio::stream::StreamExt;
-use crate::lib::db::user::model::MinimalUser;
 #[post("/api/file/{path:.*}")]
-pub async fn save_file(mut payload: Multipart, path: web::Path<String>) -> Result<HttpResponse, Error> {
+pub async fn save_file(
+    mut payload: Multipart,
+    path: web::Path<String>,
+) -> Result<HttpResponse, Error> {
     print!("{}", path);
     // iterate over multipart stream
     let url = format!("/{}", path);
@@ -28,13 +31,12 @@ pub async fn save_file(mut payload: Multipart, path: web::Path<String>) -> Resul
 }
 #[post("/api/create/user")]
 pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, Error> {
-    match insert_user(String::from(body.name.clone()), String::from(body.email.clone()), String::from(body.password.clone())) {
-        Ok(_) => {
-            Ok(HttpResponse::Ok().body("Your request has been accepted"))
-        },
-        Err(_) => {
-            Ok(HttpResponse::Ok().body("Your request is bad"))
-        }
+    match insert_user(
+        String::from(body.name.clone()),
+        String::from(body.email.clone()),
+        String::from(body.password.clone()),
+    ) {
+        Ok(_) => Ok(HttpResponse::Ok().body("Your request has been accepted")),
+        Err(_) => Ok(HttpResponse::Ok().body("Your request is bad")),
     }
-    
 }

@@ -1,7 +1,7 @@
 use crate::lib::db::sqlite_conn::conn;
 
 pub fn create() {
-	let conn = conn();
+    let conn = conn();
     conn.execute(
         "CREATE TABLE IF NOT EXISTS User (
                   id              INTEGER PRIMARY KEY,
@@ -10,6 +10,7 @@ pub fn create() {
                   token           TEXT,
                   email           TEXT
                   )",
-		"".bytes()
-    ).expect("Error");
+        "".bytes(),
+    )
+    .expect("Error");
 }
