@@ -1,26 +1,25 @@
-use actix_web::HttpRequest;
-use actix_http::Response;
 use crate::lib::file::file::get_file_as_byte_vec;
-use bytes::Bytes;
-use actix_files::file_extension_to_mime;
-use actix_utils::mpsc;
-use std::io::Error;
 use crate::lib::http::http::last_cli;
-use actix_web::http::ContentEncoding;
+use actix_files::file_extension_to_mime;
+use actix_http::Response;
+use actix_utils::mpsc;
 use actix_web::dev::BodyEncoding;
+use actix_web::http::ContentEncoding;
+use actix_web::HttpRequest;
+use bytes::Bytes;
 use std::fs::File;
-use zip_extensions::zip_create_from_directory_with_options;
-use tokio::fs as afs;
+use std::io::Error;
 use std::path::PathBuf;
-use zip::CompressionMethod;
+use tokio::fs as afs;
 use zip::write::FileOptions;
+use zip::CompressionMethod;
+use zip_extensions::zip_create_from_directory_with_options;
 
 pub async fn get_zip(req: HttpRequest) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
-    let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
-        req.path().parse().unwrap(),
-        &"zip",
-    ).await)));
+    let _ = tx.send(Ok::<_, Error>(Bytes::from(
+        get_file_as_byte_vec(req.path().parse().unwrap(), &"zip").await,
+    )));
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
@@ -35,10 +34,9 @@ pub async fn get_zip(req: HttpRequest) -> std::io::Result<Response> {
 
 pub async fn get_tar(req: HttpRequest) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
-    let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
-        req.path().parse().unwrap(),
-        &"tar",
-    ).await)));
+    let _ = tx.send(Ok::<_, Error>(Bytes::from(
+        get_file_as_byte_vec(req.path().parse().unwrap(), &"tar").await,
+    )));
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
@@ -51,16 +49,21 @@ pub async fn get_tar(req: HttpRequest) -> std::io::Result<Response> {
         .streaming(rx_body))
 }
 
-
 async fn async_zip_archive(name: String, dir: String) -> afs::File {
     let file_name = format!("./temp/{}.zip", name);
     File::create(file_name.clone()).unwrap();
     println!("filename => {}", dir);
-    match zip_create_from_directory_with_options(&PathBuf::from(&file_name), &PathBuf::from(dir), FileOptions::default().compression_method(CompressionMethod::Bzip2)) {
+    match zip_create_from_directory_with_options(
+        &PathBuf::from(&file_name),
+        &PathBuf::from(dir),
+        FileOptions::default().compression_method(CompressionMethod::Bzip2),
+    ) {
         Ok(_e) => println!("Ok"),
-        Err(e) => println!("{}", e)
+        Err(e) => println!("{}", e),
     }
-    afs::File::open(format!("./temp/{}.zip", name)).await.expect("Error")
+    afs::File::open(format!("./temp/{}.zip", name))
+        .await
+        .expect("Error")
 }
 
 async fn async_tar_archive(name: String, dir: String) -> afs::File {

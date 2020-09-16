@@ -81,7 +81,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::DropdownNext => model.dropdown = model.dropdown.next(),
         Msg::ModalToggle => model.modal_toggle = model.modal_toggle.next(),
         Msg::Download(dtype) => {
-            orders.skip().perform_cmd(download(model.url.clone(), dtype));
+            orders
+                .skip()
+                .perform_cmd(download(model.url.clone(), dtype));
         }
         Msg::Delete(url) => {
             orders.skip().perform_cmd(delete(url));
@@ -110,10 +112,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                             C!["column"],
                             component::delete::delete(model.modal_toggle, model.url.clone()),
                         ],
-                        div![
-                            C!["column"],
-                            component::download::download(model.dropdown)
-                        ]
+                        div![C!["column"], component::download::download(model.dropdown)]
                     ],
                     component::folder_list::folder_list(model.api.content.clone()),
                 ]
