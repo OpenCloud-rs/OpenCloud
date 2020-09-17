@@ -1,7 +1,7 @@
 Not Release 0.4.0
 Add Tar.gz
 Add temp folder
-Randomize Archive name 
+Randomize Archive name
 Add Download on web client
 Add Remove on Web Client
 Update Actix and Seed
