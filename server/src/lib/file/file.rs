@@ -5,7 +5,6 @@ use actix_http::Response;
 use actix_web::body::Body;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
-use actix_web::HttpRequest;
 use shared::{FType, Folder, JsonStruct};
 use std::fs;
 use std::fs::metadata;
