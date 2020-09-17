@@ -10,13 +10,13 @@
         <li>
             No superfluous functionality
         </li>
-		        <li>
+		<li>
            Folder downloading as Archive (Zip / Tar)
         </li>
-		        <li>
+		<li>
             Web Client
         </li>
-		        <li>
+		<li>
             RESTAPI 
         </li>
 		<li>
@@ -26,7 +26,9 @@
         <h3>Screenshot<h3/>
         <img src="https://raw.githubusercontent.com/OpenCloud-rs/OpenCloud/restruct/asset/OpenCloud-UI.gif">
         <hr>
-	<h3><a href="https://trello.com/b/Qk61NYI3/opencloud">Trello<a></h3>
+        <h3>
+            <a href="https://trello.com/b/Qk61NYI3/opencloud">Trello<a>
+        </h3>
         <hr>
 	<p><strong>Made by Rheydskey<strong></p>
 </div>
