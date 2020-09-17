@@ -7,7 +7,7 @@ pub fn update_token(token: String, id: i32) {
         "UPDATE \"User\"
 SET token=?1
 WHERE id=?2;",
-        params![token,id],
+        params![token, id],
     )
     .expect("Error");
 }

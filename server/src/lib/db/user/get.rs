@@ -1,5 +1,5 @@
 use crate::lib::db::sqlite_conn::*;
-use crate::lib::db::user::model::{User, Id};
+use crate::lib::db::user::model::{Id, User};
 use rusqlite::params;
 pub fn get_user() {
     let conn = conn();
@@ -26,20 +26,15 @@ pub fn get_user() {
 
 pub fn get_id(name: String, password: String) -> i32 {
     let conn = conn();
-    let mut id:Vec<i32> = Vec::new();
+    let mut id: Vec<i32> = Vec::new();
     let mut stmt = conn
         .prepare("SELECT id FROM User WHERE name=?1 AND password=?2")
         .expect("Can't do prepared request");
     let person_iter = stmt
-        .query_map(params![name, password], |row| {
-            Ok(Id{
-                id: row.get(0)?
-            })
-        })
+        .query_map(params![name, password], |row| Ok(Id { id: row.get(0)? }))
         .expect("Error on mapping request");
     for ids in person_iter {
         id.push(ids.expect("Error").id);
     }
     id.first().unwrap().to_owned()
-
 }

@@ -23,5 +23,5 @@ pub struct LoginUser {
 }
 
 pub struct Id {
-    pub id: i32
+    pub id: i32,
 }
