@@ -14,8 +14,12 @@ pub fn dir_content(path: String) -> String {
     let mut content: Vec<Folder> = Vec::new();
     let mut result: bool = false;
     let mut ftype: FType = FType::Error;
-
-    match fs::metadata(path.clone()) {
+    let root = if cfg!(windows) {
+        "C:"
+    } else {
+        ""
+    };
+    match fs::metadata(format!("{}{}",root, path.clone())) {
         Ok(e) => {
             if e.is_file() == true {
                 result = true;
