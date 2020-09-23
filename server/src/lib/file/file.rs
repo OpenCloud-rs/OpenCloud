@@ -1,7 +1,7 @@
 use crate::lib::archive::archive::random_archive;
 use crate::lib::http::http::without_api;
 use actix_files::file_extension_to_mime;
-use actix_http::Response;
+use actix_web::HttpResponse as Response;
 use actix_web::body::Body;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
