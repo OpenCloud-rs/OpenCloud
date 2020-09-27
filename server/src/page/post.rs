@@ -39,14 +39,17 @@ pub async fn save_file(req: HttpRequest, mut payload: Multipart, path: web::Path
     // iterate over multipart stream
 }
 
-#[post("/api/create/user")]
+#[post("/api/user/create")]
 pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, Error> {
     match insert_user(
         String::from(body.name.clone()),
         String::from(body.email.clone()),
         String::from(body.password.clone()),
     ) {
-        Ok(_) => Ok(HttpResponse::Ok().body("Your request has been accepted")),
+        Ok(_) => {
+            std::fs::create_dir(format!("./home/{}", body.name.clone()));
+            Ok(HttpResponse::Ok().body("Your request has been accepted"))
+        },
         Err(_) => Ok(HttpResponse::Ok().body("Your request is bad")),
     }
 }

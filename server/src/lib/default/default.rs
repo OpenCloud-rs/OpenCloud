@@ -19,6 +19,9 @@ pub fn default() -> Config {
     if !vec.contains(&String::from("db.sql")) {
         std::fs::File::create("./db.sql").expect("Error");
     }
+    if !vec.contains(&String::from("home")) {
+        std::fs::create_dir("./home").expect("Error");
+    }
     if !vec.contains(&String::from("config.yaml")) {
         let config = Config {
             server_ip: "0.0.0.0".to_string(),
