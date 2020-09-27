@@ -8,3 +8,4 @@ OpenCloud/
 .idea/
 *config.yaml
 db.sql
+*home/*
