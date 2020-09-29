@@ -32,19 +32,19 @@ pub async fn get_zip(req: HttpRequest) -> std::io::Result<Response> {
         .streaming(rx_body))
 }
 
-pub async fn get_tar(req: HttpRequest) -> std::io::Result<Response> {
+pub async fn get_tar(path: String) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(Bytes::from(
-        get_file_as_byte_vec(req.path().parse().unwrap(), &"tar").await,
+        get_file_as_byte_vec(path.clone(), &"tar").await,
     )));
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .header(
             "Content-Disposition",
-            format!("\"attachment\";filename=\"{}.zip\"", last_cli(req.clone())),
+            format!("\"attachment\";filename=\"{}.zip\"", path.clone().split('/').last().expect("Error")),
         )
-        .content_type(file_extension_to_mime(req.clone().path()).essence_str())
+        .content_type(file_extension_to_mime(path.clone().as_str()).essence_str())
         .encoding(ContentEncoding::Gzip)
         .streaming(rx_body))
 }

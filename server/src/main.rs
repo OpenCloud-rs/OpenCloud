@@ -23,7 +23,7 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::from_env(Env::default().default_filter_or("info")).init();
 
-    lib::db::user::get::get_user();
+    lib::db::user::get::get_users();
     lib::db::user::create::create();
 
     HttpServer::new(move || {

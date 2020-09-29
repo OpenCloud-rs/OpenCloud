@@ -1,10 +1,9 @@
-use crate::lib::http::http::without_api;
 use actix_web::{delete, Error, HttpRequest, HttpResponse, web};
 use shared::{FType, Folder, JsonStruct};
 use crate::lib::db::user::valid_session::valid_session;
 
 #[delete("/api/file/{path:.*}")]
-pub async fn deletef(req: HttpRequest, path: web::Path<(String)>) -> Result<HttpResponse, Error> {
+pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpResponse, Error> {
     let mut result = JsonStruct {
         result: false,
         lenght: 0,

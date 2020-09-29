@@ -1,6 +1,5 @@
 use crate::lib::db::sqlite_conn::conn;
 use rusqlite::params;
-use serde::de::Unexpected::Bool;
 
 pub fn insert_user(
     name: String,
@@ -11,7 +10,7 @@ pub fn insert_user(
     conn.execute(
         "INSERT INTO User (name,email, password) VALUES(?1, ?2, ?3);",
         params![name, email, password],
-    );
+    ).expect("Error");
     
     Ok(usize::from(true))
 }

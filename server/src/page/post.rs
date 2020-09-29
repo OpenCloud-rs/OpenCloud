@@ -47,8 +47,12 @@ pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, E
         String::from(body.password.clone()),
     ) {
         Ok(_) => {
-            std::fs::create_dir(format!("./home/{}", body.name.clone()));
-            Ok(HttpResponse::Ok().body("Your request has been accepted"))
+            if std::fs::create_dir(format!("./home/{}", body.name.clone())).is_err() {
+                Ok(HttpResponse::Ok().body("Error on Creation of Home"))
+            } else {
+                Ok(HttpResponse::Ok().body("Your request has been accepted"))
+            }
+
         },
         Err(_) => Ok(HttpResponse::Ok().body("Your request is bad")),
     }
