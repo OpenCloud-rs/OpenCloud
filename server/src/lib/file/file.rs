@@ -32,11 +32,11 @@ pub fn dir_content(path: String) -> String {
             } else if e.is_dir() == true {
                 match fs::read_dir(path) {
                     Ok(e) => {
+                        result = true;
+                        ftype = FType::Folder;
                         for dpath in e {
                             match dpath {
                                 Ok(f) => {
-                                    result = true;
-                                    ftype = FType::Folder;
                                     match f.metadata() {
                                         Ok(e) => {
                                             if e.is_file() == true {
