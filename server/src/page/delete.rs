@@ -17,15 +17,21 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
                     result.result = true;
                     result.content = vec![Folder {
                         result: true,
+                        size: 0,
+                        created: String::from("0-0-0000 00:00:00"),
                         name: "Work".to_string(),
                         ftype: "File".to_string(),
+                        modified: String::from("0-0-0000 00:00:00")
                     }]
                 }
                 Err(_e) => {
                     result.content = vec![Folder {
                         result: false,
+                        size: 0,
+                        created: String::from("0-0-0000 00:00:00"),
                         name: "Error".to_string(),
                         ftype: "Error".to_string(),
+                        modified: String::from("0-0-0000 00:00:00")
                     }]
                 }
             };

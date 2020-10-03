@@ -3,7 +3,7 @@ use crate::lib::db::user::model::LoginUser;
 use crate::lib::db::user::token::gen_token;
 use crate::lib::db::user::update::update_token;
 use crate::lib::db::user::valid_session::valid_session;
-use crate::lib::file::file::get_dir;
+use crate::lib::file::file::{get_dir, Sort};
 use crate::lib::{archive::archive::*, http::http::get_args};
 use actix_http::body::Body;
 use actix_web::{get, web, HttpRequest, HttpResponse as Response, HttpResponse};
@@ -25,8 +25,23 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
                         result = get_zip(req.clone()).await;
                     }
                 }
+            } else if bvec.contains_key("sort") {
+                match bvec.get("sort").unwrap().as_ref() {
+                    "by_size" => {
+                        result = get_dir(format!("{}/{}",user.home, path.0.clone()), Sort::Size);
+                    },
+                    "by_type" => {
+                        result = get_dir(format!("{}/{}",user.home, path.0.clone()), Sort::Type);
+                    },
+                    "by_date" => {
+                        result = get_dir(format!("{}/{}",user.home, path.0.clone()), Sort::Date);
+                    }
+                    _ => {
+                        result = get_dir(format!("{}/{}",user.home, path.0.clone()), Sort::Name);
+                    }
+                }
             } else {
-                result = get_dir(format!("{}/{}",user.home, path.0.clone()));
+                result = get_dir(format!("{}/{}",user.home, path.0.clone()), Sort::Name);
             }
         } else {
             result = Ok(HttpResponse::Ok().body("The token provided isn't valid"))
