@@ -136,13 +136,11 @@ pub fn dir_content(path: String, sort: Sort) -> String {
     }
 }
 
-pub async fn get_file_as_byte_vec(mut filename: String, compress: &str) -> Vec<u8> {
-    filename = without_api(filename.as_str()).to_string();
-    println!("{}", filename);
+pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
     match metadata(filename.clone()) {
         Ok(e) => {
             if e.is_file() {
-                let mut buf: Vec<u8> = vec![0; e.len() as usize];
+                let mut buf: Vec<u8> = Vec::new();
                 match tokio::fs::File::open(filename.clone()).await {
                     Ok(mut o) => {
                         o.read(&mut buf).await.expect("Error");
@@ -156,11 +154,11 @@ pub async fn get_file_as_byte_vec(mut filename: String, compress: &str) -> Vec<u
                 let mut file = match compress.to_lowercase().as_str() {
                     "tar" => random_archive("tar.gz".to_string(), filename),
                     _ => random_archive("zip".to_string(), filename),
-                }
-                    .await;
+                }.await;
+
                 println!("{}", file.metadata().await.unwrap().len());
 
-                let mut buf: Vec<u8> = vec![0; file.metadata().await.unwrap().len() as usize];
+                let mut buf: Vec<u8> = Vec::new();
                 match file.read_to_end(&mut buf).await {
                     Ok(e) => {
                         println!("{}", e);
@@ -210,14 +208,10 @@ pub fn get_size_dir(path: String) -> u64 {
     size
 }
 
-use bytes::Bytes;
-use actix_http::Payload;
-use futures::StreamExt;
-
 pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
-    let (mut tx, rx_body) = mpsc::channel();
+    let (tx, rx_body) = mpsc::channel();
 
-    let mut try_file = tokio::fs::File::open(path.clone()).await;
+    let try_file = tokio::fs::File::open(path.clone()).await;
     if try_file.is_err() {
         return Ok(Response::Ok().header("Access-Control-Allow-Origin", "*")
             .header("charset", "utf-8").body("Error"))

@@ -31,7 +31,7 @@ impl Default for Model {
                 result: false,
                 lenght: 0,
                 ftype: FType::File,
-                content: vec![],
+                content: Vec::new(),
             },
             uri: String::new(),
             url: Url::current(),

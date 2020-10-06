@@ -21,7 +21,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
                         result = get_tar(format!("{}/{}",user.home, path.0.clone())).await;
                     }
                     _ => {
-                        result = get_zip(req.clone()).await;
+                        result = get_zip(format!("{}/{}",user.home, path.0.clone())).await;
                     }
                 }
             } else if bvec.contains_key("sort") {

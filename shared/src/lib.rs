@@ -47,7 +47,7 @@ impl JsonStruct {
             result: false,
             lenght: 0,
             ftype: FType::Error,
-            content: vec![],
+            content: Vec::new(),
         }
     }
 }
