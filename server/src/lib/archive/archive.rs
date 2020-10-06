@@ -59,7 +59,7 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
         FileOptions::default().compression_method(CompressionMethod::Bzip2),
     ) {
         Ok(_e) => println!("Ok"),
-        Err(e) => println!("{}", e),
+        Err(e) => println!("{:?}", e),
     }
     afs::File::open(format!("./temp/{}.zip", name))
         .await

@@ -35,8 +35,6 @@ pub async fn save_file(req: HttpRequest, mut payload: Multipart, path: web::Path
     } else {
         Ok(HttpResponse::Ok().body("No token provided"))
     }
-
-    // iterate over multipart stream
 }
 
 #[post("/api/user/create")]
