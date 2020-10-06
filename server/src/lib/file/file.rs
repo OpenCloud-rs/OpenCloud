@@ -1,5 +1,4 @@
 use crate::lib::archive::archive::random_archive;
-use crate::lib::http::http::without_api;
 use actix_files::file_extension_to_mime;
 use actix_web::{HttpResponse as Response, Error};
 use actix_web::body::Body;

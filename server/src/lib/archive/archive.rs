@@ -1,11 +1,10 @@
 use crate::lib::file::file::get_file_as_byte_vec;
-use crate::lib::http::http::last_cli;
 use actix_files::file_extension_to_mime;
 use actix_http::Response;
 use actix_utils::mpsc;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
-use actix_web::{HttpRequest, web};
+use actix_web::web;
 use bytes::Bytes;
 use std::fs::File;
 use std::io::Error;
@@ -14,7 +13,6 @@ use tokio::fs as afs;
 use zip::write::FileOptions;
 use zip::CompressionMethod;
 use zip_extensions::zip_create_from_directory_with_options;
-use futures::TryFutureExt;
 
 pub async fn get_zip(path: String) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
@@ -58,7 +56,7 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
         &PathBuf::from(file_name),
         &PathBuf::from(dir),
         FileOptions::default().compression_method(CompressionMethod::Bzip2),
-    )).await;
+    )).await.expect("Error");
     afs::File::open(format!("./temp/{}.zip", name))
         .await
         .expect("Error")
