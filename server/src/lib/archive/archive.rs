@@ -54,11 +54,11 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
     let file_name = format!("./temp/{}.zip", name);
     File::create(file_name.clone()).unwrap();
     println!("filename => {}", dir);
-    web::block(move || Ok(zip_create_from_directory_with_options(
+    web::block(|| zip_create_from_directory_with_options(
         &PathBuf::from(file_name),
         &PathBuf::from(dir),
         FileOptions::default().compression_method(CompressionMethod::Bzip2),
-    ).expect("Error"))).await;
+    )).await;
     afs::File::open(format!("./temp/{}.zip", name))
         .await
         .expect("Error")
