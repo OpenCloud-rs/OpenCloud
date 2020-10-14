@@ -5,6 +5,9 @@ use actix_web::{post, web, Error, HttpResponse, HttpRequest};
 use std::io::Write;
 use tokio::stream::StreamExt;
 use crate::lib::db::user::valid_session::valid_session;
+use crate::lib::db::log::insert::insert;
+use crate::lib::db::log::model::action_type;
+use crate::lib::db::user::get::get_user_by_token;
 
 #[post("/api/file/{path:.*}")]
 pub async fn save_file(req: HttpRequest, mut payload: Multipart, path: web::Path<String>) -> Result<HttpResponse, Error> {
@@ -13,6 +16,7 @@ pub async fn save_file(req: HttpRequest, mut payload: Multipart, path: web::Path
         let url = format!("/{}", path.0);
         if valid_session(String::from(e.to_str().expect("Parse Str Error"))) {
         while let Ok(Some(mut field)) = tokio::stream::StreamExt::try_next(&mut payload).await {
+
             let content_type = field.content_disposition().unwrap();
             let filename = content_type.get_filename().unwrap();
             let filepath = format!("{}/{}", url, filename);
@@ -27,6 +31,10 @@ pub async fn save_file(req: HttpRequest, mut payload: Multipart, path: web::Path
                 f = web::block(move || f.write_all(&data).map(|_| f)).await?;
             }
             }
+            let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).unwrap();
+            tokio::spawn(async  move {
+                insert(user.id, action_type::Upload)
+            }).await;
             Ok(HttpResponse::Ok().into())
         } else {
            Ok(HttpResponse::Ok().body("The token provided isn't valid"))
@@ -45,13 +53,18 @@ pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, E
         String::from(body.password.clone()),
     ) {
         Ok(_) => {
-            if std::fs::create_dir(format!("./home/{}", body.name.clone())).is_err() {
-                Ok(HttpResponse::Ok().body("Error on Creation of Home"))
-            } else {
-                Ok(HttpResponse::Ok().body("Your request has been accepted"))
-            }
-
-        },
+            match std::fs::create_dir(format!("./home/{}", body.name.clone())) {
+                Ok(e) => {
+                    Ok(HttpResponse::Ok().body("Your request has been accepted"))
+                },
+                Err(e) => {
+                    if e.raw_os_error().unwrap() == 17 {
+                        return Ok(HttpResponse::Ok().body("This user name is already used"))
+                    }
+                    Ok(HttpResponse::Ok().body("Error on Creation of Home"))
+                }
+        }
+        }
         Err(_) => Ok(HttpResponse::Ok().body("Your request is bad")),
     }
 }

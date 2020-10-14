@@ -1,5 +1,6 @@
 use crate::lib::config::config::Config;
-use crate::lib::db::user::create::create;
+use crate::lib::db::user::create::create as create_user_db;
+use crate::lib::db::log::create::create as create_log_db;
 use crate::lib::default::default::default;
 use crate::page::client::client;
 use crate::page::delete::deletef;
@@ -18,13 +19,15 @@ mod page;
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     let config: Config = default();
-    create();
+    create_log_db();
+    create_user_db();
     let server_ip: &str = &config.get_server_ip();
 
     env_logger::from_env(Env::default().default_filter_or("info")).init();
 
     lib::db::user::get::get_users();
-    lib::db::user::create::create();
+
+
 
     HttpServer::new(move || {
         App::new()

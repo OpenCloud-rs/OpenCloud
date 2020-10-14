@@ -7,6 +7,8 @@ use crate::lib::file::file::{get_dir, Sort, get_file_preview};
 use crate::lib::{archive::archive::*, http::http::get_args};
 use actix_http::body::Body;
 use actix_web::{get, web, HttpRequest, HttpResponse as Response, HttpResponse};
+use crate::lib::db::log::insert::insert;
+use crate::lib::db::log::model::action_type;
 
 #[get("/api/file/{path:.*}")]
 pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<Response<Body>> {
@@ -44,6 +46,9 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
             } else {
                 result = get_dir(format!("{}/{}",user.home, path.0.clone()), Sort::Name);
             }
+            tokio::spawn(async move {
+                insert(user.id, action_type::Get)
+            }).await;
         } else {
             result = Ok(HttpResponse::Ok().body("The token provided isn't valid"))
         }

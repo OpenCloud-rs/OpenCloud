@@ -36,3 +36,5 @@ shared = {path = "../shared"}
 rusqlite = "0.24.0"
 
 time = "0.2.22"
+
+chrono = "0.4.19"

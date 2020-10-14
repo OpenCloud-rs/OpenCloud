@@ -1,6 +1,9 @@
 use actix_web::{delete, Error, HttpRequest, HttpResponse, web};
 use shared::{FType, Folder, JsonStruct};
 use crate::lib::db::user::valid_session::valid_session;
+use crate::lib::db::log::insert::insert;
+use crate::lib::db::user::get::get_user_by_token;
+use crate::lib::db::log::model::action_type;
 
 #[delete("/api/file/{path:.*}")]
 pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpResponse, Error> {
@@ -12,6 +15,7 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
     };
     if let Some(e) = req.headers().get("token") {
         if valid_session(String::from(e.to_str().expect("Parse Str Error"))) {
+
             match std::fs::remove_dir_all(format!("/{}", path.0)) {
                 Ok(_o) => {
                     result.result = true;
@@ -23,6 +27,10 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
                         ftype: "File".to_string(),
                         modified: String::from("0-0-0000 00:00:00")
                     });
+                    let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).unwrap();
+                    tokio::spawn(async move {
+                        insert(user.id, action_type::Delete)
+                    }).await;
                 }
                 Err(_e) => {
                     result.content.push(Folder {
