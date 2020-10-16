@@ -21,7 +21,7 @@ async fn main() -> std::io::Result<()> {
     let config: Config = default();
     create_log_db();
     create_user_db();
-    let server_ip: &str = &config.get_server_ip();
+    let server_ip: &str = &config.get_server();
 
     env_logger::from_env(Env::default().default_filter_or("info")).init();
 

@@ -6,7 +6,7 @@ use std::io::Write;
 use tokio::stream::StreamExt;
 use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::db::log::insert::insert;
-use crate::lib::db::log::model::action_type;
+use crate::lib::db::log::model::ActionType;
 use crate::lib::db::user::get::get_user_by_token;
 
 #[post("/api/file/{path:.*}")]
@@ -33,8 +33,8 @@ pub async fn save_file(req: HttpRequest, mut payload: Multipart, path: web::Path
             }
             let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).unwrap();
             tokio::spawn(async  move {
-                insert(user.id, action_type::Upload)
-            }).await;
+                insert(user.id, ActionType::Upload)
+            }).await.expect("Error");
             Ok(HttpResponse::Ok().into())
         } else {
            Ok(HttpResponse::Ok().body("The token provided isn't valid"))
@@ -54,7 +54,7 @@ pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, E
     ) {
         Ok(_) => {
             match std::fs::create_dir(format!("./home/{}", body.name.clone())) {
-                Ok(e) => {
+                Ok(_) => {
                     Ok(HttpResponse::Ok().body("Your request has been accepted"))
                 },
                 Err(e) => {

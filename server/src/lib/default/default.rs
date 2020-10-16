@@ -27,6 +27,9 @@ pub fn default() -> Config {
             server_ip: "0.0.0.0".to_string(),
             server_port: 8081,
             folder_root: "/".to_string(),
+            db_server: "".to_string(),
+            db_type: "".to_string(),
+            db_port: 0
         };
         let mut ff = File::create("./config.yaml").unwrap();
         match ff.write_all(serde_yaml::to_string(&config).unwrap().as_bytes()) {

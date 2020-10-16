@@ -8,7 +8,7 @@ use crate::lib::{archive::archive::*, http::http::get_args};
 use actix_http::body::Body;
 use actix_web::{get, web, HttpRequest, HttpResponse as Response, HttpResponse};
 use crate::lib::db::log::insert::insert;
-use crate::lib::db::log::model::action_type;
+use crate::lib::db::log::model::ActionType;
 
 #[get("/api/file/{path:.*}")]
 pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<Response<Body>> {
@@ -46,9 +46,10 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
             } else {
                 result = get_dir(format!("{}/{}",user.home, path.0.clone()), Sort::Name);
             }
-            tokio::spawn(async move {
-                insert(user.id, action_type::Get)
-            }).await;
+            let insert_task = tokio::spawn(async move {
+                insert(user.id, ActionType::Get)
+            });
+            let _ = insert_task.await;
         } else {
             result = Ok(HttpResponse::Ok().body("The token provided isn't valid"))
         }
@@ -63,9 +64,12 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
 pub async fn login_user(body: web::Json<LoginUser>) -> std::io::Result<Response<Body>> {
     let token = gen_token();
     println!("name : {}, password: {}", body.name, body.password);
-    let id = get_id(body.name.clone(), body.password.clone());
-    update_token(token.clone(), id);
-    println!("{}", valid_session(token.clone()));
-    Ok(HttpResponse::Ok().body(&token))
+    if let Some(id) = get_id(body.name.clone(), body.password.clone()) {
+        update_token(token.clone(), id.to_owned());
+        println!("{}", valid_session(token.clone()));
+        Ok(HttpResponse::Ok().body(&token))
+    } else {
+        Ok(HttpResponse::Ok().body("No user was found"))
+    }
 }
 

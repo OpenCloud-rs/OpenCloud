@@ -1,15 +1,15 @@
-pub enum action_type {
+pub enum ActionType {
     Delete,
     Upload,
     Get,
 }
 
-impl action_type {
+impl ActionType {
     pub fn format(&self) -> String {
         match self {
-            action_type::Delete => {String::from("Delete")}
-            action_type::Upload => {String::from("Upload")}
-            action_type::Get => {String::from("Get")}
+            ActionType::Delete => {String::from("Delete")}
+            ActionType::Upload => {String::from("Upload")}
+            ActionType::Get => {String::from("Get")}
         }
     }
 }

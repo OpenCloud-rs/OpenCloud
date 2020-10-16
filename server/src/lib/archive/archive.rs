@@ -57,6 +57,7 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
         &PathBuf::from(dir),
         FileOptions::default().compression_method(CompressionMethod::Bzip2),
     )).await.expect("Error");
+
     afs::File::open(format!("./temp/{}.zip", name))
         .await
         .expect("Error")
@@ -64,12 +65,15 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
 }
 
 async fn async_tar_archive(name: String, dir: String) -> afs::File {
+
     let file_name = format!("./temp/{}.tar.gz", name);
+    println!("{} dir : {}", file_name, dir);
     File::create(&file_name).expect("Error");
+    let file = afs::File::open(&file_name);
     tar::Builder::new(File::open(&file_name).expect("no file found"))
-        .append_dir_all(&file_name, dir.as_str())
+        .append_dir_all(file_name.as_str(), dir.clone().as_str())
         .expect("Error");
-    afs::File::open(&file_name).await.expect("Error")
+    file.await.expect("Error")
 }
 
 pub async fn random_archive(extention: String, dir: String) -> afs::File {

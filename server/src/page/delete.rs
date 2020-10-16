@@ -3,7 +3,7 @@ use shared::{FType, Folder, JsonStruct};
 use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::db::log::insert::insert;
 use crate::lib::db::user::get::get_user_by_token;
-use crate::lib::db::log::model::action_type;
+use crate::lib::db::log::model::ActionType;
 
 #[delete("/api/file/{path:.*}")]
 pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpResponse, Error> {
@@ -29,8 +29,8 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
                     });
                     let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).unwrap();
                     tokio::spawn(async move {
-                        insert(user.id, action_type::Delete)
-                    }).await;
+                        insert(user.id, ActionType::Delete)
+                    }).await.expect("Error");
                 }
                 Err(_e) => {
                     result.content.push(Folder {

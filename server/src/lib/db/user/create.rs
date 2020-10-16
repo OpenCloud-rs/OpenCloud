@@ -1,4 +1,4 @@
-use crate::lib::db::sqlite_conn::conn;
+use crate::lib::db::conn::conn;
 
 pub fn create() {
     let conn = conn();

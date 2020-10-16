@@ -1,4 +1,4 @@
-use crate::lib::db::sqlite_conn::conn;
+use crate::lib::db::conn::conn;
 use rusqlite::params;
 
 pub fn insert_user(

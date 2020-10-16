@@ -1,4 +1,4 @@
-use crate::lib::db::sqlite_conn::*;
+use crate::lib::db::conn::*;
 use crate::lib::db::user::model::{Id, User};
 use rusqlite::params;
 pub fn get_users() -> Vec<User> {
@@ -52,7 +52,7 @@ pub fn get_user_by_token(token: String) -> Option<User> {
 
     result
 }
-pub fn get_id(name: String, password: String) -> i32 {
+pub fn get_id(name: String, password: String) -> Option<i32> {
     let conn = conn();
     let mut id: Vec<i32> = Vec::new();
     let mut stmt = conn
@@ -64,5 +64,5 @@ pub fn get_id(name: String, password: String) -> i32 {
     for ids in person_iter {
         id.push(ids.expect("Error").id);
     }
-    id.first().unwrap().to_owned()
+    id.first().cloned()
 }
