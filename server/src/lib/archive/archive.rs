@@ -88,7 +88,7 @@ pub async fn random_archive(extention: String, dir: String) -> afs::File {
 
 fn random_name() -> String {
     use rand::Rng;
-    let charset: &[u8] = b"abcdefghijklmnopqrstuvwxyz123456789";
+    let charset: &[u8] = b"abcdefghijklmnopqrstuvwxyzABCEDFGHIJKLMNOPQRSTUVWXYZ123456789";
     let mut rng = rand::thread_rng();
     (0..10)
         .map(|_| {
