@@ -99,13 +99,13 @@ fn random_name() -> String {
         .collect()
 }
 
-pub struct ArchiveFile {
+pub struct _ArchiveFile {
    pub src_path: String,
    pub name: String,
 }
 
-impl ArchiveFile {
-    pub async fn read_zip(&'static self) -> std::io::Result<Bytes> {
+impl _ArchiveFile {
+    pub async fn _read_zip(&'static self) -> std::io::Result<Bytes> {
         let file_name = format!("./temp/{}.zip", &self.name);
         let mut vec = Vec::new();
         let _ = afs::File::create(file_name.clone()).await?;
@@ -120,10 +120,10 @@ impl ArchiveFile {
 
         Ok(Bytes::from(vec))
     }
-    pub fn write_tar(&self) {
+    pub fn _write_tar(&self) {
 
     }
-    pub fn read_to_bytes(&self) {
+    pub fn _read_to_bytes(&self) {
 
     }
 }

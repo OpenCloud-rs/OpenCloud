@@ -13,7 +13,7 @@ impl Config {
     pub fn get_server(&self) -> String {
         format!("{}:{}", self.server_ip, self.server_port)
     }
-    pub fn get_server_ip(&self) -> String {
+    pub fn _get_server_ip(&self) -> String {
         self.server_ip.clone()
     }
     pub fn _get_server_port(&self) -> i64 {
