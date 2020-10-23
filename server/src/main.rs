@@ -23,14 +23,14 @@ async fn main() -> std::io::Result<()> {
     create_log_db();
     create_user_db();
     let server_ip: &str = &config.get_server();
-    
+
     lib::db::user::get::get_users();
 
 
-
+ //TODO: Reformat
     HttpServer::new(move || {
         App::new()
-            .default_service(web::resource("").route(web::get().to(client)))
+            .default_service(web::resource("/").route(web::get().to(client)))
             .service(
                 actix_files::Files::new("/pkg/", "./client/pkg/")
                     .show_files_listing()

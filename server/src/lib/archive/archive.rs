@@ -9,14 +9,15 @@ use bytes::Bytes;
 use std::fs::File;
 use std::io::Error;
 use std::path::PathBuf;
-use tokio::fs as afs;
+use async_std::fs as afs;
 use zip::write::FileOptions;
 use zip::CompressionMethod;
 use zip_extensions::zip_create_from_directory_with_options;
+use futures::AsyncReadExt;
 
 pub async fn get_zip(path: String) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
-    let _ = tx.send(Ok::<_, Error>(Bytes::from(
+    let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(
         get_file_as_byte_vec(path.clone(), &"zip").await,
     )));
     Ok(Response::Ok()
@@ -33,7 +34,7 @@ pub async fn get_zip(path: String) -> std::io::Result<Response> {
 
 pub async fn get_tar(path: String) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
-    let _ = tx.send(Ok::<_, Error>(Bytes::from(
+    let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(
         get_file_as_byte_vec(path.clone(), &"tar").await,
     )));
     Ok(Response::Ok()
@@ -96,4 +97,33 @@ fn random_name() -> String {
             charset[idx] as char
         })
         .collect()
+}
+
+pub struct ArchiveFile {
+   pub src_path: String,
+   pub name: String,
+}
+
+impl ArchiveFile {
+    pub async fn read_zip(&'static self) -> std::io::Result<Bytes> {
+        let file_name = format!("./temp/{}.zip", &self.name);
+        let mut vec = Vec::new();
+        let _ = afs::File::create(file_name.clone()).await?;
+        println!("filename => {}", &self.src_path);
+        let _ = web::block(move || zip_create_from_directory_with_options(
+            &PathBuf::from(file_name),
+            &PathBuf::from(&self.src_path),
+            FileOptions::default().compression_method(CompressionMethod::Bzip2),
+        )).await;
+
+        let  _ = afs::File::open(format!("./temp/{}.zip", &self.name)).await?.read_to_end(&mut vec).await?;
+
+        Ok(Bytes::from(vec))
+    }
+    pub fn write_tar(&self) {
+
+    }
+    pub fn read_to_bytes(&self) {
+
+    }
 }

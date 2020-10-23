@@ -7,7 +7,7 @@ use actix_web::http::ContentEncoding;
 use shared::{FType, Folder, JsonStruct};
 use std::fs;
 use std::fs::{metadata, read_dir};
-use tokio::io::AsyncReadExt;
+use async_std::io::ReadExt;
 use actix_utils::mpsc;
 
 pub enum Sort {
@@ -140,7 +140,7 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
         Ok(e) => {
             if e.is_file() {
                 let mut buf: Vec<u8> = Vec::new();
-                match tokio::fs::File::open(filename.clone()).await {
+                match async_std::fs::File::open(filename.clone()).await {
                     Ok(mut o) => {
                         o.read(&mut buf).await.expect("Error");
                     }
@@ -210,7 +210,7 @@ pub fn get_size_dir(path: String) -> u64 {
 pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
     let (tx, rx_body) = mpsc::channel();
 
-    let try_file = tokio::fs::File::open(path.clone()).await;
+    let try_file = async_std::fs::File::open(path.clone()).await;
     if try_file.is_err() {
         return Ok(Response::Ok().header("Access-Control-Allow-Origin", "*")
             .header("charset", "utf-8").body("Error"))
