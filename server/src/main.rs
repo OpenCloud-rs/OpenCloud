@@ -18,13 +18,12 @@ mod page;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     let config: Config = default();
     create_log_db();
     create_user_db();
     let server_ip: &str = &config.get_server();
-
-    env_logger::from_env(Env::default().default_filter_or("info")).init();
-
+    
     lib::db::user::get::get_users();
 
 
