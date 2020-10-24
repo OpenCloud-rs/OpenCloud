@@ -6,7 +6,7 @@ pub struct Config {
     pub folder_root: String,
     pub db_server: String,
     pub db_type: String,
-    pub db_port: i64
+    pub db_port: i64,
 }
 
 impl Config {
@@ -31,5 +31,4 @@ impl Config {
     pub fn _get_db_type(&self) -> String {
         self.db_type.clone()
     }
-
 }

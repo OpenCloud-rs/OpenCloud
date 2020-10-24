@@ -10,7 +10,8 @@ pub fn insert_user(
     conn.execute(
         "INSERT INTO User (name,email, password) VALUES(?1, ?2, ?3);",
         params![name, email, password],
-    ).expect("Error");
-    
+    )
+    .expect("Error");
+
     Ok(usize::from(true))
 }

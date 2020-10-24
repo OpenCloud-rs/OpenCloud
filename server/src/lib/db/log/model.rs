@@ -7,9 +7,9 @@ pub enum ActionType {
 impl ActionType {
     pub fn format(&self) -> String {
         match self {
-            ActionType::Delete => {String::from("Delete")}
-            ActionType::Upload => {String::from("Upload")}
-            ActionType::Get => {String::from("Get")}
+            ActionType::Delete => String::from("Delete"),
+            ActionType::Upload => String::from("Upload"),
+            ActionType::Get => String::from("Get"),
         }
     }
 }

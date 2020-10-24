@@ -1,6 +1,6 @@
 use crate::lib::config::config::Config;
-use crate::lib::db::user::create::create as create_user_db;
 use crate::lib::db::log::create::create as create_log_db;
+use crate::lib::db::user::create::create as create_user_db;
 use crate::lib::default::default::default;
 use crate::page::client::client;
 use crate::page::delete::deletef;
@@ -26,8 +26,7 @@ async fn main() -> std::io::Result<()> {
 
     lib::db::user::get::get_users();
 
-
- //TODO: Reformat
+    //TODO: Reformat
     HttpServer::new(move || {
         App::new()
             .default_service(web::resource("/").route(web::get().to(client)))

@@ -5,15 +5,15 @@ use actix_utils::mpsc;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 use actix_web::web;
+use async_std::fs as afs;
 use bytes::Bytes;
+use futures::AsyncReadExt;
 use std::fs::File;
 use std::io::Error;
 use std::path::PathBuf;
-use async_std::fs as afs;
 use zip::write::FileOptions;
 use zip::CompressionMethod;
 use zip_extensions::zip_create_from_directory_with_options;
-use futures::AsyncReadExt;
 
 pub async fn get_zip(path: String) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
@@ -25,7 +25,10 @@ pub async fn get_zip(path: String) -> std::io::Result<Response> {
         .header("charset", "utf-8")
         .header(
             "Content-Disposition",
-            format!("\"attachment\";filename=\"{}.zip\"",  path.clone().split('/').last().expect("Error")),
+            format!(
+                "\"attachment\";filename=\"{}.zip\"",
+                path.clone().split('/').last().expect("Error")
+            ),
         )
         .content_type(file_extension_to_mime(path.clone().as_str()).essence_str())
         .encoding(ContentEncoding::Gzip)
@@ -42,7 +45,10 @@ pub async fn get_tar(path: String) -> std::io::Result<Response> {
         .header("charset", "utf-8")
         .header(
             "Content-Disposition",
-            format!("\"attachment\";filename=\"{}.tar.gz\"", path.clone().split('/').last().expect("Error")),
+            format!(
+                "\"attachment\";filename=\"{}.tar.gz\"",
+                path.clone().split('/').last().expect("Error")
+            ),
         )
         .content_type(file_extension_to_mime(path.clone().as_str()).essence_str())
         .encoding(ContentEncoding::Gzip)
@@ -53,20 +59,22 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
     let file_name = format!("./temp/{}.zip", name);
     File::create(file_name.clone()).unwrap();
     println!("filename => {}", dir);
-    web::block(|| zip_create_from_directory_with_options(
-        &PathBuf::from(file_name),
-        &PathBuf::from(dir),
-        FileOptions::default().compression_method(CompressionMethod::Bzip2),
-    )).await.expect("Error");
+    web::block(|| {
+        zip_create_from_directory_with_options(
+            &PathBuf::from(file_name),
+            &PathBuf::from(dir),
+            FileOptions::default().compression_method(CompressionMethod::Bzip2),
+        )
+    })
+    .await
+    .expect("Error");
 
     afs::File::open(format!("./temp/{}.zip", name))
         .await
         .expect("Error")
-
 }
 
 async fn async_tar_archive(name: String, dir: String) -> afs::File {
-
     let file_name = format!("./temp/{}.tar.gz", name);
     println!("{} dir : {}", file_name, dir);
     File::create(&file_name).expect("Error");
@@ -100,8 +108,8 @@ fn random_name() -> String {
 }
 
 pub struct _ArchiveFile {
-   pub src_path: String,
-   pub name: String,
+    pub src_path: String,
+    pub name: String,
 }
 
 impl _ArchiveFile {
@@ -110,20 +118,22 @@ impl _ArchiveFile {
         let mut vec = Vec::new();
         let _ = afs::File::create(file_name.clone()).await?;
         println!("filename => {}", &self.src_path);
-        let _ = web::block(move || zip_create_from_directory_with_options(
-            &PathBuf::from(file_name),
-            &PathBuf::from(&self.src_path),
-            FileOptions::default().compression_method(CompressionMethod::Bzip2),
-        )).await;
+        let _ = web::block(move || {
+            zip_create_from_directory_with_options(
+                &PathBuf::from(file_name),
+                &PathBuf::from(&self.src_path),
+                FileOptions::default().compression_method(CompressionMethod::Bzip2),
+            )
+        })
+        .await;
 
-        let  _ = afs::File::open(format!("./temp/{}.zip", &self.name)).await?.read_to_end(&mut vec).await?;
+        let _ = afs::File::open(format!("./temp/{}.zip", &self.name))
+            .await?
+            .read_to_end(&mut vec)
+            .await?;
 
         Ok(Bytes::from(vec))
     }
-    pub fn _write_tar(&self) {
-
-    }
-    pub fn _read_to_bytes(&self) {
-
-    }
+    pub fn _write_tar(&self) {}
+    pub fn _read_to_bytes(&self) {}
 }

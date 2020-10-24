@@ -21,7 +21,7 @@ pub fn get_users() -> Vec<User> {
         .expect("Error on mapping request");
 
     for person in person_iter {
-        let mut person  = person.expect("Error");
+        let mut person = person.expect("Error");
         person.home = format!("./home/{}/", person.name);
         vec.push(person);
     }
@@ -32,23 +32,25 @@ pub fn get_user_by_token(token: String) -> Option<User> {
     let mut stmt = conn
         .prepare("SELECT * FROM User WHERE token = ?1")
         .expect("Can't do prepared request");
-    let user = stmt.query_map(params![token], |row| {
-        Ok(User {
-            id: row.get(0)?,
-            name: row.get(1)?,
-            password: row.get(2)?,
-            token: row.get(3).unwrap_or(String::new()),
-            email: row.get(4).unwrap_or(String::new()),
-            home: String::new(),
+    let user = stmt
+        .query_map(params![token], |row| {
+            Ok(User {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                password: row.get(2)?,
+                token: row.get(3).unwrap_or(String::new()),
+                email: row.get(4).unwrap_or(String::new()),
+                home: String::new(),
+            })
         })
-    }).expect("Error");
+        .expect("Error");
     let mut result = None;
-   for u in user {
-       let mut user = u.expect("Error");
-       user.home = format!("./home/{}", user.name);
-       result  = Some(user);
-       break;
-    };
+    for u in user {
+        let mut user = u.expect("Error");
+        user.home = format!("./home/{}", user.name);
+        result = Some(user);
+        break;
+    }
 
     result
 }

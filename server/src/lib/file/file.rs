@@ -1,14 +1,14 @@
 use crate::lib::archive::archive::random_archive;
 use actix_files::file_extension_to_mime;
-use actix_web::{HttpResponse as Response, Error};
+use actix_utils::mpsc;
 use actix_web::body::Body;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
+use actix_web::{Error, HttpResponse as Response};
+use async_std::io::ReadExt;
 use shared::{FType, Folder, JsonStruct};
 use std::fs;
 use std::fs::{metadata, read_dir};
-use async_std::io::ReadExt;
-use actix_utils::mpsc;
 
 pub enum Sort {
     Name,
@@ -21,11 +21,7 @@ pub fn dir_content(path: String, sort: Sort) -> String {
     let mut content: Vec<Folder> = Vec::new();
     let mut result: bool = false;
     let mut ftype: FType = FType::Error;
-    let root = if cfg!(windows) {
-        "C:"
-    } else {
-        ""
-    };
+    let root = if cfg!(windows) { "C:" } else { "" };
 
     match fs::metadata(format!("{}{}", root, path.clone())) {
         Ok(e) => {
@@ -35,10 +31,12 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                 content.push(Folder {
                     result: true,
                     size: e.len(),
-                    created: time::PrimitiveDateTime::from(e.created().expect("Error")).format("%d-%m-%Y %T"),
+                    created: time::PrimitiveDateTime::from(e.created().expect("Error"))
+                        .format("%d-%m-%Y %T"),
                     name: String::from(path.split("/").last().unwrap()),
                     ftype: file_extension_to_mime(path.split("/").last().unwrap()).to_string(),
-                    modified: time::PrimitiveDateTime::from(e.modified().expect("Error")).format("%d-%m-%Y %T"),
+                    modified: time::PrimitiveDateTime::from(e.modified().expect("Error"))
+                        .format("%d-%m-%Y %T"),
                 });
             } else if e.is_dir() == true {
                 match fs::read_dir(path.clone()) {
@@ -47,46 +45,76 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                         ftype = FType::Folder;
                         for dpath in e {
                             match dpath {
-                                Ok(f) => {
-                                    match f.metadata() {
-                                        Ok(e) => {
-                                            if e.is_file() == true {
-                                                content.push(Folder {
-                                                    result: true,
-                                                    name: String::from(
-                                                        f.file_name().to_str().unwrap_or("Bad Name"),
-                                                    ),
-                                                    ftype: get_mime(
-                                                        f.file_name().to_str().unwrap_or("Bad Type"),
-                                                    ),
-                                                    size: e.len(),
-                                                    created: time::PrimitiveDateTime::from(f.metadata().expect("Error").created().expect("Error")).format("%d-%m-%Y %T"),
-                                                    modified: time::PrimitiveDateTime::from(f.metadata().expect("Error").modified().expect("Error")).format("%d-%m-%Y %T"),
-                                                });
-                                            } else {
-                                                content.push(Folder {
-                                                    result: true,
-                                                    name: String::from(
-                                                        f.file_name().to_str().unwrap_or("Bad File Type"),
-                                                    ),
-                                                    size: get_size_dir(format!("{}{}/{}", root, path.clone(), f.file_name().to_str().unwrap_or("Bad File Type"))),
-                                                    created: time::PrimitiveDateTime::from(f.metadata().expect("Error").created().expect("Error")).format("%d-%m-%Y %T"),
-                                                    modified: time::PrimitiveDateTime::from(f.metadata().expect("Error").modified().expect("Error")).format("%d-%m-%Y %T"),
-                                                    ftype: String::from("Folder"),
-                                                });
-                                            }
+                                Ok(f) => match f.metadata() {
+                                    Ok(e) => {
+                                        if e.is_file() == true {
+                                            content.push(Folder {
+                                                result: true,
+                                                name: String::from(
+                                                    f.file_name().to_str().unwrap_or("Bad Name"),
+                                                ),
+                                                ftype: get_mime(
+                                                    f.file_name().to_str().unwrap_or("Bad Type"),
+                                                ),
+                                                size: e.len(),
+                                                created: time::PrimitiveDateTime::from(
+                                                    f.metadata()
+                                                        .expect("Error")
+                                                        .created()
+                                                        .expect("Error"),
+                                                )
+                                                .format("%d-%m-%Y %T"),
+                                                modified: time::PrimitiveDateTime::from(
+                                                    f.metadata()
+                                                        .expect("Error")
+                                                        .modified()
+                                                        .expect("Error"),
+                                                )
+                                                .format("%d-%m-%Y %T"),
+                                            });
+                                        } else {
+                                            content.push(Folder {
+                                                result: true,
+                                                name: String::from(
+                                                    f.file_name()
+                                                        .to_str()
+                                                        .unwrap_or("Bad File Type"),
+                                                ),
+                                                size: get_size_dir(format!(
+                                                    "{}{}/{}",
+                                                    root,
+                                                    path.clone(),
+                                                    f.file_name()
+                                                        .to_str()
+                                                        .unwrap_or("Bad File Type")
+                                                )),
+                                                created: time::PrimitiveDateTime::from(
+                                                    f.metadata()
+                                                        .expect("Error")
+                                                        .created()
+                                                        .expect("Error"),
+                                                )
+                                                .format("%d-%m-%Y %T"),
+                                                modified: time::PrimitiveDateTime::from(
+                                                    f.metadata()
+                                                        .expect("Error")
+                                                        .modified()
+                                                        .expect("Error"),
+                                                )
+                                                .format("%d-%m-%Y %T"),
+                                                ftype: String::from("Folder"),
+                                            });
                                         }
-                                        Err(_e) => content.push(Folder {
-                                            result: false,
-                                            size: 0,
-                                            created: String::from("0-0-0000 00:00:00"),
-                                            modified: String::from("0-0-0000 00:00:00"),
-                                            name: String::from("Error"),
-                                            ftype: String::from("Error"),
-
-                                        }),
                                     }
-                                }
+                                    Err(_e) => content.push(Folder {
+                                        result: false,
+                                        size: 0,
+                                        created: String::from("0-0-0000 00:00:00"),
+                                        modified: String::from("0-0-0000 00:00:00"),
+                                        name: String::from("Error"),
+                                        ftype: String::from("Error"),
+                                    }),
+                                },
                                 Err(_e) => {
                                     content.push(Folder {
                                         result: false,
@@ -95,7 +123,6 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                                         modified: String::from("0-0-0000 00:00:00"),
                                         name: String::from("Error"),
                                         ftype: String::from("Error"),
-
                                     });
                                 }
                             }
@@ -118,10 +145,18 @@ pub fn dir_content(path: String, sort: Sort) -> String {
         Err(_e) => {}
     }
     match sort {
-        Sort::Name => { content.sort_by(|a, b| a.name.cmp(&b.name)); }
-        Sort::Type => { content.sort_by(|a, b| b.ftype.cmp(&a.ftype)); }
-        Sort::Size => { content.sort_by(|a, b| b.size.cmp(&a.size)); }
-        Sort::Date => { content.sort_by(|a, b| b.created.cmp(&a.created)); }
+        Sort::Name => {
+            content.sort_by(|a, b| a.name.cmp(&b.name));
+        }
+        Sort::Type => {
+            content.sort_by(|a, b| b.ftype.cmp(&a.ftype));
+        }
+        Sort::Size => {
+            content.sort_by(|a, b| b.size.cmp(&a.size));
+        }
+        Sort::Date => {
+            content.sort_by(|a, b| b.created.cmp(&a.created));
+        }
     }
     let folder = JsonStruct {
         result,
@@ -153,7 +188,8 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                 let mut file = match compress.to_lowercase().as_str() {
                     "tar" => random_archive("tar.gz".to_string(), filename),
                     _ => random_archive("zip".to_string(), filename),
-                }.await;
+                }
+                .await;
 
                 println!("{}", file.metadata().await.unwrap().len());
 
@@ -212,10 +248,12 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
 
     let try_file = async_std::fs::File::open(path.clone()).await;
     if try_file.is_err() {
-        return Ok(Response::Ok().header("Access-Control-Allow-Origin", "*")
-            .header("charset", "utf-8").body("Error"))
+        return Ok(Response::Ok()
+            .header("Access-Control-Allow-Origin", "*")
+            .header("charset", "utf-8")
+            .body("Error"));
     }
-    
+
     let mut buf: Vec<u8> = Vec::new();
     match try_file.expect("Error").read_to_end(&mut buf).await {
         Ok(e) => {
@@ -226,8 +264,9 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
 
     let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(buf.clone())));
 
-    Ok(Response::Ok().header("Access-Control-Allow-Origin", "*")
-        .header("charset", "utf-8").content_type(get_mime(
-        path.clone().as_str(),
-    )).streaming(rx_body))
+    Ok(Response::Ok()
+        .header("Access-Control-Allow-Origin", "*")
+        .header("charset", "utf-8")
+        .content_type(get_mime(path.clone().as_str()))
+        .streaming(rx_body))
 }

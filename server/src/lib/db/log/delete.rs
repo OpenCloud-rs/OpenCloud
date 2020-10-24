@@ -4,9 +4,9 @@ pub fn _delete(id: i32) -> bool {
     let conn = conn();
     match conn.execute(
         format!("delete from log where id = {}", id).as_str(),
-        params![]
+        params![],
     ) {
-        Ok(_) => {true}
-        Err(_) => {false}
+        Ok(_) => true,
+        Err(_) => false,
     }
 }
