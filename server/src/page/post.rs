@@ -54,26 +54,13 @@ pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, E
         String::from(body.password.clone()),
     ) {
         Ok(_) => {
-            if let e = create_home(body.name.clone()).await  {
+            let e = create_home(body.name.clone()).await;
                if e.result {
                    Ok(HttpResponse::Ok().body(e.body))
                } else {
                    Ok(HttpResponse::Ok().body(e.body))
                }
-            } else {
-                Ok(HttpResponse::Ok().body("Error on Creation of Home"))
             }
-        }
-            /*match std::fs::create_dir(format!("./home/{}", body.name.clone())) {
-                Ok(_) => {
-                    Ok(HttpResponse::Ok().body("Your request has been accepted"))
-                },
-                Err(e) => {
-                    if e.raw_os_error().unwrap() == 17 {
-                        return Ok(HttpResponse::Ok().body("This user name is already used"))
-                    }
-                    Ok(HttpResponse::Ok().body("Error on Creation of Home"))
-                }*/
         Err(_) => Ok(HttpResponse::Ok().body("Your request is bad")),
     }
 }
