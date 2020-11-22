@@ -29,7 +29,7 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
                     let user =
                         get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
                             .unwrap();
-                     insert(user.id, ActionType::Delete);
+                    insert(user.id, ActionType::Delete);
                 }
                 Err(_e) => result.content.push(Folder {
                     result: false,

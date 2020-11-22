@@ -37,7 +37,7 @@ pub async fn save_file(
             }
             let user =
                 get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).unwrap();
-                insert(user.id, ActionType::Upload);
+            insert(user.id, ActionType::Upload);
             Ok(HttpResponse::Ok().into())
         } else {
             Ok(HttpResponse::Ok().body("The token provided isn't valid"))
