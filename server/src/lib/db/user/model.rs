@@ -13,7 +13,7 @@ pub struct User {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MinimalUser {
     pub name: String,
-    pub email: String,
+    pub email: Option<String>,
     pub password: String,
 }
 

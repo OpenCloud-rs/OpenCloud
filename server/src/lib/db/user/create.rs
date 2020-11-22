@@ -1,7 +1,9 @@
+use sqlx::Executor;
+
 use crate::lib::db::conn::conn;
 
-pub fn create() {
-    let conn = conn();
+pub async fn create() {
+    let mut conn = conn().await;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS User (
                   id              INTEGER PRIMARY KEY,
@@ -10,7 +12,5 @@ pub fn create() {
                   token           TEXT,
                   email           TEXT
                   )",
-        "".bytes(),
-    )
-    .expect("Error");
+    ).await.expect("Error");
 }

@@ -20,11 +20,11 @@ mod page;
 async fn main() -> std::io::Result<()> {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     let config: Config = default();
-    create_log_db();
-    create_user_db();
+    create_log_db().await;
+    create_user_db().await;
     let server_ip: &str = &config.get_server();
 
-    lib::db::user::get::get_users();
+    lib::db::user::get::get_users().await;
 
     //TODO: Reformat
     HttpServer::new(move || {
@@ -41,15 +41,6 @@ async fn main() -> std::io::Result<()> {
             .service(save_file)
             .service(deletef)
             .service(login_user)
-            /*.service(
-                web::resource("/api/{path:.*}")
-                    .route(actix_web::web::delete().to())
-                    .route(
-                        web::route()
-                            .guard(guard::Not(guard::Get()))
-                            .to(HttpResponse::MethodNotAllowed),
-                    ),
-            )*/
             .wrap(Logger::new("%s : %r in %T"))
             .wrap(ErrorHandlers::new().handler(http::StatusCode::INTERNAL_SERVER_ERROR, p500))
     })

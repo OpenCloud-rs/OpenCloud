@@ -1,13 +1,11 @@
 use crate::lib::db::conn::conn;
-use rusqlite::params;
+use sqlx::Executor;
 
-pub fn update_token(token: String, id: i32) {
-    let conn = conn();
-    conn.execute(
-        "UPDATE \"User\"
-SET token=?1
-WHERE id=?2;",
-        params![token, id],
-    )
-    .expect("Error");
+pub async fn update_token(token: String, id: i32) {
+    let mut conn = conn().await;
+    
+    //conn.prepare(r#"UPDATE User SET token=? WHERE id=?"#).bind(token).bind(id).await;
+    conn.execute(format!("UPDATE User SET token=\"{}\" WHERE id=\"{}\"", token, id).as_ref()).await.expect("Error");
+    //conn.execute(r#"UPDATE User SET token=? WHERE id=?"#).bind(token).bind(id)
+    //let query = sqlx::query(r#"UPDATE User SET token=? WHERE id=?"#).bind(token).bind(id).fetch(&mut conn).await.expect("Error");
 }

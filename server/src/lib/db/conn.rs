@@ -1,5 +1,5 @@
-use rusqlite::Connection;
+use sqlx::{Connection, SqliteConnection};
 
-pub fn conn() -> Connection {
-    Connection::open("./db.sql").expect("Can't open the file")
+pub async fn conn() -> SqliteConnection {
+    sqlx::sqlite::SqliteConnection::connect("./db.sql").await.expect("Error")
 }

@@ -1,19 +1,15 @@
 use crate::lib::db::conn::conn;
-use rusqlite::params;
+use sqlx::Executor;
 
-pub fn valid_session(token: String) -> bool {
+pub async fn valid_session(token: String) -> bool {
     let mut result = false;
     if !token.is_empty() {
-        let conn = conn();
-        let exec: rusqlite::Result<i32> = conn.query_row_and_then(
-            "SELECT * FROM `User` WHERE token = ?1",
-            params![token],
-            |row| row.get("id"),
-        );
-        match exec {
+        let mut conn = conn().await;
+        let query = conn.execute(format!("SELECT * FROM `User` WHERE token = \"{}\"", token).as_ref()).await;
+        match query {
             Ok(_) => result = true,
             Err(_) => {}
-        }
+        };
     }
     result
 }

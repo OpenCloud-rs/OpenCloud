@@ -1,17 +1,13 @@
 use crate::lib::db::conn::conn;
-use rusqlite::params;
+use sqlx::Executor;
 
-pub fn insert_user(
+pub async fn insert_user(
     name: String,
     email: String,
     password: String,
-) -> std::result::Result<usize, rusqlite::Error> {
-    let conn = conn();
-    conn.execute(
-        "INSERT INTO User (name,email, password) VALUES(?1, ?2, ?3);",
-        params![name, email, password],
-    )
-    .expect("Error");
+) -> std::io::Result<usize> {
+    let mut conn = conn().await;
+    conn.execute(format!("INSERT INTO User (name,email, password) VALUES(\"{}\", \"{}\", \"{}\")", name, email, password).as_ref()).await.expect("Error");
 
     Ok(usize::from(true))
 }

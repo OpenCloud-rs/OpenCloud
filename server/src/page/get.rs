@@ -14,10 +14,9 @@ use actix_web::{get, web, HttpRequest, HttpResponse as Response, HttpResponse};
 pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<Response<Body>> {
     let result;
     if let Some(e) = req.headers().get("token") {
-        if valid_session(String::from(e.to_str().expect("Parse Str Error"))) {
+        if valid_session(String::from(e.to_str().expect("Parse Str Error"))).await {
             let bvec = get_args(req.clone());
-            let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
-                .expect("Error");
+            let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await.expect("Error");
             if bvec.contains_key("download") {
                 match bvec.get("download").unwrap().as_ref() {
                     "tar.gz" => {
@@ -62,9 +61,9 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
 pub async fn login_user(body: web::Json<LoginUser>) -> std::io::Result<Response<Body>> {
     let token = gen_token();
     println!("name : {}, password: {}", body.name, body.password);
-    if let Some(id) = get_id(body.name.clone(), body.password.clone()) {
-        update_token(token.clone(), id.to_owned());
-        println!("{}", valid_session(token.clone()));
+    if let Some(id) = get_id(body.name.clone(), body.password.clone()).await {
+        update_token(token.clone(), id.to_owned()).await;
+        println!("{}", valid_session(token.clone()).await);
         Ok(HttpResponse::Ok().body(&token))
     } else {
         Ok(HttpResponse::Ok().body("No user was found"))

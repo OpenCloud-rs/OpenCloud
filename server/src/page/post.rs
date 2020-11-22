@@ -19,12 +19,16 @@ pub async fn save_file(
     print!("{}", path);
     if let Some(e) = req.headers().get("token") {
         let url = format!("/{}", path.0);
-        if valid_session(String::from(e.to_str().expect("Parse Str Error"))) {
+        if valid_session(String::from(e.to_str().expect("Parse Str Error"))).await {
             while let Ok(Some(mut field)) = tokio::stream::StreamExt::try_next(&mut payload).await {
                 let content_type = field.content_disposition().unwrap();
                 let filename = content_type.get_filename().unwrap();
-                let filepath = format!("{}/{}", url, filename);
+                
+                let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await.unwrap();
+                let filepath = format!("./home/{}/{}/{}",user.name, url, filename);
                 // File::create is blocking operation, use threadpool
+                println!("Url : {}, Path: {}", url, filepath);
+
                 let mut f = web::block(|| std::fs::File::create(filepath))
                     .await
                     .unwrap();
@@ -35,10 +39,9 @@ pub async fn save_file(
                     f = web::block(move || f.write_all(&data).map(|_| f)).await?;
                 }
             }
-            let user =
-                get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).unwrap();
-            insert(user.id, ActionType::Upload);
-            Ok(HttpResponse::Ok().into())
+            let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await.unwrap();
+            insert(user.id, ActionType::Upload).await;
+            return Ok(HttpResponse::Ok().body("The file is uploaded"))
         } else {
             Ok(HttpResponse::Ok().body("The token provided isn't valid"))
         }
@@ -51,9 +54,9 @@ pub async fn save_file(
 pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, Error> {
     match insert_user(
         String::from(body.name.clone()),
-        String::from(body.email.clone()),
+        String::from(body.clone().email.unwrap_or_default()),
         String::from(body.password.clone()),
-    ) {
+    ).await {
         Ok(_) => {
             let e = create_home(body.name.clone()).await;
             if e.result {
