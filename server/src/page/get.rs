@@ -47,8 +47,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
             } else {
                 result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
             }
-            let insert_task = tokio::spawn(async move { insert(user.id, ActionType::Get) });
-            let _ = insert_task.await;
+            let _ = insert(user.id, ActionType::Get);
         } else {
             result = Ok(HttpResponse::Ok().body("The token provided isn't valid"))
         }
