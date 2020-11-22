@@ -14,32 +14,58 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
         content: Vec::new(),
     };
     if let Some(e) = req.headers().get("token") {
-        if valid_session(String::from(e.to_str().expect("Parse Str Error"))) {
-            match std::fs::remove_dir_all(format!("/{}", path.0)) {
-                Ok(_o) => {
-                    result.result = true;
-                    result.content.push(Folder {
-                        result: true,
+        if valid_session(String::from(e.to_str().expect("Parse Str Error"))).await {
+            let user = get_user_by_token(e.to_str().unwrap().to_string()).await.unwrap();
+            println!("./home/{}/{}",user.name, path.0);
+            if async_std::fs::metadata(format!("./home/{}/{}",user.name, path.0)).await.unwrap().is_dir() {
+                match async_std::fs::remove_dir_all(format!("./home/{}/{}",user.name, path.0)).await {
+                    Ok(_) => {
+                        result.result = true;
+                        result.content.push(Folder {
+                            result: true,
+                            size: 0,
+                            created: String::from("0-0-0000 00:00:00"),
+                            name: "Work".to_string(),
+                            ftype: "File".to_string(),
+                            modified: String::from("0-0-0000 00:00:00"),
+                        });
+                        let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await.unwrap();
+                        insert(user.id, ActionType::Delete).await;
+                    }
+                    Err(e) => result.content.push(Folder {
+                        result: false,
                         size: 0,
                         created: String::from("0-0-0000 00:00:00"),
-                        name: "Work".to_string(),
-                        ftype: "File".to_string(),
+                        name: e.to_string(),
+                        ftype: "Error".to_string(),
                         modified: String::from("0-0-0000 00:00:00"),
-                    });
-                    let user =
-                        get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
-                            .unwrap();
-                    insert(user.id, ActionType::Delete);
-                }
-                Err(_e) => result.content.push(Folder {
-                    result: false,
-                    size: 0,
-                    created: String::from("0-0-0000 00:00:00"),
-                    name: "Error".to_string(),
-                    ftype: "Error".to_string(),
-                    modified: String::from("0-0-0000 00:00:00"),
-                }),
-            };
+                    }),
+                };
+            } else {
+                match async_std::fs::remove_file(format!("./home/{}/{}",user.name, path.0)).await {
+                    Ok(_) => {
+                        result.result = true;
+                        result.content.push(Folder {
+                            result: true,
+                            size: 0,
+                            created: String::from("0-0-0000 00:00:00"),
+                            name: "Work".to_string(),
+                            ftype: "File".to_string(),
+                            modified: String::from("0-0-0000 00:00:00"),
+                        });
+                        let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await.unwrap();
+                        insert(user.id, ActionType::Delete).await;
+                    }
+                    Err(e) => result.content.push(Folder {
+                        result: false,
+                        size: 0,
+                        created: String::from("0-0-0000 00:00:00"),
+                        name: e.to_string(),
+                        ftype: "Error".to_string(),
+                        modified: String::from("0-0-0000 00:00:00"),
+                    }),
+                };
+            }
             Ok(HttpResponse::Ok()
                 .header("charset", "utf-8")
                 .header("Access-Control-Allow-Origin", "*")
