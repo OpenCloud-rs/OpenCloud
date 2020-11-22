@@ -23,9 +23,11 @@ pub async fn save_file(
             while let Ok(Some(mut field)) = tokio::stream::StreamExt::try_next(&mut payload).await {
                 let content_type = field.content_disposition().unwrap();
                 let filename = content_type.get_filename().unwrap();
-                
-                let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await.unwrap();
-                let filepath = format!("./home/{}/{}/{}",user.name, url, filename);
+
+                let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
+                    .await
+                    .unwrap();
+                let filepath = format!("./home/{}/{}/{}", user.name, url, filename);
                 // File::create is blocking operation, use threadpool
                 println!("Url : {}, Path: {}", url, filepath);
 
@@ -39,9 +41,11 @@ pub async fn save_file(
                     f = web::block(move || f.write_all(&data).map(|_| f)).await?;
                 }
             }
-            let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await.unwrap();
+            let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
+                .await
+                .unwrap();
             insert(user.id, ActionType::Upload).await;
-            return Ok(HttpResponse::Ok().body("The file is uploaded"))
+            return Ok(HttpResponse::Ok().body("The file is uploaded"));
         } else {
             Ok(HttpResponse::Ok().body("The token provided isn't valid"))
         }
@@ -56,7 +60,9 @@ pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, E
         String::from(body.name.clone()),
         String::from(body.clone().email.unwrap_or_default()),
         String::from(body.password.clone()),
-    ).await {
+    )
+    .await
+    {
         Ok(_) => {
             let e = create_home(body.name.clone()).await;
             if e.result {

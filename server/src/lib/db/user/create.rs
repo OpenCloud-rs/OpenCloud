@@ -12,5 +12,7 @@ pub async fn create() {
                   token           TEXT,
                   email           TEXT
                   )",
-    ).await.expect("Error");
+    )
+    .await
+    .expect("Error");
 }

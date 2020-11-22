@@ -16,7 +16,9 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
     if let Some(e) = req.headers().get("token") {
         if valid_session(String::from(e.to_str().expect("Parse Str Error"))).await {
             let bvec = get_args(req.clone());
-            let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await.expect("Error");
+            let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
+                .await
+                .expect("Error");
             if bvec.contains_key("download") {
                 match bvec.get("download").unwrap().as_ref() {
                     "tar.gz" => {

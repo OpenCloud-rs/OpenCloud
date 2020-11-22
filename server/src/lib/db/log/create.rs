@@ -11,5 +11,7 @@ pub async fn create() {
                   user_id         INTEGER NOT NULL,
                   date           TEXT
                   )",
-    ).await.expect("Error");
+    )
+    .await
+    .expect("Error");
 }
