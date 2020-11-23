@@ -22,11 +22,11 @@ mime_guess = "2.0.3"
 
 serde = {version = "1.0.117", features = ['derive']}
 serde_json = "1.0.59"
-serde_yaml = "0.8.13"
+serde_yaml = "0.8.14"
 
-futures = "0.3.7"
-tokio = {version = "0.3.1", features = ["full"]}
-futures-core = "0.3.7"
+futures = "0.3.8"
+tokio = {version = "0.3.4", features = ["full"]}
+futures-core = "0.3.8"
 
 env_logger = "0.8"
 bytes = "0.6.0"
@@ -36,7 +36,7 @@ shared = {path = "../shared"}
 rusqlite = "0.24.1"
 sqlx = {version = "0.4.1", features = ["sqlite", "runtime-async-std-rustls"]}
 
-time = "0.2.22"
+time = "0.2.23"
 
 async-std = "1.7.0"
 
