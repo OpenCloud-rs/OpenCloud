@@ -31,11 +31,11 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                 content.push(Folder {
                     result: true,
                     size: e.len(),
-                    created: time::PrimitiveDateTime::from(e.created().expect("Error"))
+                    created: time::PrimitiveDateTime::from(e.created().unwrap_or(std::time::SystemTime::now()))
                         .format("%d-%m-%Y %T"),
                     name: String::from(path.split("/").last().unwrap()),
                     ftype: file_extension_to_mime(path.split("/").last().unwrap()).to_string(),
-                    modified: time::PrimitiveDateTime::from(e.modified().expect("Error"))
+                    modified: time::PrimitiveDateTime::from(e.modified().unwrap_or(std::time::SystemTime::now()))
                         .format("%d-%m-%Y %T"),
                 });
             } else if e.is_dir() == true {
@@ -61,14 +61,14 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                                                     f.metadata()
                                                         .expect("Error")
                                                         .created()
-                                                        .expect("Error"),
+                                                        .unwrap_or(std::time::SystemTime::now()),
                                                 )
                                                 .format("%d-%m-%Y %T"),
                                                 modified: time::PrimitiveDateTime::from(
                                                     f.metadata()
                                                         .expect("Error")
                                                         .modified()
-                                                        .expect("Error"),
+                                                        .unwrap_or(std::time::SystemTime::now()),
                                                 )
                                                 .format("%d-%m-%Y %T"),
                                             });
@@ -92,14 +92,14 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                                                     f.metadata()
                                                         .expect("Error")
                                                         .created()
-                                                        .expect("Error"),
+                                                        .unwrap_or(std::time::SystemTime::now()),
                                                 )
                                                 .format("%d-%m-%Y %T"),
                                                 modified: time::PrimitiveDateTime::from(
                                                     f.metadata()
                                                         .expect("Error")
                                                         .modified()
-                                                        .expect("Error"),
+                                                        .unwrap_or(std::time::SystemTime::now()),
                                                 )
                                                 .format("%d-%m-%Y %T"),
                                                 ftype: String::from("Folder"),
