@@ -8,6 +8,7 @@
 - Add Download on web client
 - Add Remove on Web Client
 - Update Actix and Seed
+- Replace Rusqlite to Sqlx
 
 ###0.3.0
 
