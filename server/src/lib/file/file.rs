@@ -234,8 +234,19 @@ pub fn get_size_dir(path: String) -> u64 {
     match read_dir(path) {
         Ok(e) => {
             for entry in e {
-                let sizef = entry.expect("Error").metadata().expect("Error").len();
-                size += sizef;
+                match entry {
+                    Ok(dentry) => {
+                        match dentry.metadata() {
+                            Ok(e) => {
+                                size += e.len();
+                            },
+                            Err(_) => {
+
+                            }
+                        } 
+                    }
+                    Err(_) => {}
+                }
             }
         }
         Err(_e) => {}
