@@ -1,4 +1,4 @@
-###Not Release 0.9.0
+### Not Release 0.9.0
 
 - Add User
 - Log Action of User
@@ -10,7 +10,7 @@
 - Update Actix and Seed
 - Replace Rusqlite to Sqlx
 
-###0.3.0
+### 0.3.0
 
 - Add 404 Error
 - Add Download (Tar / Zip)
@@ -18,13 +18,13 @@
 - Add Config File
 - Redesign of Web Client
 
-###0.2.0
+### 0.2.0
 
 - Add Download
 - Add Mime
 - Rework on Json Struct
  
-###0.1.0
+### 0.1.0
 
 - Initial release
 - Add Router
