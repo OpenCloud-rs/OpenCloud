@@ -22,7 +22,7 @@ pub fn dir_content(path: String, sort: Sort) -> String {
     let mut result: bool = false;
     let mut ftype: FType = FType::Error;
     let root = if cfg!(windows) { "C:" } else { "" };
-
+    if inhome(path.clone()) {} else {return String::from("Error")};
     match fs::metadata(format!("{}{}", root, path.clone())) {
         Ok(e) => {
             if e.is_file() == true {
@@ -144,6 +144,7 @@ pub fn dir_content(path: String, sort: Sort) -> String {
         }
         Err(_e) => {}
     }
+
     match sort {
         Sort::Name => {
             content.sort_by(|a, b| a.name.cmp(&b.name));
@@ -256,7 +257,7 @@ pub fn get_size_dir(path: String) -> u64 {
 
 pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
     let (tx, rx_body) = mpsc::channel();
-
+    
     let try_file = async_std::fs::File::open(path.clone()).await;
     if try_file.is_err() {
         return Ok(Response::Ok()
@@ -280,4 +281,30 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
         .header("charset", "utf-8")
         .content_type(get_mime(path.clone().as_str()))
         .streaming(rx_body))
+}
+
+pub fn inhome(path: String) -> bool {
+    let split: Vec<&str> = path.split("/").collect();
+    let mut n = 0;
+   // let clean_path = path.replace("/..", "");
+    for a in split.clone() {
+        if a == ".." {
+           n += 1; 
+        };
+    }
+    let mut result = String::new();
+    let mut e = 0;
+    for a in split.clone() {
+        if e == n && n != 0{
+            break;
+        } else {
+            result.push_str(format!("{}/", a).as_str());
+        }
+        e += 1;
+    }
+    if result.contains(format!("./home/{}", split[2]).as_str()) {
+        true
+    } else {
+        false
+    }
 }
