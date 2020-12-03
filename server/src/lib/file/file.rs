@@ -22,7 +22,10 @@ pub fn dir_content(path: String, sort: Sort) -> String {
     let mut result: bool = false;
     let mut ftype: FType = FType::Error;
     let root = if cfg!(windows) { "C:" } else { "" };
-    if inhome(path.clone()) {} else {return String::from("Error")};
+    if inhome(path.clone()) {
+    } else {
+        return String::from("Error");
+    };
     match fs::metadata(format!("{}{}", root, path.clone())) {
         Ok(e) => {
             if e.is_file() == true {
@@ -31,12 +34,16 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                 content.push(Folder {
                     result: true,
                     size: e.len(),
-                    created: time::PrimitiveDateTime::from(e.created().unwrap_or(std::time::SystemTime::now()))
-                        .format("%d-%m-%Y %T"),
+                    created: time::PrimitiveDateTime::from(
+                        e.created().unwrap_or(std::time::SystemTime::now()),
+                    )
+                    .format("%d-%m-%Y %T"),
                     name: String::from(path.split("/").last().unwrap()),
                     ftype: file_extension_to_mime(path.split("/").last().unwrap()).to_string(),
-                    modified: time::PrimitiveDateTime::from(e.modified().unwrap_or(std::time::SystemTime::now()))
-                        .format("%d-%m-%Y %T"),
+                    modified: time::PrimitiveDateTime::from(
+                        e.modified().unwrap_or(std::time::SystemTime::now()),
+                    )
+                    .format("%d-%m-%Y %T"),
                 });
             } else if e.is_dir() == true {
                 match fs::read_dir(path.clone()) {
@@ -236,16 +243,12 @@ pub fn get_size_dir(path: String) -> u64 {
         Ok(e) => {
             for entry in e {
                 match entry {
-                    Ok(dentry) => {
-                        match dentry.metadata() {
-                            Ok(e) => {
-                                size += e.len();
-                            },
-                            Err(_) => {
-
-                            }
-                        } 
-                    }
+                    Ok(dentry) => match dentry.metadata() {
+                        Ok(e) => {
+                            size += e.len();
+                        }
+                        Err(_) => {}
+                    },
                     Err(_) => {}
                 }
             }
@@ -257,7 +260,7 @@ pub fn get_size_dir(path: String) -> u64 {
 
 pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
     let (tx, rx_body) = mpsc::channel();
-    
+
     let try_file = async_std::fs::File::open(path.clone()).await;
     if try_file.is_err() {
         return Ok(Response::Ok()
@@ -286,16 +289,16 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
 pub fn inhome(path: String) -> bool {
     let split: Vec<&str> = path.split("/").collect();
     let mut n = 0;
-   // let clean_path = path.replace("/..", "");
+    // let clean_path = path.replace("/..", "");
     for a in split.clone() {
         if a == ".." {
-           n += 1; 
+            n += 1;
         };
     }
     let mut result = String::new();
     let mut e = 0;
     for a in split.clone() {
-        if e == n && n != 0{
+        if e == n && n != 0 {
             break;
         } else {
             result.push_str(format!("{}/", a).as_str());

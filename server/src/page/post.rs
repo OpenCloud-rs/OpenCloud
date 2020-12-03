@@ -24,20 +24,23 @@ pub async fn save_file(
                 let content_type = field.content_disposition().unwrap();
                 let filename = content_type.get_filename().unwrap();
 
-                let user = match get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await {
-                    Some(e) => {e}
-                    None => {return Ok(HttpResponse::Ok().body("Can't get user")); }
-                };
-                
+                let user =
+                    match get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
+                        .await
+                    {
+                        Some(e) => e,
+                        None => {
+                            return Ok(HttpResponse::Ok().body("Can't get user"));
+                        }
+                    };
+
                 let filepath = format!("./home/{}/{}/{}", user.name, url, filename);
                 // File::create is blocking operation, use threadpool
                 println!("Url : {}, Path: {}", url, filepath);
 
-               // let mut f = web::block(|| std::fs::File::create(filepath)).await;
+                // let mut f = web::block(|| std::fs::File::create(filepath)).await;
                 let mut f = match web::block(|| std::fs::File::create(filepath)).await {
-                    Ok(e) => {
-                        e
-                    },
+                    Ok(e) => e,
                     Err(_) => {
                         return Ok(HttpResponse::Ok().body("Error on file upload"));
                     }
