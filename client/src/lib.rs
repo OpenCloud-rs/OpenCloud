@@ -1,27 +1,72 @@
 use crate::component::footer::footer;
+use log::login::login;
 use shared::{FType, JsonStruct};
 mod component;
+mod http;
 mod library;
+mod log;
+
 use crate::component::breadcrumb::breadcrumb;
 use crate::component::uploadfile::upload_file;
+use crate::http::get::connect::get_connect;
 use crate::library::lib::download;
 use library::lib::delete;
 use library::lib::fetch_repository_info;
+use library::lib::Account;
 use seed::browser::Url;
 use seed::{prelude::*, *};
+use crate::http::get::get_files::{get_files, back};
+use seed::prelude::wasm_bindgen::__rt::std::str::FromStr;
 
+#[derive(Clone, Debug)]
+pub enum StateApp {
+    Login,
+    Logged
+}
+
+pub enum ChangeRouteType {
+    Remove,
+    Add
+}
+fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
+    Model {
+        api: JsonStruct {
+            result: false,
+            lenght: 0,
+            ftype: FType::File,
+            content: vec![],
+        },
+        uri: "".to_string(),
+        url: Default::default(),
+        upload_toggle: Default::default(),
+        dropdown: Default::default(),
+        modal_toggle: Default::default(),
+        name: String::new(),
+        pass: String::new(),
+        account: Account::new(),
+        token: String::new(),
+        state: StateApp::Login,
+        route: "".to_string()
+    }
+}
 // ------ ------
 //     Model
 // ------ ------
 
-#[derive(Debug)]
-struct Model {
+#[derive(Debug, Clone)]
+pub struct Model {
     pub api: JsonStruct,
     pub uri: String,
     pub url: Url,
     pub upload_toggle: component::uploadfile::State,
     pub dropdown: component::download::State,
     pub modal_toggle: component::delete::State,
+    pub name: String,
+    pub pass: String,
+    pub account: Account,
+    pub token: String,
+    pub state: StateApp,
+    pub route: String,
 }
 
 impl Default for Model {
@@ -38,6 +83,12 @@ impl Default for Model {
             upload_toggle: component::uploadfile::State::Hidden,
             dropdown: component::download::State::NotActive,
             modal_toggle: component::delete::State::NotActive,
+            name: String::new(),
+            pass: String::new(),
+            account: Account::new(),
+            token: String::new(),
+            state: StateApp::Login,
+            route: "".to_string()
         }
     }
 }
@@ -45,12 +96,10 @@ impl Default for Model {
 // ------ ------
 //  After Mount
 // ------ ------
-
-fn after_mount(url: Url, orders: &mut impl Orders<Msg>) -> AfterMount<Model> {
-    orders.perform_cmd(fetch_repository_info(url));
-    AfterMount::default()
+pub enum InputType {
+    Name,
+    Password,
 }
-
 // ------ ------
 //    Update
 // ------ ------
@@ -62,6 +111,11 @@ pub enum Msg {
     ModalToggle,
     Download(String),
     Delete(Url),
+    InputChange(String, InputType),
+    Connect,
+    Token(String),
+    Getted(String),
+    ChangeRoute(String, ChangeRouteType),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -88,6 +142,38 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Delete(url) => {
             orders.skip().perform_cmd(delete(url));
         }
+        Msg::InputChange(e, it) => match it {
+            InputType::Name => model.account.name = e,
+            InputType::Password => model.account.password = e,
+        },
+        Msg::Connect => {
+            orders
+                .skip()
+                .perform_cmd(get_connect(model.clone().account));
+        }
+        Msg::Token(e) => {
+            if e == "No user was found" {
+                model.token = "No user was found".to_string();
+            } else {
+                model.token = e.clone();
+                model.state = StateApp::Logged;
+                orders.skip().perform_cmd(get_files("".to_string(), e.clone()));
+            }
+        }
+        Msg::Getted(e) => {
+            log!(e);
+        }
+        Msg::ChangeRoute(s, crt) => {
+            match crt {
+                ChangeRouteType::Remove => {
+                    model.route = back(model.clone().route);
+                }
+                ChangeRouteType::Add => {
+                    model.route.push_str(format!("{}/", s ).as_str());
+                }
+            };
+            orders.skip().perform_cmd(get_files(model.clone().route, model.clone().token));
+        }
     }
 }
 
@@ -97,20 +183,28 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 
 fn view(model: &Model) -> Vec<Node<Msg>> {
     println!("{}", model.url);
-    vec![
-        div![
+    match model.state {
+        StateApp::Login => {
+            vec![
+                div![
+                    login(&model.clone())
+                ]
+            ]
+        }
+        StateApp::Logged => {    vec![
+            div![
             attrs! {At::Id => "wrapper"},
             div![
                 C!["container"],
                 div![
                     C!["column"],
-                    breadcrumb((&model.uri).parse().unwrap()),
+                    breadcrumb((&model.route).parse().unwrap()),
                     div![
                         C!["columns has-text-centered"],
-                        div![C!["column"], upload_file(model.upload_toggle, &model.uri),],
+                        div![C!["column"], upload_file(model.upload_toggle, &model.route),],
                         div![
                             C!["column"],
-                            component::delete::delete(model.modal_toggle, model.url.clone()),
+                            component::delete::delete(model.modal_toggle, Url::from_str(model.clone().route.as_str()).unwrap()),
                         ],
                         div![C!["column"], component::download::download(model.dropdown)]
                     ],
@@ -118,21 +212,14 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                 ]
             ]
         ],
-        footer(),
-    ]
+            footer(),
+        ]}
+    }
 }
-
-fn routes(url: Url) -> Option<Msg> {
-    Some(Msg::RoutePage(url))
-}
-
 //     Start
 // ------ ------
 
 #[wasm_bindgen(start)]
 pub fn render() {
-    App::builder(update, view)
-        .routes(routes)
-        .after_mount(after_mount)
-        .build_and_start();
+    App::start("app", init, update, view);
 }

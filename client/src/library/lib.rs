@@ -2,6 +2,7 @@ use crate::Msg;
 use seed::browser::fetch::{fetch, Method, Request};
 use seed::prelude::Header;
 use seed::{window, Url};
+use serde::Serialize;
 use shared::JsonStruct;
 
 pub async fn delete(url: Url) {
@@ -72,4 +73,17 @@ pub async fn fetch_repository_info(url: Url) -> Msg {
         Err(_e) => JsonStruct::new(),
     };
     Msg::Fetched(Some(result))
+}
+#[derive(Debug, Serialize, Clone)]
+pub struct Account {
+    pub name: String,
+    pub password: String,
+}
+impl Account {
+    pub fn new() -> Account {
+        Account {
+            name: String::new(),
+            password: String::new(),
+        }
+    }
 }
