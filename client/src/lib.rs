@@ -37,10 +37,10 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
             content: vec![],
         },
         uri: "".to_string(),
-        url: Default::default(),
-        upload_toggle: Default::default(),
-        dropdown: Default::default(),
-        modal_toggle: Default::default(),
+        url: Url::new(),
+        upload_toggle: component::uploadfile::State::Hidden,
+        dropdown: component::download::State::NotActive,
+        modal_toggle: component::delete::State::NotActive,
         name: String::new(),
         pass: String::new(),
         account: Account::new(),
@@ -69,30 +69,6 @@ pub struct Model {
     pub route: String,
 }
 
-impl Default for Model {
-    fn default() -> Self {
-        Self {
-            api: JsonStruct {
-                result: false,
-                lenght: 0,
-                ftype: FType::File,
-                content: Vec::new(),
-            },
-            uri: String::new(),
-            url: Url::current(),
-            upload_toggle: component::uploadfile::State::Hidden,
-            dropdown: component::download::State::NotActive,
-            modal_toggle: component::delete::State::NotActive,
-            name: String::new(),
-            pass: String::new(),
-            account: Account::new(),
-            token: String::new(),
-            state: StateApp::Login,
-            route: "".to_string()
-        }
-    }
-}
-
 // ------ ------
 //  After Mount
 // ------ ------
@@ -116,6 +92,7 @@ pub enum Msg {
     Token(String),
     Getted(String),
     ChangeRoute(String, ChangeRouteType),
+    DeleteFile(Result<u16,u16>, String)
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -173,6 +150,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 }
             };
             orders.skip().perform_cmd(get_files(model.clone().route, model.clone().token));
+        }
+        Msg::DeleteFile(result, name) => {
+            
         }
     }
 }

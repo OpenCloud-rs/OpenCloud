@@ -8,12 +8,9 @@ pub async fn get_connect(account: Account) -> Msg {
         "{}{}{}",
         "http://".to_owned(),
         &window().location().host().expect("127.0.0.1:8081"),
-        "/api/"
+        "/api/user/login"
     );
-    let ip1 = "http://127.0.0.1:8081/api/user/login";
-    // let hey: String = account.serialize().unwrap();
-    //let e = reqwest::Client::new().post(ip1).header("Access-Control-Allow-Origin", "*").body(r#"{"name":"Xx", "password":"Xx"}"#).send().await.expect("Error").text().await.expect("error");
-    let e = Request::new(ip1)
+   let e = Request::new(ip.as_str())
         .method(Method::Post)
         .header(Header::custom("Access-Control-Allow-Origin", "*"))
         .header(Header::custom("Content-Type", "application/json"))
