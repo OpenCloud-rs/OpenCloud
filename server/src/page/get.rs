@@ -8,7 +8,7 @@ use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::file::file::{get_dir, get_file_preview, Sort};
 use crate::lib::{archive::archive::*, http::http::get_args};
 use actix_http::body::Body;
-use actix_web::{get, web, HttpRequest, HttpResponse as Response, HttpResponse};
+use actix_web::{get, post, web, HttpRequest, HttpResponse as Response, HttpResponse};
 
 #[get("/api/file/{path:.*}")]
 pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<Response<Body>> {
@@ -59,7 +59,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
     result
 }
 
-#[get("/api/user/login")]
+#[post("/api/user/login")]
 pub async fn login_user(body: web::Json<LoginUser>) -> std::io::Result<Response<Body>> {
     let token = gen_token();
     println!("name : {}, password: {}", body.name, body.password);
