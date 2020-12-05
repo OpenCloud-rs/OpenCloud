@@ -3,11 +3,12 @@ use seed::{prelude::*, *};
 use shared::Folder;
 use crate::ChangeRouteType;
 
-pub fn folder_list(mut content: Vec<Folder>) -> Node<Msg> {
+pub fn folder_list(mut content: Vec<Folder>, url: String) -> Node<Msg> {
     content.sort();
     let mut folder_list = vec![];
     for t in content {
         let name = t.clone().name;
+        let path = format!("{}{}", url.clone(), name.clone());
         folder_list.push(tr![
                 th![if t.ftype.to_string() == "Folder".to_string() {
                     img![attrs! {At::Src => format!["/pkg/obj/folder.svg"]}]
@@ -17,7 +18,7 @@ pub fn folder_list(mut content: Vec<Folder>) -> Node<Msg> {
                 th![if t.ftype.to_string() == "Folder".to_string() {
                     a![
                         format!["{}/", &t.name.to_string()],
-                        ev(Ev::Click, move |_| Msg::ChangeRoute(name, ChangeRouteType::Add))
+                        ev(Ev::Click, move |_| Msg::ChangeRoute(format!("{}", name), ChangeRouteType::Add))
                     ]
                 } else {
                     a![
@@ -26,6 +27,7 @@ pub fn folder_list(mut content: Vec<Folder>) -> Node<Msg> {
                     ]
                 }],
                 th![&t.ftype],
+                th![button!["Delete", ev(Ev::Click, move |_| Msg::CallDelete(path))],]
             ])
     }
     div![table![

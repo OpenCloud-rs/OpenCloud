@@ -1,4 +1,5 @@
 use crate::component::footer::footer;
+use http::get::refresh::refresh;
 use log::login::login;
 use shared::{FType, JsonStruct};
 mod component;
@@ -46,7 +47,8 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
         account: Account::new(),
         token: String::new(),
         state: StateApp::Login,
-        route: "".to_string()
+        route: "".to_string(),
+        delete: (false, "".to_string())
     }
 }
 // ------ ------
@@ -67,6 +69,7 @@ pub struct Model {
     pub token: String,
     pub state: StateApp,
     pub route: String,
+    pub delete: (bool, String)
 }
 
 // ------ ------
@@ -89,10 +92,12 @@ pub enum Msg {
     Delete(Url),
     InputChange(String, InputType),
     Connect,
+    Refresh,
     Token(String),
     Getted(String),
     ChangeRoute(String, ChangeRouteType),
-    DeleteFile(Result<u16,u16>, String)
+    DeleteFile(Result<u16,u16>, String),
+    CallDelete(String)
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -137,6 +142,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 orders.skip().perform_cmd(get_files("".to_string(), e.clone()));
             }
         }
+        Msg::Refresh => {
+            orders.skip().perform_cmd(get_files(model.clone().route, model.clone().token));
+        }
         Msg::Getted(e) => {
             log!(e);
         }
@@ -151,8 +159,16 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             };
             orders.skip().perform_cmd(get_files(model.clone().route, model.clone().token));
         }
+        Msg::CallDelete(e) => {
+            orders.skip().perform_cmd(http::delete::delete::delete(model.clone().token, e));
+        }
         Msg::DeleteFile(result, name) => {
-            
+            let mut re = (false, name);
+            if result.is_ok() {
+                re.0 = true;
+                orders.skip().perform_cmd(refresh());
+            }
+            model.delete = re;
         }
     }
 }
@@ -162,7 +178,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 
 fn view(model: &Model) -> Vec<Node<Msg>> {
-    println!("{}", model.url);
+    log!(model.route);
     match model.state {
         StateApp::Login => {
             vec![
@@ -171,13 +187,29 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                 ]
             ]
         }
-        StateApp::Logged => {    vec![
+        StateApp::Logged => {  
+            let delete= if model.delete.1.is_empty() {
+                div![""]
+            } else {
+                match model.delete.0 {
+                    true => {
+                        div![format!{"Delete succesfully"}]
+                    }
+                    false => {
+                        div![format!{"Delete unsuccessfully"}]
+                    }
+                }
+            };  
+            vec![
             div![
             attrs! {At::Id => "wrapper"},
             div![
                 C!["container"],
                 div![
                     C!["column"],
+                    div![
+                        delete
+                    ],
                     breadcrumb((&model.route).parse().unwrap()),
                     div![
                         C!["columns has-text-centered"],
@@ -188,7 +220,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                         ],
                         div![C!["column"], component::download::download(model.dropdown)]
                     ],
-                    component::folder_list::folder_list(model.api.content.clone()),
+                    component::folder_list::folder_list(model.api.content.clone(), model.route.clone()),
                 ]
             ]
         ],
