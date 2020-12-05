@@ -17,6 +17,6 @@ pub fn login(_model: &Model) -> Node<Msg> {
                 ))
             ]
         ],
-        button!["hello", ev(Ev::Click, |_| Msg::Connect)]
+        button!["Welcome back", ev(Ev::Click, |_| Msg::Connect)]
     ]
 }
