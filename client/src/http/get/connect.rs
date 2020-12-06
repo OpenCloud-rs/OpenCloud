@@ -10,7 +10,7 @@ pub async fn get_connect(account: Account) -> Msg {
         &window().location().host().expect("127.0.0.1:8081"),
         "/api/user/login"
     );
-   let e = Request::new(ip.as_str())
+    let e = Request::new(ip.as_str())
         .method(Method::Post)
         .header(Header::custom("Access-Control-Allow-Origin", "*"))
         .header(Header::custom("Content-Type", "application/json"))

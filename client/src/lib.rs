@@ -10,24 +10,24 @@ mod log;
 use crate::component::breadcrumb::breadcrumb;
 use crate::component::uploadfile::upload_file;
 use crate::http::get::connect::get_connect;
+use crate::http::get::get_files::{back, get_files};
 use crate::library::lib::download;
 use library::lib::delete;
 use library::lib::fetch_repository_info;
 use library::lib::Account;
 use seed::browser::Url;
-use seed::{prelude::*, *};
-use crate::http::get::get_files::{get_files, back};
 use seed::prelude::wasm_bindgen::__rt::std::str::FromStr;
+use seed::{prelude::*, *};
 
 #[derive(Clone, Debug)]
 pub enum StateApp {
     Login,
-    Logged
+    Logged,
 }
 
 pub enum ChangeRouteType {
     Remove,
-    Add
+    Add,
 }
 fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
     Model {
@@ -48,7 +48,7 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
         token: String::new(),
         state: StateApp::Login,
         route: "".to_string(),
-        delete: (false, "".to_string())
+        delete: (false, "".to_string()),
     }
 }
 // ------ ------
@@ -69,7 +69,7 @@ pub struct Model {
     pub token: String,
     pub state: StateApp,
     pub route: String,
-    pub delete: (bool, String)
+    pub delete: (bool, String),
 }
 
 // ------ ------
@@ -96,8 +96,8 @@ pub enum Msg {
     Token(String),
     Getted(String),
     ChangeRoute(String, ChangeRouteType),
-    DeleteFile(Result<u16,u16>, String),
-    CallDelete(String)
+    DeleteFile(Result<u16, u16>, String),
+    CallDelete(String),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -139,11 +139,15 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             } else {
                 model.token = e.clone();
                 model.state = StateApp::Logged;
-                orders.skip().perform_cmd(get_files("".to_string(), e.clone()));
+                orders
+                    .skip()
+                    .perform_cmd(get_files("".to_string(), e.clone()));
             }
         }
         Msg::Refresh => {
-            orders.skip().perform_cmd(get_files(model.clone().route, model.clone().token));
+            orders
+                .skip()
+                .perform_cmd(get_files(model.clone().route, model.clone().token));
         }
         Msg::Getted(e) => {
             log!(e);
@@ -154,13 +158,17 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     model.route = back(model.clone().route);
                 }
                 ChangeRouteType::Add => {
-                    model.route.push_str(format!("{}/", s ).as_str());
+                    model.route.push_str(format!("{}/", s).as_str());
                 }
             };
-            orders.skip().perform_cmd(get_files(model.clone().route, model.clone().token));
+            orders
+                .skip()
+                .perform_cmd(get_files(model.clone().route, model.clone().token));
         }
         Msg::CallDelete(e) => {
-            orders.skip().perform_cmd(http::delete::delete::delete(model.clone().token, e));
+            orders
+                .skip()
+                .perform_cmd(http::delete::delete::delete(model.clone().token, e));
         }
         Msg::DeleteFile(result, name) => {
             let mut re = (false, name);
@@ -181,51 +189,52 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
     log!(model.route);
     match model.state {
         StateApp::Login => {
-            vec![
-                div![
-                    login(&model.clone())
-                ]
-            ]
+            vec![div![login(&model.clone())]]
         }
-        StateApp::Logged => {  
-            let delete= if model.delete.1.is_empty() {
+        StateApp::Logged => {
+            let delete = if model.delete.1.is_empty() {
                 div![""]
             } else {
                 match model.delete.0 {
                     true => {
-                        div![format!{"Delete succesfully"}]
+                        div![format! {"Delete succesfully"}]
                     }
                     false => {
-                        div![format!{"Delete unsuccessfully"}]
+                        div![format! {"Delete unsuccessfully"}]
                     }
                 }
-            };  
+            };
             vec![
-            div![
-            attrs! {At::Id => "wrapper"},
-            div![
-                C!["container"],
                 div![
-                    C!["column"],
+                    attrs! {At::Id => "wrapper"},
                     div![
-                        delete
-                    ],
-                    breadcrumb((&model.route).parse().unwrap()),
-                    div![
-                        C!["columns has-text-centered"],
-                        div![C!["column"], upload_file(model.upload_toggle, &model.route),],
+                        C!["container"],
                         div![
                             C!["column"],
-                            component::delete::delete(model.modal_toggle, Url::from_str(model.clone().route.as_str()).unwrap()),
-                        ],
-                        div![C!["column"], component::download::download(model.dropdown)]
-                    ],
-                    component::folder_list::folder_list(model.api.content.clone(), model.route.clone()),
-                ]
+                            div![delete],
+                            breadcrumb((&model.route).parse().unwrap()),
+                            div![
+                                C!["columns has-text-centered"],
+                                div![C!["column"], upload_file(model.upload_toggle, &model.route),],
+                                div![
+                                    C!["column"],
+                                    component::delete::delete(
+                                        model.modal_toggle,
+                                        Url::from_str(model.clone().route.as_str()).unwrap()
+                                    ),
+                                ],
+                                div![C!["column"], component::download::download(model.dropdown)]
+                            ],
+                            component::folder_list::folder_list(
+                                model.api.content.clone(),
+                                model.route.clone()
+                            ),
+                        ]
+                    ]
+                ],
+                footer(),
             ]
-        ],
-            footer(),
-        ]}
+        }
     }
 }
 //     Start
