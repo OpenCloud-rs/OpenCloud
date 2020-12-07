@@ -189,12 +189,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
     log!(model.route);
     match model.state {
         StateApp::Login => {
-            vec![
-                div![
-                    C!["container"],
-                    login(&model.clone())
-                    ]
-                ]
+            vec![div![C!["container"], login(&model.clone())]]
         }
         StateApp::Logged => {
             let delete = if model.delete.1.is_empty() {
@@ -206,17 +201,16 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                             C!["notification is-success"],
                             button![
                                 C!["delete"],
+                                ev(Ev::Click, |_| Msg::DeleteFile(Err(1), "".to_string()))
                             ],
-                            format!{"Delete succesfully"}
+                            format! {"Delete succesfully"}
                         ]
                     }
                     false => {
                         div![
                             C!["notification is-danger"],
-                            button![
-                                C!["delete"],
-                            ],
-                            format!{"Delete unsuccessfully"}
+                            button![C!["delete"],],
+                            format! {"Delete unsuccessfully"}
                         ]
                     }
                 }
