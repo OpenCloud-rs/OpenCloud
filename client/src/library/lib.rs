@@ -1,30 +1,7 @@
 use crate::Msg;
-use seed::browser::fetch::{fetch, Method, Request};
-use seed::prelude::Header;
-use seed::{window, Url};
+use seed::{Url, prelude::fetch, window};
 use serde::Serialize;
 use shared::JsonStruct;
-
-pub async fn delete(url: Url) {
-    let mut url_string: String = String::from(
-        "http://".to_owned() + &window().location().host().expect("127.0.0.1:8081") + "/api/",
-    );
-    for d in url.path().iter() {
-        url_string.push_str(format!["{}/", d].as_ref())
-    }
-    println!("{}", url_string);
-    Request::new(url_string.as_str())
-        .header(Header::custom("Access-Control-Allow-Credentials", "true"))
-        .header(Header::custom(
-            "Access-Control-Allow-Origin",
-            "http://127.0.0.1",
-        ))
-        .header(Header::custom("Access-Control-Expose-Headers", "x-json"))
-        .method(Method::Delete)
-        .fetch()
-        .await
-        .unwrap();
-}
 
 pub async fn download(url: Url, dtype: String) {
     let mut url_string: String = String::from(

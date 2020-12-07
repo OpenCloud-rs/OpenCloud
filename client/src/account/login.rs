@@ -23,6 +23,11 @@ pub fn login(_model: &Model) -> Node<Msg> {
             C!["button is-link"],
             "Welcome back",
             ev(Ev::Click, |_| Msg::Connect)
+        ],
+        button![
+            C!["button is-link"],
+            "Sign Up",
+            ev(Ev::Click, |_| Msg::SignUp)
         ]
     ]
 }

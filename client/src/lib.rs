@@ -1,27 +1,26 @@
 use crate::component::footer::footer;
 use http::get::refresh::refresh;
-use log::login::login;
+use account::{login::login, signup::signup};
 use shared::{FType, JsonStruct};
 mod component;
 mod http;
 mod library;
-mod log;
+mod account;
 
 use crate::component::breadcrumb::breadcrumb;
 use crate::component::uploadfile::upload_file;
 use crate::http::get::connect::get_connect;
 use crate::http::get::get_files::{back, get_files};
 use crate::library::lib::download;
-use library::lib::delete;
 use library::lib::fetch_repository_info;
 use library::lib::Account;
 use seed::browser::Url;
-use seed::prelude::wasm_bindgen::__rt::std::str::FromStr;
 use seed::{prelude::*, *};
 
 #[derive(Clone, Debug)]
 pub enum StateApp {
     Login,
+    SignUp,
     Logged,
 }
 
@@ -89,7 +88,7 @@ pub enum Msg {
     DropdownNext,
     ModalToggle,
     Download(String),
-    Delete(Url),
+    //Delete(Url),
     InputChange(String, InputType),
     Connect,
     Refresh,
@@ -97,6 +96,7 @@ pub enum Msg {
     ChangeRoute(String, ChangeRouteType),
     DeleteFile(Result<u16, u16>, String),
     CallDelete(String),
+    SignUp,
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -120,9 +120,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 .skip()
                 .perform_cmd(download(model.url.clone(), dtype));
         }
-        Msg::Delete(url) => {
+       /* Msg::Delete(url) => {
             orders.skip().perform_cmd(delete(url));
-        }
+        }*/
         Msg::InputChange(e, it) => match it {
             InputType::Name => model.account.name = e,
             InputType::Password => model.account.password = e,
@@ -173,6 +173,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 orders.skip().perform_cmd(refresh());
             }
             model.delete = re;
+        },
+        Msg::SignUp => {
+            model.state = StateApp::SignUp;
         }
     }
 }
@@ -186,6 +189,14 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
     match model.state {
         StateApp::Login => {
             vec![div![C!["container"], login(&model.clone())]]
+        }
+        StateApp::SignUp => {
+            vec![
+                div![
+                    C!["container"],
+                    signup()
+                ]
+            ]
         }
         StateApp::Logged => {
             let delete = if model.delete.1.is_empty() {
@@ -223,13 +234,6 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                             div![
                                 C!["columns has-text-centered"],
                                 div![C!["column"], upload_file(model.upload_toggle, &model.route),],
-                                div![
-                                    C!["column"],
-                                    component::delete::delete(
-                                        model.modal_toggle,
-                                        Url::from_str(model.clone().route.as_str()).unwrap()
-                                    ),
-                                ],
                                 div![C!["column"], component::download::download(model.dropdown)]
                             ],
                             component::folder_list::folder_list(
