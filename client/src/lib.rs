@@ -94,7 +94,6 @@ pub enum Msg {
     Connect,
     Refresh,
     Token(String),
-    Getted(String),
     ChangeRoute(String, ChangeRouteType),
     DeleteFile(Result<u16, u16>, String),
     CallDelete(String),
@@ -148,9 +147,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders
                 .skip()
                 .perform_cmd(get_files(model.clone().route, model.clone().token));
-        }
-        Msg::Getted(e) => {
-            log!(e);
         }
         Msg::ChangeRoute(s, crt) => {
             match crt {
