@@ -189,7 +189,12 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
     log!(model.route);
     match model.state {
         StateApp::Login => {
-            vec![div![login(&model.clone())]]
+            vec![
+                div![
+                    C!["container"],
+                    login(&model.clone())
+                    ]
+                ]
         }
         StateApp::Logged => {
             let delete = if model.delete.1.is_empty() {
@@ -197,10 +202,22 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
             } else {
                 match model.delete.0 {
                     true => {
-                        div![format! {"Delete succesfully"}]
+                        div![
+                            C!["notification is-success"],
+                            button![
+                                C!["delete"],
+                            ],
+                            format!{"Delete succesfully"}
+                        ]
                     }
                     false => {
-                        div![format! {"Delete unsuccessfully"}]
+                        div![
+                            C!["notification is-danger"],
+                            button![
+                                C!["delete"],
+                            ],
+                            format!{"Delete unsuccessfully"}
+                        ]
                     }
                 }
             };
@@ -211,7 +228,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                         C!["container"],
                         div![
                             C!["column"],
-                            div![delete],
+                            delete,
                             breadcrumb((&model.route).parse().unwrap()),
                             div![
                                 C!["columns has-text-centered"],
