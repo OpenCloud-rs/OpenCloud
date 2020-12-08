@@ -180,7 +180,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
     log!(model.route);
     match model.state {
         StateApp::Login => {
-            vec![div![C!["container"], login(&model.clone())]]
+            vec![div![C!["container"], login()]]
         }
         StateApp::SignUp => {
             vec![div![C!["container"], signup()]]

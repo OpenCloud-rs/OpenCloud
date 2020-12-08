@@ -1,8 +1,8 @@
 use seed::{prelude::*, *};
 
-use crate::{Model, Msg};
+use crate::Msg;
 
-pub fn login(_model: &Model) -> Node<Msg> {
+pub fn login() -> Node<Msg> {
     div![
         form![
             input![
