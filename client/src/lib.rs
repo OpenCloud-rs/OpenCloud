@@ -180,7 +180,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
     log!(model.route);
     match model.state {
         StateApp::Login => {
-            vec![div![C!["container"], login()]]
+            vec![div![C!["container is-align-items-center is-flex is-justify-content-center is-align-content-center"], login()]]
         }
         StateApp::SignUp => {
             vec![div![C!["container"], signup()]]
