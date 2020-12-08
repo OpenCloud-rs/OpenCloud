@@ -1,11 +1,11 @@
 use crate::component::footer::footer;
-use http::get::refresh::refresh;
 use account::{login::login, signup::signup};
+use http::get::refresh::refresh;
 use shared::{FType, JsonStruct};
+mod account;
 mod component;
 mod http;
 mod library;
-mod account;
 
 use crate::component::breadcrumb::breadcrumb;
 use crate::component::uploadfile::upload_file;
@@ -165,7 +165,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 orders.skip().perform_cmd(refresh());
             }
             model.delete = re;
-        },
+        }
         Msg::SignUp => {
             model.state = StateApp::SignUp;
         }
@@ -183,12 +183,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
             vec![div![C!["container"], login(&model.clone())]]
         }
         StateApp::SignUp => {
-            vec![
-                div![
-                    C!["container"],
-                    signup()
-                ]
-            ]
+            vec![div![C!["container"], signup()]]
         }
         StateApp::Logged => {
             let delete = if model.delete.1.is_empty() {

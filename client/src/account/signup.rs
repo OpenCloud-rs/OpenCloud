@@ -2,7 +2,7 @@ use seed::{prelude::*, *};
 
 use crate::Msg;
 
-pub fn signup() -> Node<Msg>{
+pub fn signup() -> Node<Msg> {
     div![
         C!["container"],
         form![
@@ -19,7 +19,7 @@ pub fn signup() -> Node<Msg>{
             input![
                 C!["input"],
                 attrs! {At::Type => "password", At::Name => "password",At::Placeholder => "password"},
-               // input_ev(Ev::Input, |e| Msg::InputChange(e, crate::InputType::Name))
+                // input_ev(Ev::Input, |e| Msg::InputChange(e, crate::InputType::Name))
             ],
             button![
                 C!["button is-link"],
