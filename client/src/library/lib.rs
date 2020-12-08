@@ -1,5 +1,5 @@
 use crate::Msg;
-use seed::{Url, prelude::fetch, window};
+use seed::{prelude::fetch, window, Url};
 use serde::Serialize;
 use shared::JsonStruct;
 
