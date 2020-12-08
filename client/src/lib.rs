@@ -40,7 +40,6 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
         url: Url::new(),
         upload_toggle: component::uploadfile::State::Hidden,
         dropdown: component::download::State::NotActive,
-        modal_toggle: component::delete::State::NotActive,
         name: String::new(),
         pass: String::new(),
         account: Account::new(),
@@ -61,7 +60,6 @@ pub struct Model {
     pub url: Url,
     pub upload_toggle: component::uploadfile::State,
     pub dropdown: component::download::State,
-    pub modal_toggle: component::delete::State,
     pub name: String,
     pub pass: String,
     pub account: Account,
@@ -86,9 +84,7 @@ pub enum Msg {
     Fetched(Option<JsonStruct>),
     UploadNext,
     DropdownNext,
-    ModalToggle,
     Download(String),
-    //Delete(Url),
     InputChange(String, InputType),
     Connect,
     Refresh,
@@ -114,15 +110,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
         Msg::UploadNext => model.upload_toggle = model.upload_toggle.next(),
         Msg::DropdownNext => model.dropdown = model.dropdown.next(),
-        Msg::ModalToggle => model.modal_toggle = model.modal_toggle.next(),
         Msg::Download(dtype) => {
             orders
                 .skip()
                 .perform_cmd(download(model.url.clone(), dtype));
         }
-       /* Msg::Delete(url) => {
-            orders.skip().perform_cmd(delete(url));
-        }*/
         Msg::InputChange(e, it) => match it {
             InputType::Name => model.account.name = e,
             InputType::Password => model.account.password = e,
