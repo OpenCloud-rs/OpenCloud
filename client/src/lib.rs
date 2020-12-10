@@ -96,7 +96,7 @@ pub enum Msg {
     DeleteFile(Result<u16, u16>, String),
     CallDelete(String),
     SignUp,
-    CallSignUp
+    CallSignUp,
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -122,7 +122,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::InputChange(e, it) => match it {
             InputType::Name => model.account.name = e,
             InputType::Password => model.account.password = e,
-            InputType::Mail => model.account.mail = Some(e)
+            InputType::Mail => model.account.mail = Some(e),
         },
         Msg::Connect => {
             orders
@@ -176,7 +176,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.state = StateApp::SignUp;
         }
         Msg::CallSignUp => {
-            orders.skip().perform_cmd(create_user(model.account.clone()));
+            orders
+                .skip()
+                .perform_cmd(create_user(model.account.clone()));
         }
     }
 }

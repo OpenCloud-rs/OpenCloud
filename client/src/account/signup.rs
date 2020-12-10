@@ -19,7 +19,10 @@ pub fn signup() -> Node<Msg> {
             input![
                 C!["input mt-2"],
                 attrs! {At::Type => "password", At::Name => "password",At::Placeholder => "password"},
-                input_ev(Ev::Input, |e| Msg::InputChange(e, crate::InputType::Password))
+                input_ev(Ev::Input, |e| Msg::InputChange(
+                    e,
+                    crate::InputType::Password
+                ))
             ],
         ],
         button![

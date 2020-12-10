@@ -55,7 +55,7 @@ pub async fn fetch_repository_info(url: Url) -> Msg {
 pub struct Account {
     pub name: String,
     pub password: String,
-    pub mail: Option<String>
+    pub mail: Option<String>,
 }
 impl Account {
     pub fn new() -> Account {
@@ -71,7 +71,7 @@ impl Account {
 pub struct SignUpAccount {
     pub name: String,
     pub password: String,
-    pub email: String
+    pub email: String,
 }
 impl SignUpAccount {
     pub fn new() -> SignUpAccount {
