@@ -29,7 +29,7 @@ pub async fn create_home(name: String) -> Result {
                 body: "Your request has been accepted".to_string(),
             }
         }
-        Err(e) => match e.raw_os_error().expect("Error") {
+        Err(e) => match e.raw_os_error().unwrap_or_default() {
             17 => Result {
                 result: false,
                 body: "User Already Exist".to_string(),
