@@ -1,6 +1,6 @@
 use crate::component::footer::footer;
 use account::{login::login, signup::signup};
-use http::get::refresh::refresh;
+use http::{get::refresh::refresh, post::create_user::create_user};
 use shared::{FType, JsonStruct};
 mod account;
 mod component;
@@ -42,6 +42,7 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
         dropdown: component::download::State::NotActive,
         name: String::new(),
         pass: String::new(),
+        mail: String::new(),
         account: Account::new(),
         token: String::new(),
         state: StateApp::Login,
@@ -62,6 +63,7 @@ pub struct Model {
     pub dropdown: component::download::State,
     pub name: String,
     pub pass: String,
+    pub mail: String,
     pub account: Account,
     pub token: String,
     pub state: StateApp,
@@ -75,6 +77,7 @@ pub struct Model {
 pub enum InputType {
     Name,
     Password,
+    Mail,
 }
 // ------ ------
 //    Update
@@ -93,6 +96,7 @@ pub enum Msg {
     DeleteFile(Result<u16, u16>, String),
     CallDelete(String),
     SignUp,
+    CallSignUp
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -118,6 +122,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::InputChange(e, it) => match it {
             InputType::Name => model.account.name = e,
             InputType::Password => model.account.password = e,
+            InputType::Mail => model.account.mail = Some(e)
         },
         Msg::Connect => {
             orders
@@ -167,7 +172,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.delete = re;
         }
         Msg::SignUp => {
+            model.account = Account::new();
             model.state = StateApp::SignUp;
+        }
+        Msg::CallSignUp => {
+            orders.skip().perform_cmd(create_user(model.account.clone()));
         }
     }
 }
@@ -183,7 +192,8 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
             vec![div![C!["container is-align-items-center is-flex is-justify-content-center is-align-content-center"], login()]]
         }
         StateApp::SignUp => {
-            vec![div![C!["container"], signup()]]
+            vec![
+                div![C!["container is-align-items-center is-flex is-justify-content-center is-align-content-center"], format!("{:?}", model.account), signup()]]
         }
         StateApp::Logged => {
             let delete = if model.delete.1.is_empty() {

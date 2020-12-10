@@ -55,12 +55,42 @@ pub async fn fetch_repository_info(url: Url) -> Msg {
 pub struct Account {
     pub name: String,
     pub password: String,
+    pub mail: Option<String>
 }
 impl Account {
     pub fn new() -> Account {
         Account {
             name: String::new(),
+            mail: Some(String::new()),
             password: String::new(),
         }
+    }
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct SignUpAccount {
+    pub name: String,
+    pub password: String,
+    pub email: String
+}
+impl SignUpAccount {
+    pub fn new() -> SignUpAccount {
+        SignUpAccount {
+            name: String::new(),
+            email: String::new(),
+            password: String::new(),
+        }
+    }
+    pub fn from_account(account: Account) -> SignUpAccount {
+        let mut result = SignUpAccount::new();
+        result.name = account.name;
+        result.password = account.password;
+        if let Some(e) = account.mail {
+            result.email = e
+        } else {
+            result.email = String::new();
+        }
+
+        result
     }
 }
