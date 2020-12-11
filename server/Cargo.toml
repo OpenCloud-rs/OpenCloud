@@ -33,7 +33,6 @@ bytes = "0.6.0"
 
 shared = {path = "../shared"}
 
-rusqlite = "0.24.2"
 sqlx = {version = "0.4.1", features = ["sqlite", "runtime-async-std-rustls"]}
 
 time = "0.2.23"
