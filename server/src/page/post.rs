@@ -19,25 +19,20 @@ pub async fn save_file(
     print!("{}", path);
     if let Some(e) = req.headers().get("token") {
         let url = format!("/{}", path.0);
+        let user = match get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await
+        {
+            Some(e) => e,
+            None => {
+                return Ok(HttpResponse::Ok().body("Can't get user"));
+            }
+        };
         if valid_session(String::from(e.to_str().expect("Parse Str Error"))).await {
             while let Ok(Some(mut field)) = tokio::stream::StreamExt::try_next(&mut payload).await {
                 let content_type = field.content_disposition().unwrap();
                 let filename = content_type.get_filename().unwrap();
-
-                let user =
-                    match get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
-                        .await
-                    {
-                        Some(e) => e,
-                        None => {
-                            return Ok(HttpResponse::Ok().body("Can't get user"));
-                        }
-                    };
-
                 let filepath = format!("./home/{}/{}/{}", user.name, url, filename);
                 // File::create is blocking operation, use threadpool
                 println!("Url : {}, Path: {}", url, filepath);
-
                 // let mut f = web::block(|| std::fs::File::create(filepath)).await;
                 let mut f = match web::block(|| std::fs::File::create(filepath)).await {
                     Ok(e) => e,
@@ -52,9 +47,7 @@ pub async fn save_file(
                     f = web::block(move || f.write_all(&data).map(|_| f)).await?;
                 }
             }
-            let user = get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
-                .await
-                .unwrap();
+
             insert(user.id, ActionType::Upload).await;
             return Ok(HttpResponse::Ok().body("The file is uploaded"));
         } else {
