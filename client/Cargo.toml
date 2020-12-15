@@ -16,7 +16,7 @@ serde = { version = "1.0.118", features = ['derive'] }
 serde_json = {version = "1.0.60"}
 futures = "0.3.8"
 shared =  {path = "../shared"}
-reqwest = "0.10.9"
+reqwest = "0.10.10"
 
 [profile.release]
 lto = true
