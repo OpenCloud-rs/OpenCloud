@@ -14,7 +14,7 @@ use crate::http::get::get_files::{back, get_files};
 use crate::library::lib::download;
 use library::lib::fetch_repository_info;
 use library::lib::Account;
-use seed::browser::Url;
+use seed::{browser::Url, prelude::web_sys::File};
 use seed::{prelude::*, *};
 
 #[derive(Clone, Debug)]
@@ -48,6 +48,7 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
         state: StateApp::Login,
         route: "".to_string(),
         delete: (false, "".to_string()),
+        file: File::new_with_str_sequence(&JsValue::from_str(&"Hello"), "Default"),
     }
 }
 // ------ ------
@@ -69,6 +70,7 @@ pub struct Model {
     pub state: StateApp,
     pub route: String,
     pub delete: (bool, String),
+    pub file: Result<File, seed::prelude::JsValue>,
 }
 
 // ------ ------
@@ -97,6 +99,10 @@ pub enum Msg {
     CallDelete(String),
     SignUp,
     CallSignUp,
+    Log(String),
+    FileSelect(File),
+    CallUploadFile,
+    CallbackUploadFile(bool, String),
 }
 
 fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
@@ -106,6 +112,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             error!(format!("Fetch error - Fetching folder info failed",));
             orders.skip();
         }
+        Msg::Log(e) => log!(e),
         Msg::RoutePage(url) => {
             orders
                 .skip()
@@ -180,6 +187,17 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 .skip()
                 .perform_cmd(create_user(model.account.clone()));
         }
+        Msg::FileSelect(e) => model.file = Ok(e),
+        Msg::CallUploadFile => {
+            orders.skip().perform_cmd(http::post::upload::upload_file(
+                model.token.clone(),
+                model.file.clone().unwrap(),
+            ));
+        }
+        Msg::CallbackUploadFile(e, msg) => {
+            log!(format! {"{} / {}",e , msg});
+            orders.skip().perform_cmd(refresh());
+        }
     }
 }
 
@@ -195,7 +213,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
         }
         StateApp::SignUp => {
             vec![
-                div![C!["container is-align-items-center is-flex is-justify-content-center is-align-content-center"], format!("{:?}", model.account), signup()]]
+                div![C!["container is-align-items-center is-flex is-justify-content-center is-align-content-center"], signup()]]
         }
         StateApp::Logged => {
             let delete = if model.delete.1.is_empty() {

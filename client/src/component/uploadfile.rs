@@ -32,6 +32,7 @@ impl fmt::Display for State {
 }
 pub fn upload_file(state: State, url: &String) -> Node<Msg> {
     println!("{}", url);
+    // let e = ev(Ev::Input, |e| {let value = e.target().unwrap().dyn_into::<web_sys::HtmlInputElement>().unwrap().;Msg::Log(format!{"{:?}", value})});
     div![
         div![
             C!["mt-2 is-centered is-mobile columns"],
@@ -52,6 +53,24 @@ pub fn upload_file(state: State, url: &String) -> Node<Msg> {
             ],
         ],
         div![
+            /*form![
+                    input![
+                        C!["file-input"],
+                        attrs!{
+                            At::Name => "file"
+                            At::Value => "File"
+                            At::Type => "file"
+                        }
+                    ],
+                    span!("Hey"),
+                    input![
+                        C!["button"],
+                        attrs!{
+                            At::Type => "submit"
+                        }
+                    ]
+
+            ],*/
             attrs! {At::from("style") => format!["visibility: {}", state]},
             div![
                 C!["file columns is-centered"],
@@ -63,9 +82,22 @@ pub fn upload_file(state: State, url: &String) -> Node<Msg> {
                             At::from("name") => "file",
                             At::from("type") => "file",
                         },
+                        ev(Ev::Input, |e| {
+                            let value = e
+                                .target()
+                                .unwrap()
+                                .dyn_into::<web_sys::HtmlInputElement>()
+                                .unwrap()
+                                .files()
+                                .unwrap()
+                                .get(0)
+                                .unwrap();
+                            Msg::FileSelect(value)
+                        })
                     ],
                     span![C!["file-cta"], span![C!["file-label"], "Choose a file"]]
-                ]
+                ],
+                button![C!["button is-link"], ev(Ev::Click, |_| Msg::CallUploadFile)]
             ]
         ]
     ]
