@@ -1,7 +1,7 @@
-use crate::lib::{db::log::insert::insert, http::http::get_args};
 use crate::lib::db::log::model::ActionType;
 use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::valid_session::valid_session;
+use crate::lib::{db::log::insert::insert, http::http::get_args};
 use actix_web::{delete, web, Error, HttpRequest, HttpResponse};
 use shared::{FType, Folder, JsonStruct};
 
@@ -13,12 +13,16 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
         ftype: FType::File,
         content: Vec::new(),
     };
-    let e = if let Some(e) = req.headers().get("token") {String::from(e.to_str().expect("Error to_str"))} else if let Some(e) = get_args(req).get("token") {String::from(e)} else {String::new()};
+    let e = if let Some(e) = req.headers().get("token") {
+        String::from(e.to_str().expect("Error to_str"))
+    } else if let Some(e) = get_args(req).get("token") {
+        String::from(e)
+    } else {
+        String::new()
+    };
     if !e.is_empty() {
         if valid_session(String::from(e.clone())).await {
-            let user = get_user_by_token(e.clone())
-                .await
-                .unwrap();
+            let user = get_user_by_token(e.clone()).await.unwrap();
             println!("./home/{}/{}", user.name, path.0);
             if async_std::fs::metadata(format!("./home/{}/{}", user.name, path.0))
                 .await

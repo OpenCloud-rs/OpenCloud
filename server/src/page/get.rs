@@ -13,13 +13,17 @@ use actix_web::{get, post, web, HttpRequest, HttpResponse as Response, HttpRespo
 #[get("/api/file/{path:.*}")]
 pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<Response<Body>> {
     let result;
-    let e = if let Some(e) = req.headers().get("token") {String::from(e.to_str().expect("Error to_str"))} else if let Some(e) = get_args(req.clone()).get("token") {String::from(e)} else {String::new()};
+    let e = if let Some(e) = req.headers().get("token") {
+        String::from(e.to_str().expect("Error to_str"))
+    } else if let Some(e) = get_args(req.clone()).get("token") {
+        String::from(e)
+    } else {
+        String::new()
+    };
     if !e.is_empty() {
         if valid_session(e.clone()).await {
             let bvec = get_args(req.clone());
-            let user = get_user_by_token(e.clone())
-                .await
-                .expect("Error");
+            let user = get_user_by_token(e.clone()).await.expect("Error");
             if bvec.contains_key("download") {
                 match bvec.get("download").unwrap().as_ref() {
                     "tar.gz" => {
