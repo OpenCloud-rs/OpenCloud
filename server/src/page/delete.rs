@@ -1,4 +1,4 @@
-use crate::lib::db::log::insert::insert;
+use crate::lib::{db::log::insert::insert, http::http::get_args};
 use crate::lib::db::log::model::ActionType;
 use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::valid_session::valid_session;
@@ -13,9 +13,10 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
         ftype: FType::File,
         content: Vec::new(),
     };
-    if let Some(e) = req.headers().get("token") {
-        if valid_session(String::from(e.to_str().expect("Parse Str Error"))).await {
-            let user = get_user_by_token(e.to_str().unwrap().to_string())
+    let e = if let Some(e) = req.headers().get("token") {String::from(e.to_str().expect("Error to_str"))} else if let Some(e) = get_args(req).get("token") {String::from(e)} else {String::new()};
+    if !e.is_empty() {
+        if valid_session(String::from(e.clone())).await {
+            let user = get_user_by_token(e.clone())
                 .await
                 .unwrap();
             println!("./home/{}/{}", user.name, path.0);
@@ -37,10 +38,6 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
                             ftype: "File".to_string(),
                             modified: String::from("0-0-0000 00:00:00"),
                         });
-                        let user =
-                            get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
-                                .await
-                                .unwrap();
                         insert(user.id, ActionType::Delete).await;
                     }
                     Err(e) => result.content.push(Folder {
@@ -64,10 +61,6 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
                             ftype: "File".to_string(),
                             modified: String::from("0-0-0000 00:00:00"),
                         });
-                        let user =
-                            get_user_by_token(String::from(e.to_str().expect("Parse Str Error")))
-                                .await
-                                .unwrap();
                         insert(user.id, ActionType::Delete).await;
                     }
                     Err(e) => result.content.push(Folder {

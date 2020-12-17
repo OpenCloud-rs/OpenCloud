@@ -1,4 +1,4 @@
-use crate::lib::db::log::insert::insert;
+use crate::lib::{db::log::insert::insert, http::http::get_args};
 use crate::lib::db::log::model::ActionType;
 use crate::lib::db::user::create_home::create_home;
 use crate::lib::db::user::get::get_user_by_token;
@@ -16,23 +16,23 @@ pub async fn save_file(
     mut payload: Multipart,
     path: web::Path<String>,
 ) -> Result<HttpResponse, Error> {
-    print!("{}", path);
-    if let Some(e) = req.headers().get("token") {
+    println!("-----------------  {}  ---------------------------", path);
+    let e = if let Some(e) = req.headers().get("token") {String::from(e.to_str().expect("Error to_str"))} else if let Some(e) = get_args(req.clone()).get("token") {String::from(e)} else {String::new()};
+    if !e.is_empty() {
         let url = format!("/{}", path.0);
-        let user = match get_user_by_token(String::from(e.to_str().expect("Parse Str Error"))).await
-        {
-            Some(e) => e,
-            None => {
-                return Ok(HttpResponse::Ok().body("Can't get user"));
-            }
-        };
-        if valid_session(String::from(e.to_str().expect("Parse Str Error"))).await {
-            while let Ok(Some(mut field)) = tokio::stream::StreamExt::try_next(&mut payload).await {
-                let content_type = field.content_disposition().unwrap();
-                let filename = content_type.get_filename().unwrap();
+        if valid_session(e.clone()).await {
+            let user = match get_user_by_token(e.clone()).await
+            {
+                Some(e) => e,
+                None => {
+                    return Ok(HttpResponse::Ok().body("Can't get user"));
+                }
+            };
+            while let Some(mut field) = tokio::stream::StreamExt::try_next(&mut payload).await.expect("Error") {
+                let filename = field.content_disposition().and_then(|cd| cd.get_name().map(ToString::to_string)).expect("Can't get field name!");
                 let filepath = format!("./home/{}/{}/{}", user.name, url, filename);
                 // File::create is blocking operation, use threadpool
-                println!("Url : {}, Path: {}", url, filepath);
+                println!("--------------------- Url : {}, Path: {} ---------------------------", url, filepath);
                 // let mut f = web::block(|| std::fs::File::create(filepath)).await;
                 let mut f = match web::block(|| std::fs::File::create(filepath)).await {
                     Ok(e) => e,
@@ -41,10 +41,9 @@ pub async fn save_file(
                     }
                 };
                 // Field in turn is stream of *Bytes* object
-                while let Some(chunk) = field.next().await {
-                    let data = chunk.unwrap();
+                while let Some(Ok(chunk)) = field.next().await {
                     // filesystem operations are blocking, we have to use threadpool
-                    f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+                    f = web::block(move || f.write_all(&chunk).map(|_| f)).await?;
                 }
             }
 
