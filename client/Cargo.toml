@@ -17,6 +17,7 @@ serde_json = {version = "1.0.60"}
 futures = "0.3.8"
 shared =  {path = "../shared"}
 reqwest = "0.10.10"
+percent-encoding = "2.1.0"
 
 [profile.release]
 lto = true
