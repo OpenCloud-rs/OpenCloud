@@ -9,6 +9,7 @@ pub fn folder_list(mut content: Vec<Folder>, url: String) -> Node<Msg> {
     for t in content {
         let name = t.clone().name;
         let path = format!("{}{}", url.clone(), name.clone());
+        let path_download = format!("{}{}", url.clone(), name.clone());
         folder_list.push(tr![
             th![if t.ftype.to_string() == "Folder".to_string() {
                 img![attrs! {At::Src => format!["/pkg/obj/folder.svg"]}]
@@ -30,11 +31,18 @@ pub fn folder_list(mut content: Vec<Folder>, url: String) -> Node<Msg> {
                 ]
             }],
             th![&t.ftype],
-            th![button![
-                C!["button is-link"],
-                "Delete",
-                ev(Ev::Click, move |_| Msg::CallDelete(path))
-            ],]
+            th![
+                button![
+                    C!["button is-link"],
+                    "Delete",
+                    ev(Ev::Click, move |_| Msg::CallDelete(path.clone()))
+                ],
+                button![
+                    C!["button is-link"],
+                    "Download",
+                    ev(Ev::Click, move |_| Msg::CallDownload(path_download.clone()))
+                ],
+            ]
         ])
     }
     div![table![

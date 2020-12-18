@@ -97,6 +97,7 @@ pub enum Msg {
     ChangeRoute(String, ChangeRouteType),
     DeleteFile(Result<u16, u16>, String),
     CallDelete(String),
+    CallDownload(String),
     SignUp,
     CallSignUp,
     Log(String),
@@ -122,9 +123,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::UploadNext => model.upload_toggle = model.upload_toggle.next(),
         Msg::DropdownNext => model.dropdown = model.dropdown.next(),
         Msg::Download(dtype) => {
-            orders
-                .skip()
-                .perform_cmd(download(model.url.clone(), dtype));
+            /* orders
+            .skip()
+            .perform_cmd(download(model.url.clone(), dtype));*/
         }
         Msg::InputChange(e, it) => match it {
             InputType::Name => model.account.name = e,
@@ -169,6 +170,11 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders
                 .skip()
                 .perform_cmd(http::delete::delete::delete(model.clone().token, e));
+        }
+        Msg::CallDownload(e) => {
+            orders
+                .skip()
+                .perform_cmd(download(e, "zip".to_string(), model.clone().token));
         }
         Msg::DeleteFile(result, name) => {
             let mut re = (false, name);

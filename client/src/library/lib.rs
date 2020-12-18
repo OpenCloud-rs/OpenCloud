@@ -1,33 +1,23 @@
 use crate::Msg;
-use seed::{prelude::fetch, window, Url};
+use seed::{Url, log, window};
 use serde::Serialize;
 use shared::JsonStruct;
 
-pub async fn download(url: Url, dtype: String) {
+pub async fn download(url: String, dtype: String, token: String) {
+    
     let mut url_string: String = String::from(
-        "http://".to_owned() + &window().location().host().expect("127.0.0.1:8081") + "/api/",
+        "http://".to_owned()
+            + &window().location().host().expect("127.0.0.1:8081")
+            + "/api/file/" + percent_encoding::utf8_percent_encode(url.as_str(), percent_encoding::NON_ALPHANUMERIC).to_string().as_str()
     );
-    for d in url.path().iter() {
-        url_string.push_str(format!["{}/", d].as_ref())
-    }
+    log!(url_string);
     if dtype == "tar.gz" {
         url_string.push_str("?download=tar");
     } else {
         url_string.push_str("?download");
     }
     println!("{}", url_string);
-    fetch(url_string.as_str()).await.expect("Error").status();
-    //Request::new(url_string.as_str()).redirect(RequestRedirect::Follow);
-    /* Request::new(url_string.as_str())
-    .header(Header::custom("Access-Control-Allow-Credentials", "true"))
-    .header(Header::custom(
-        "Access-Control-Allow-Origin",
-        "http://127.0.0.1",
-    ))
-    .header(Header::custom("Access-Control-Expose-Headers", "x-json"))
-    .method(Method::Get)
-    .mode(RequestMode::SameOrigin)
-    .redirect(RequestRedirect::Manual);*/
+    window().open_with_url_and_target(format!{"{}&token={}", url_string.clone(), token.clone()}.as_str(), "blank").unwrap();
 }
 pub async fn fetch_repository_info(url: Url) -> Msg {
     let mut url_string: String = String::from(
