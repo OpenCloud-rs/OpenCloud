@@ -33,7 +33,7 @@ pub fn folder_list(mut content: Vec<Folder>, url: String) -> Node<Msg> {
             th![&t.ftype],
             th![
                 button![
-                    C!["button is-link"],
+                    C!["button mr-2 is-link"],
                     "Delete",
                     ev(Ev::Click, move |_| Msg::CallDelete(path.clone()))
                 ],
