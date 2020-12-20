@@ -1,14 +1,19 @@
 use crate::Msg;
-use seed::{Url, log, window};
+use seed::{log, window, Url};
 use serde::Serialize;
 use shared::JsonStruct;
 
 pub async fn download(url: String, dtype: String, token: String) {
-    
     let mut url_string: String = String::from(
         "http://".to_owned()
             + &window().location().host().expect("127.0.0.1:8081")
-            + "/api/file/" + percent_encoding::utf8_percent_encode(url.as_str(), percent_encoding::NON_ALPHANUMERIC).to_string().as_str()
+            + "/api/file/"
+            + percent_encoding::utf8_percent_encode(
+                url.as_str(),
+                percent_encoding::NON_ALPHANUMERIC,
+            )
+            .to_string()
+            .as_str(),
     );
     log!(url_string);
     if dtype == "tar.gz" {
@@ -17,7 +22,12 @@ pub async fn download(url: String, dtype: String, token: String) {
         url_string.push_str("?download");
     }
     println!("{}", url_string);
-    window().open_with_url_and_target(format!{"{}&token={}", url_string.clone(), token.clone()}.as_str(), "blank").unwrap();
+    window()
+        .open_with_url_and_target(
+            format! {"{}&token={}", url_string.clone(), token.clone()}.as_str(),
+            "blank",
+        )
+        .unwrap();
 }
 pub async fn fetch_repository_info(url: Url) -> Msg {
     let mut url_string: String = String::from(
