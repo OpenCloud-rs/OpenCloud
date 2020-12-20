@@ -44,14 +44,6 @@ pub fn _dropdown(state: State) -> Node<Msg> {
             }
         ]],
         div![
-            C!["dropdown-trigger"],
-            button![
-                C!["button"],
-                ev(Ev::Click, |_| Msg::DropdownNext),
-                span![":"],
-            ]
-        ],
-        div![
             C!["dropdown-menu"],
             attrs! {
             At::Id => "dropdown-menu",

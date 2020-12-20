@@ -39,7 +39,6 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
         uri: "".to_string(),
         url: Url::new(),
         upload_toggle: component::uploadfile::State::Hidden,
-        dropdown: component::download::State::NotActive,
         name: String::new(),
         pass: String::new(),
         mail: String::new(),
@@ -61,7 +60,6 @@ pub struct Model {
     pub uri: String,
     pub url: Url,
     pub upload_toggle: component::uploadfile::State,
-    pub dropdown: component::download::State,
     pub name: String,
     pub pass: String,
     pub mail: String,
@@ -88,8 +86,6 @@ pub enum Msg {
     RoutePage(Url),
     Fetched(Option<JsonStruct>),
     UploadNext,
-    DropdownNext,
-    Download(String),
     InputChange(String, InputType),
     Connect,
     Refresh,
@@ -121,12 +117,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             model.uri = url.path().to_vec().join("/").clone()
         }
         Msg::UploadNext => model.upload_toggle = model.upload_toggle.next(),
-        Msg::DropdownNext => model.dropdown = model.dropdown.next(),
-        Msg::Download(dtype) => {
-            /* orders
-            .skip()
-            .perform_cmd(download(model.url.clone(), dtype));*/
-        }
         Msg::InputChange(e, it) => match it {
             InputType::Name => model.account.name = e,
             InputType::Password => model.account.password = e,
@@ -257,7 +247,6 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                             div![
                                 C!["columns has-text-centered"],
                                 div![C!["column"], upload_file(model.upload_toggle, &model.route),],
-                                div![C!["column"], component::download::download(model.dropdown)]
                             ],
                             component::folder_list::folder_list(
                                 model.api.content.clone(),
