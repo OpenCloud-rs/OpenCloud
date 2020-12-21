@@ -13,7 +13,7 @@ actix-service = "1.0.6"
 actix-http = "2.2.0"
 actix-utils = "2.0.0"
 
-rand = "0.7.3"
+rand = "0.8.0"
 zip = "0.5.8"
 zip-extensions = "0.6.0"
 tar = "0.4"
