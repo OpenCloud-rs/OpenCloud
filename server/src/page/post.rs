@@ -7,8 +7,8 @@ use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::{db::log::insert::insert, http::http::get_args};
 use actix_multipart::Multipart;
 use actix_web::{post, web, Error, HttpRequest, HttpResponse};
-use std::io::Write;
 use tokio::stream::StreamExt;
+use std::io::Write;
 
 #[post("/api/file/{path:.*}")]
 pub async fn save_file(
@@ -16,7 +16,7 @@ pub async fn save_file(
     mut payload: Multipart,
     path: web::Path<String>,
 ) -> Result<HttpResponse, Error> {
-    println!("-----------------  {}  ---------------------------", path);
+    //println!("-----------------  {}  ---------------------------", path);
     let e = if let Some(e) = req.headers().get("token") {
         String::from(e.to_str().expect("Error to_str"))
     } else if let Some(e) = get_args(req.clone()).get("token") {
@@ -41,7 +41,7 @@ pub async fn save_file(
                     .content_disposition()
                     .and_then(|cd| cd.get_name().map(ToString::to_string))
                     .expect("Can't get field name!");
-                let filepath = format!("./home/{}/{}/{}", user.name, url, filename);
+                let filepath = format!("./home/{}/{}/{}", user.name, url.strip_prefix("/").unwrap(), filename);
                 // File::create is blocking operation, use threadpool
                 println!(
                     "--------------------- Url : {}, Path: {} ---------------------------",
@@ -60,7 +60,6 @@ pub async fn save_file(
                     f = web::block(move || f.write_all(&chunk).map(|_| f)).await?;
                 }
             }
-
             insert(user.id, ActionType::Upload).await;
             return Ok(HttpResponse::Ok().body("The file is uploaded"));
         } else {

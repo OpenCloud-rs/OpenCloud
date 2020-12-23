@@ -27,10 +27,10 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
             if bvec.contains_key("download") {
                 match bvec.get("download").unwrap().as_ref() {
                     "tar.gz" => {
-                        result = get_tar(format!("{}/{}", user.home, path.0.clone())).await;
+                        result =  download(format!("{}/{}", user.home, path.0.clone()), ArchiveType::Targz).await;
                     }
                     _ => {
-                        result = get_zip(format!("{}/{}", user.home, path.0.clone())).await;
+                        result = download(format!("{}/{}", user.home, path.0.clone()), ArchiveType::Zip).await;
                     }
                 }
             } else if bvec.contains_key("sort") {
