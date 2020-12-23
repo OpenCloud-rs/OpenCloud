@@ -13,8 +13,8 @@ actix-service = "1.0.6"
 actix-http = "2.2.0"
 actix-utils = "2.0.0"
 
-rand = "0.7.3"
-zip = "0.5.8"
+rand = "0.8.0"
+zip = "0.5.9"
 zip-extensions = "0.6.0"
 tar = "0.4"
 
@@ -29,11 +29,11 @@ tokio = {version = "0.3.6", features = ["full"]}
 futures-core = "0.3.8"
 
 env_logger = "0.8"
-bytes = "0.6.0"
+bytes = "1.0.0"
 
 shared = {path = "../shared"}
 
-sqlx = {version = "0.4.1", features = ["sqlite", "runtime-async-std-rustls"]}
+sqlx = {version = "0.4.2", features = ["sqlite", "runtime-async-std-rustls"]}
 
 time = "0.2.23"
 
