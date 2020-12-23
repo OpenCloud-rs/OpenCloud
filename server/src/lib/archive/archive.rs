@@ -1,4 +1,4 @@
-use crate::lib::file::file::get_file_as_byte_vec;
+use crate::lib::{file::file::{get_file_as_byte_vec, get_file_preview}};
 use actix_files::file_extension_to_mime;
 use actix_http::Response;
 use actix_utils::mpsc;
@@ -14,7 +14,30 @@ use std::path::PathBuf;
 use zip::write::FileOptions;
 use zip::CompressionMethod;
 use zip_extensions::zip_create_from_directory_with_options;
-
+pub enum ArchiveType {
+    Targz,
+    Zip
+}
+pub async fn download(path: String, atype: ArchiveType) -> Result<actix_web::HttpResponse, std::io::Error> {
+    match async_std::fs::metadata(path.clone()).await {
+        Ok(e) => {
+            if e.is_file() { 
+                get_file_preview(path.clone()).await
+            } else if e.is_dir() {
+                match atype {
+                    ArchiveType::Targz => {get_tar(path.clone()).await}
+                    ArchiveType::Zip => {get_zip(path.clone()).await}
+                }
+            } else {
+                Ok(Response::Ok().body("No file"))
+            }
+             
+        },
+        Err(_) => {
+            Ok(Response::Ok().body("Error"))
+        }
+    }
+}
 pub async fn get_zip(path: String) -> std::io::Result<Response> {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(
