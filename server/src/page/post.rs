@@ -7,7 +7,7 @@ use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::{db::log::insert::insert, http::http::get_args};
 use actix_multipart::Multipart;
 use actix_web::{post, web, Error, HttpRequest, HttpResponse};
-use tokio::stream::StreamExt;
+use tokio_stream::StreamExt;
 use std::io::Write;
 
 #[post("/api/file/{path:.*}")]
@@ -33,7 +33,7 @@ pub async fn save_file(
                     return Ok(HttpResponse::Ok().body("Can't get user"));
                 }
             };
-            while let Some(mut field) = tokio::stream::StreamExt::try_next(&mut payload)
+            while let Some(mut field) = StreamExt::try_next(&mut payload)
                 .await
                 .expect("Error")
             {

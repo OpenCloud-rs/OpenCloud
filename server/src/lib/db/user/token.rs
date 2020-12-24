@@ -5,7 +5,7 @@ pub fn gen_token() -> String {
     let mut rng = rand::thread_rng();
     (0..30)
         .map(|_| {
-            let idx = rng.gen_range(0, charset.len());
+            let idx = rng.gen_range(0..charset.len());
             charset[idx] as char
         })
         .collect()

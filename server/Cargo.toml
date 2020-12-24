@@ -27,6 +27,7 @@ serde_yaml = "0.8.14"
 futures = "0.3.8"
 tokio = {version = "1.0.0", features = ["full"]}
 futures-core = "0.3.8"
+tokio-stream = "0.1.0"
 
 env_logger = "0.8"
 bytes = "1.0.0"
