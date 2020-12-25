@@ -7,8 +7,8 @@ use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::{db::log::insert::insert, http::http::get_args};
 use actix_multipart::Multipart;
 use actix_web::{post, web, Error, HttpRequest, HttpResponse};
-use tokio_stream::StreamExt;
 use std::io::Write;
+use tokio_stream::StreamExt;
 
 #[post("/api/file/{path:.*}")]
 pub async fn save_file(
@@ -33,15 +33,17 @@ pub async fn save_file(
                     return Ok(HttpResponse::Ok().body("Can't get user"));
                 }
             };
-            while let Some(mut field) = StreamExt::try_next(&mut payload)
-                .await
-                .expect("Error")
-            {
+            while let Some(mut field) = StreamExt::try_next(&mut payload).await.expect("Error") {
                 let filename = field
                     .content_disposition()
                     .and_then(|cd| cd.get_name().map(ToString::to_string))
                     .expect("Can't get field name!");
-                let filepath = format!("./home/{}/{}/{}", user.name, url.strip_prefix("/").unwrap(), filename);
+                let filepath = format!(
+                    "./home/{}/{}/{}",
+                    user.name,
+                    url.strip_prefix("/").unwrap(),
+                    filename
+                );
                 // File::create is blocking operation, use threadpool
                 println!(
                     "--------------------- Url : {}, Path: {} ---------------------------",

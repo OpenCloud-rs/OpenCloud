@@ -54,10 +54,12 @@ pub async fn get_user_by_token(token: String) -> Option<User> {
 
 pub async fn get_id_of_user(name: String, password: String) -> Option<i32> {
     let mut conn = conn().await;
-    let query: (i32, ) = sqlx::query_as("SELECT id FROM User WHERE name=? AND password=?")
+    let query: (i32,) = sqlx::query_as("SELECT id FROM User WHERE name=? AND password=?")
         .bind(name)
         .bind(password)
-        .fetch_one(&mut conn).await.expect("Error");
+        .fetch_one(&mut conn)
+        .await
+        .expect("Error");
 
     Some(query.0)
 }

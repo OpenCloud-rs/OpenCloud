@@ -12,8 +12,10 @@ pub async fn upload_file(token: String, file: File) -> Msg {
         "/api/file/"
     );
     let formdata = web_sys::FormData::new().unwrap();
-    formdata.append_with_blob_and_filename(file.name().as_str(), &file, file.name().as_str()).unwrap();
-    log!(format!{"{:?}", formdata});
+    formdata
+        .append_with_blob_and_filename(file.name().as_str(), &file, file.name().as_str())
+        .unwrap();
+    log!(format! {"{:?}", formdata});
     match Request::new(ip.as_str())
         .method(Method::Post)
         .header(Header::custom("token", token))
@@ -24,10 +26,12 @@ pub async fn upload_file(token: String, file: File) -> Msg {
         .await
         .expect("Error")
         .text()
-        .await {
-            Ok(e) => {    Msg::CallbackUploadFile(true, e)},
-            Err(e) => {  log!(e);  Msg::CallbackUploadFile(false, format!{"{:?}", e})}
+        .await
+    {
+        Ok(e) => Msg::CallbackUploadFile(true, e),
+        Err(e) => {
+            log!(e);
+            Msg::CallbackUploadFile(false, format! {"{:?}", e})
         }
-    
-
+    }
 }
