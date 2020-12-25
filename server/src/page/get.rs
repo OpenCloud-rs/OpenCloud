@@ -1,6 +1,6 @@
 use crate::lib::db::log::insert::insert;
 use crate::lib::db::log::model::ActionType;
-use crate::lib::db::user::get::{get_id, get_user_by_token};
+use crate::lib::db::user::get::{get_id_of_user, get_user_by_token};
 use crate::lib::db::user::model::LoginUser;
 use crate::lib::db::user::token::gen_token;
 use crate::lib::db::user::update::update_token;
@@ -53,7 +53,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
             } else {
                 result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
             }
-            let _ = insert(user.id, ActionType::Get);
+            insert(user.id, ActionType::Get).await;
         } else {
             result = Ok(HttpResponse::Ok().body("The token provided isn't valid"))
         }
@@ -68,7 +68,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
 pub async fn login_user(body: web::Json<LoginUser>) -> std::io::Result<Response<Body>> {
     let token = gen_token();
     println!("name : {}, password: {}", body.name, body.password);
-    if let Some(id) = get_id(body.name.clone(), body.password.clone()).await {
+    if let Some(id) = get_id_of_user(body.name.clone(), body.password.clone()).await {
         update_token(token.clone(), id.to_owned()).await;
         println!("{}", valid_session(token.clone()).await);
         Ok(HttpResponse::Ok().body(&token))

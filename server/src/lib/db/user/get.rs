@@ -1,15 +1,14 @@
 use crate::lib::db::conn::*;
-use crate::lib::db::user::model::{Id, User};
+use crate::lib::db::user::model::User;
 use futures::TryStreamExt;
 use sqlx::Row;
 
 pub async fn get_users() -> Vec<User> {
     let mut conn = conn().await;
     let mut vec: Vec<User> = Vec::new();
-    //let get = sqlx::query_as::<_ User>(sql);
-    let mut ll = sqlx::query("SELECT * FROM User").fetch(&mut conn);
+    let mut response = sqlx::query("SELECT * FROM User").fetch(&mut conn);
     let mut person_vec: Vec<User> = Vec::new();
-    while let Some(row) = ll.try_next().await.expect("Error") {
+    while let Some(row) = response.try_next().await.expect("Error") {
         person_vec.push(User {
             id: row.try_get("id").expect("Error"),
             name: row.try_get("name").expect("Error"),
@@ -52,21 +51,13 @@ pub async fn get_user_by_token(token: String) -> Option<User> {
 
     result
 }
-pub async fn get_id(name: String, password: String) -> Option<i32> {
+
+pub async fn get_id_of_user(name: String, password: String) -> Option<i32> {
     let mut conn = conn().await;
-    let mut id: Vec<i32> = Vec::new();
-    let mut query_id: Vec<Id> = Vec::new();
-    let mut query = sqlx::query("SELECT id FROM User WHERE name=? AND password=?")
+    let query: (i32, ) = sqlx::query_as("SELECT id FROM User WHERE name=? AND password=?")
         .bind(name)
         .bind(password)
-        .fetch(&mut conn);
-    while let Some(row) = query.try_next().await.expect("Error") {
-        query_id.push(Id {
-            id: row.try_get("id").expect("Error"),
-        });
-    }
-    for ids in query_id {
-        id.push(ids.id);
-    }
-    id.first().cloned()
+        .fetch_one(&mut conn).await.expect("Error");
+
+    Some(query.0)
 }

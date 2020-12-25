@@ -22,7 +22,3 @@ pub struct LoginUser {
     pub name: String,
     pub password: String,
 }
-
-pub struct Id {
-    pub id: i32,
-}
