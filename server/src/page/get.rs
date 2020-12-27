@@ -14,7 +14,7 @@ use actix_web::{get, post, web, HttpRequest, HttpResponse as Response, HttpRespo
 pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<Response<Body>> {
     let result;
     let e = if let Some(e) = req.headers().get("token") {
-        String::from(e.to_str().expect("Error to_str"))
+        String::from(e.to_str().unwrap_or_default())
     } else if let Some(e) = get_args(req.clone()).get("token") {
         String::from(e)
     } else {
@@ -23,9 +23,11 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
     if !e.is_empty() {
         if valid_session(e.clone()).await {
             let bvec = get_args(req.clone());
-            let user = get_user_by_token(e.clone()).await.expect("Error");
+            let user = match get_user_by_token(e.clone()).await {
+            Some(e) => {e}, None => {return Ok(HttpResponse::Ok().body(String::from("Error on get user")));}    
+            };
             if bvec.contains_key("download") {
-                match bvec.get("download").unwrap().as_ref() {
+                match bvec.get("download").unwrap_or(&String::new()).as_ref() {
                     "tar.gz" => {
                         result = download(
                             format!("{}/{}", user.home, path.0.clone()),
@@ -42,7 +44,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
                     }
                 }
             } else if bvec.contains_key("sort") {
-                match bvec.get("sort").unwrap().as_ref() {
+                match bvec.get("sort").unwrap_or(&String::new()).as_ref() {
                     "by_size" => {
                         result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Size);
                     }

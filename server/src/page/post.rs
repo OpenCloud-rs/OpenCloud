@@ -18,7 +18,7 @@ pub async fn save_file(
 ) -> Result<HttpResponse, Error> {
     //println!("-----------------  {}  ---------------------------", path);
     let e = if let Some(e) = req.headers().get("token") {
-        String::from(e.to_str().expect("Error to_str"))
+        String::from(e.to_str().unwrap_or(""))
     } else if let Some(e) = get_args(req.clone()).get("token") {
         String::from(e)
     } else {
@@ -33,7 +33,7 @@ pub async fn save_file(
                     return Ok(HttpResponse::Ok().body("Can't get user"));
                 }
             };
-            while let Some(mut field) = StreamExt::try_next(&mut payload).await.expect("Error") {
+            while let Ok(Some(mut field)) = StreamExt::try_next(&mut payload).await {
                 let filename = field
                     .content_disposition()
                     .and_then(|cd| cd.get_name().map(ToString::to_string))

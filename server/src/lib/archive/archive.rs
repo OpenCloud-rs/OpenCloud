@@ -50,7 +50,7 @@ pub async fn get_zip(path: String) -> std::io::Result<Response> {
             "Content-Disposition",
             format!(
                 "\"attachment\";filename=\"{}.zip\"",
-                path.clone().split('/').last().expect("Error")
+                path.clone().split('/').last().unwrap_or("default_name")
             ),
         )
         .content_type(file_extension_to_mime(path.clone().as_str()).essence_str())
@@ -70,7 +70,7 @@ pub async fn get_tar(path: String) -> std::io::Result<Response> {
             "Content-Disposition",
             format!(
                 "\"attachment\";filename=\"{}.tar.gz\"",
-                path.clone().split('/').last().expect("Error")
+                path.clone().split('/').last().unwrap_or("default_name")
             ),
         )
         .content_type(file_extension_to_mime(path.clone().as_str()).essence_str())
@@ -82,15 +82,29 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
     let file_name = format!("./temp/{}.zip", name);
     File::create(file_name.clone()).unwrap();
     println!("filename => {}", dir);
-    web::block(|| {
+    match web::block(|| {
         zip_create_from_directory_with_options(
             &PathBuf::from(file_name),
             &PathBuf::from(dir),
             FileOptions::default().compression_method(CompressionMethod::Bzip2),
         )
     })
-    .await
-    .expect("Error");
+    .await {
+        Ok(_) => {},
+        Err(e) => {
+            match e {
+                actix_http::error::BlockingError::Error(ziperror) => {
+                    match ziperror {
+                        zip::result::ZipError::Io(_) => {eprintln!("I/O Error")}
+                        zip::result::ZipError::InvalidArchive(_) => {eprintln!("Invalid Archive")}
+                        zip::result::ZipError::UnsupportedArchive(_) => {eprintln!("Unsupported Archive")}
+                        zip::result::ZipError::FileNotFound => {eprintln!("File not found")}
+                    }
+                }
+                actix_http::error::BlockingError::Canceled => {}
+            }
+        }
+    };
 
     afs::File::open(format!("./temp/{}.zip", name))
         .await

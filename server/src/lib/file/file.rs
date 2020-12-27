@@ -65,17 +65,25 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                                                 ),
                                                 size: e.len(),
                                                 created: time::PrimitiveDateTime::from(
-                                                    f.metadata()
-                                                        .expect("Error")
-                                                        .created()
-                                                        .unwrap_or(std::time::SystemTime::now()),
+                                                    match f.metadata() {
+                                                        Ok(e) => {
+                                                            e.created().unwrap_or(std::time::SystemTime::now())
+                                                        },
+                                                        Err(_) => {
+                                                            std::time::SystemTime::now()
+                                                        }
+                                                    }
                                                 )
                                                 .format("%d-%m-%Y %T"),
                                                 modified: time::PrimitiveDateTime::from(
-                                                    f.metadata()
-                                                        .expect("Error")
-                                                        .modified()
-                                                        .unwrap_or(std::time::SystemTime::now()),
+                                                    match f.metadata() {
+                                                        Ok(e) => {
+                                                            e.modified().unwrap_or(std::time::SystemTime::now())
+                                                        },
+                                                        Err(_) => {
+                                                            std::time::SystemTime::now()
+                                                        }
+                                                    }
                                                 )
                                                 .format("%d-%m-%Y %T"),
                                             });
@@ -96,17 +104,25 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                                                         .unwrap_or("Bad File Type")
                                                 )),
                                                 created: time::PrimitiveDateTime::from(
-                                                    f.metadata()
-                                                        .expect("Error")
-                                                        .created()
-                                                        .unwrap_or(std::time::SystemTime::now()),
+                                                    match f.metadata() {
+                                                        Ok(e) => {
+                                                            e.created().unwrap_or(std::time::SystemTime::now())
+                                                        },
+                                                        Err(_) => {
+                                                            std::time::SystemTime::now()
+                                                        }
+                                                    }
                                                 )
                                                 .format("%d-%m-%Y %T"),
                                                 modified: time::PrimitiveDateTime::from(
-                                                    f.metadata()
-                                                        .expect("Error")
-                                                        .modified()
-                                                        .unwrap_or(std::time::SystemTime::now()),
+                                                    match f.metadata() {
+                                                        Ok(e) => {
+                                                            e.modified().unwrap_or(std::time::SystemTime::now())
+                                                        },
+                                                        Err(_) => {
+                                                            std::time::SystemTime::now()
+                                                        }
+                                                    }
                                                 )
                                                 .format("%d-%m-%Y %T"),
                                                 ftype: String::from("Folder"),
@@ -185,7 +201,11 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                 let mut buf: Vec<u8> = Vec::new();
                 match async_std::fs::File::open(filename.clone()).await {
                     Ok(mut o) => {
-                        o.read(&mut buf).await.expect("Error");
+                        if let Ok(_) = o.read(&mut buf).await {
+                            
+                        } else {
+                            eprint!("Read Error")
+                        };
                     }
                     Err(e) => {
                         println!("{} => {}", filename.clone(), e);
@@ -270,12 +290,15 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
     }
 
     let mut buf: Vec<u8> = Vec::new();
-    match try_file.expect("Error").read_to_end(&mut buf).await {
-        Ok(e) => {
-            println!("{}", e);
-        }
-        Err(e) => println!("{:?}", e),
-    };
+    if let Ok(mut f) = try_file {
+        match f.read_to_end(&mut buf).await {
+            Ok(e) => {
+                println!("{}", e);
+            }
+            Err(e) => println!("{:?}", e),
+        };
+    }
+    
 
     let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(buf.clone())));
 

@@ -14,7 +14,7 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
         content: Vec::new(),
     };
     let e = if let Some(e) = req.headers().get("token") {
-        String::from(e.to_str().expect("Error to_str"))
+        String::from(e.to_str().unwrap_or(""))
     } else if let Some(e) = get_args(req).get("token") {
         String::from(e)
     } else {

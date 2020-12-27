@@ -4,7 +4,7 @@ use crate::lib::db::conn::conn;
 
 pub async fn create() {
     let mut conn = conn().await;
-    conn.execute(
+    match conn.execute(
         "CREATE TABLE IF NOT EXISTS Log (
                   id              INTEGER PRIMARY KEY,
                   type            TEXT NOT NULL,
@@ -12,6 +12,8 @@ pub async fn create() {
                   date           TEXT
                   )",
     )
-    .await
-    .expect("Error");
+    .await {
+        Ok(_) => {},
+        Err(_) => eprintln!("Error on create the log database")
+    };
 }

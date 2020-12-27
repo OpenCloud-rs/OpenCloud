@@ -4,7 +4,7 @@ use crate::lib::db::conn::conn;
 
 pub async fn create() {
     let mut conn = conn().await;
-    conn.execute(
+   match conn.execute(
         "CREATE TABLE IF NOT EXISTS User (
                   id              INTEGER PRIMARY KEY,
                   name            TEXT NOT NULL,
@@ -13,6 +13,11 @@ pub async fn create() {
                   email           TEXT
                   )",
     )
-    .await
-    .expect("Error");
+    .await {
+        Ok(_) => {},
+        Err(_) => {
+            eprintln!("Error on create the database")
+        }
+    }
+
 }

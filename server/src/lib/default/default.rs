@@ -14,13 +14,13 @@ pub fn default() -> Config {
     }
 
     if !vec.contains(&String::from("temp")) {
-        std::fs::create_dir("./temp").expect("Error");
+        std::fs::create_dir("./temp").expect("Failed to create the temp folder");
     }
     if !vec.contains(&String::from("db.sql")) {
-        std::fs::File::create("./db.sql").expect("Error");
+        std::fs::File::create("./db.sql").expect("Failed to create the database");
     }
     if !vec.contains(&String::from("home")) {
-        std::fs::create_dir("./home").expect("Error");
+        std::fs::create_dir("./home").expect("Failed to create the home folder");
     }
     if !vec.contains(&String::from("config.yaml")) {
         let config = Config {
@@ -39,13 +39,24 @@ pub fn default() -> Config {
         config
     } else {
         let mut buf = String::new();
-        File::open("./config.yaml")
-            .expect("Can't found the config")
-            .read_to_string(&mut buf)
-            .expect("Can't read the config");
+        match File::open("./config.yaml") {
+            Ok(mut e) => {
+               match e.read_to_string(&mut buf) {
+                   Ok(_) => {}
+                   Err(_) => {
+                    eprintln!("Can't read the config");
+                    exit(1)
+                   }
+               }
+            }, 
+            Err(_) => {
+                eprintln!("Can't found the config");
+                exit(1)
+            }
+        };
         match serde_yaml::from_str(&buf) {
             Ok(o) => o,
-            Err(_e) => {
+            Err(_) => {
                 println!("Config Error");
                 exit(1);
             }
