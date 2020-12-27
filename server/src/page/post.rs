@@ -7,7 +7,7 @@ use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::{db::log::insert::insert, http::http::get_args};
 use actix_multipart::Multipart;
 use actix_web::{post, web, Error, HttpRequest, HttpResponse};
-use std::io::Write;
+use std::{eprintln, io::Write};
 use tokio_stream::StreamExt;
 
 #[post("/api/file/{path:.*}")]
@@ -16,7 +16,6 @@ pub async fn save_file(
     mut payload: Multipart,
     path: web::Path<String>,
 ) -> Result<HttpResponse, Error> {
-    //println!("-----------------  {}  ---------------------------", path);
     let e = if let Some(e) = req.headers().get("token") {
         String::from(e.to_str().unwrap_or(""))
     } else if let Some(e) = get_args(req.clone()).get("token") {
@@ -46,13 +45,25 @@ pub async fn save_file(
                 );
                 // File::create is blocking operation, use threadpool
                 println!(
-                    "--------------------- Url : {}, Path: {} ---------------------------",
-                    url, filepath
+                    "--------------------- Url : {}, Name: {}, Path: {} ---------------------------",
+                    url, filename, filepath
                 );
                 // let mut f = web::block(|| std::fs::File::create(filepath)).await;
                 let mut f = match web::block(|| std::fs::File::create(filepath)).await {
                     Ok(e) => e,
-                    Err(_) => {
+                    Err(err) => {
+                        match err {
+                            actix_http::error::BlockingError::Error(e) => {
+                                let string_err = e.kind(); 
+                                format!("Error : {:?}", string_err).as_str();
+                                eprintln!("{}",format!("Error : {:?}", string_err).as_str());
+                            }
+                            actix_http::error::BlockingError::Canceled => {
+
+                                eprintln!("Cancelled");
+                            }
+                        }
+                        
                         return Ok(HttpResponse::Ok().body("Error on file upload"));
                     }
                 };
