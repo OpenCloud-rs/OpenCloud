@@ -2,6 +2,7 @@ use crate::lib::db::conn::*;
 use crate::lib::db::user::model::User;
 use futures::TryStreamExt;
 use sqlx::Row;
+use crate::lib::db::user::hash_password;
 
 pub async fn get_users() -> Vec<User> {
     let mut conn = conn().await;
@@ -56,7 +57,7 @@ pub async fn get_id_of_user(name: String, password: String) -> Option<i32> {
     let mut conn = conn().await;
     let query: (i32,) = match sqlx::query_as("SELECT id FROM User WHERE name=? AND password=?")
         .bind(name)
-        .bind(password)
+        .bind(hash_password(password))
         .fetch_one(&mut conn)
         .await {
             Ok(e) => {

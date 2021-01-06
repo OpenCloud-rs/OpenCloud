@@ -1,12 +1,13 @@
 use crate::lib::db::conn::conn;
 use sqlx::Executor;
+use crate::lib::db::user::hash_password;
 
 pub async fn insert_user(name: String, email: String, password: String) -> std::io::Result<usize> {
     let mut conn = conn().await;
     match conn.execute(
         format!(
             "INSERT INTO User (name,email, password) VALUES(\"{}\", \"{}\", \"{}\")",
-            name, email, password
+            name, email, hash_password(password)
         )
         .as_ref(),
     )
