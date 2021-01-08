@@ -11,7 +11,7 @@
 		<li>RESTAPI</li>
 		<li><a href="https://github.com/OpenCloud-rs/OpenCloud-Flutter">Mobile app (IOS/ Android)</a></li>
         <hr>
-        <h3>Roadmap to 0.9</h3>
+        <h3>Roadmap to 1.0</h3>
         <li>Upload / Download file on Client Web</li>
         <li>Update mobile client</li>
         <li>Create Desktop Client</li>
