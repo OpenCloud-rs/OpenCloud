@@ -15,7 +15,7 @@ pub async fn get_users() -> Vec<User> {
             password: row.try_get("password").expect("Error"),
             token: row.try_get("token").unwrap_or(String::new()),
             email: row.try_get("email").unwrap_or(String::new()),
-            home: format!("./home/{}/",row.try_get("name").expect("Error")),
+            home: format!("./home/{}/",row.try_get::<&str, &str>("name").expect("Error")),
         });
     }
 
@@ -34,11 +34,16 @@ pub async fn get_user_by_token(token: String) -> Option<User> {
             password: row.try_get(2).expect("Error"),
             token: row.try_get(3).unwrap_or(String::new()),
             email: row.try_get(4).unwrap_or(String::new()),
-            home: format!("./home/{}", row.try_get(1).expect("Error")),
+            home: format!("./home/{}", row.try_get::<&str, usize>(1).expect("Error")),
         });
     }
-    
-    user_vec.first();
+
+    if let Some(e) = user_vec.get(0) {
+        Some(e.clone())
+    } else {
+        None
+    }
+
 }
 
 pub async fn get_id_of_user(name: String, password: String) -> Option<i32> {
