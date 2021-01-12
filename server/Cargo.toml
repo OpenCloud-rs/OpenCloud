@@ -30,7 +30,7 @@ tokio-stream = "0.1.1"
 
 env_logger = "0.8"
 
-bytes = "1.0.0"
+bytes = "1.0.1"
 
 shared = {path = "../shared"}
 
