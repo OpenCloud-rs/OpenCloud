@@ -1,10 +1,15 @@
 use seed::{prelude::*, *};
 
-use crate::Msg;
+use crate::{Msg, StateApp};
 
 pub fn signup() -> Node<Msg> {
     div![
         C!["container"],
+        button![
+            C!["button mt-2 is-link"],
+            "Back",
+            ev(Ev::Click, |_| Msg::ChangeState(StateApp::Login))
+        ],
         form![
             input![
                 C!["input mt-2"],
