@@ -89,6 +89,7 @@ pub enum Msg {
     InputChange(String, InputType),
     Connect,
     Refresh,
+    ChangeState(StateApp),
     Token(String),
     ChangeRoute(String, ChangeRouteType),
     DeleteFile(Result<u16, u16>, String),
@@ -115,7 +116,8 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 .skip()
                 .perform_cmd(fetch_repository_info(url.clone()));
             model.uri = url.path().to_vec().join("/").clone()
-        }
+        },
+        Msg::ChangeState(e) => model.state = e,
         Msg::UploadNext => model.upload_toggle = model.upload_toggle.next(),
         Msg::InputChange(e, it) => match it {
             InputType::Name => model.account.name = e,
