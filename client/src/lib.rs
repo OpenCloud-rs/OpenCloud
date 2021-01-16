@@ -12,7 +12,6 @@ use crate::component::uploadfile::upload_file;
 use crate::http::get::connect::get_connect;
 use crate::http::get::get_files::{back, get_files};
 use crate::library::lib::download;
-use library::lib::fetch_repository_info;
 use library::lib::Account;
 use seed::{browser::Url, prelude::web_sys::File};
 use seed::{prelude::*, *};
@@ -83,7 +82,6 @@ pub enum InputType {
 //    Update
 // ------ ------
 pub enum Msg {
-    RoutePage(Url),
     Fetched(Option<JsonStruct>),
     UploadNext,
     InputChange(String, InputType),
@@ -111,12 +109,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip();
         }
         Msg::Log(e) => log!(e),
-        Msg::RoutePage(url) => {
-            orders
-                .skip()
-                .perform_cmd(fetch_repository_info(url.clone()));
-            model.uri = url.path().to_vec().join("/").clone()
-        },
         Msg::ChangeState(e) => model.state = e,
         Msg::UploadNext => model.upload_toggle = model.upload_toggle.next(),
         Msg::InputChange(e, it) => match it {
