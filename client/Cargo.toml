@@ -16,7 +16,7 @@ serde = { version = "1.0.119", features = ['derive'] }
 serde_json = {version = "1.0.61"}
 futures = "0.3.11"
 shared =  {path = "../shared"}
-reqwest = "0.11.0"
+reqwest = {version="0.11.0", features=["json"]}
 percent-encoding = "2.1.0"
 
 [profile.release]
