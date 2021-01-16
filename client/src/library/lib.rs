@@ -1,12 +1,13 @@
-use crate::Msg;
-use seed::{log, window, Url};
+use seed::{log, window};
 use serde::Serialize;
-use shared::JsonStruct;
 
 pub async fn download(url: String, dtype: String, token: String) {
     let mut url_string: String = String::from(
         "http://".to_owned()
-            + &window().location().host().unwrap_or("127.0.0.1:8081".to_string())
+            + &window()
+                .location()
+                .host()
+                .unwrap_or("127.0.0.1:8081".to_string())
             + "/api/file/"
             + percent_encoding::utf8_percent_encode(
                 url.as_str(),
@@ -29,28 +30,7 @@ pub async fn download(url: String, dtype: String, token: String) {
         )
         .unwrap();
 }
-pub async fn fetch_repository_info(url: Url) -> Msg {
-    let mut url_string: String = String::from(
-        "http://".to_owned() + &window().location().host().unwrap_or("127.0.0.1:8081".to_string()) + "/api/",
-    );
 
-    for d in url.path().iter() {
-        url_string.push_str(format!["{}/", d].as_ref())
-    }
-    println!("Fetched on {}", &url_string);
-    let body = reqwest::get(url_string.as_str())
-        .await
-        .ok()
-        .unwrap()
-        .text()
-        .await
-        .ok();
-    let result: JsonStruct = match serde_json::from_str(body.unwrap().as_str()) {
-        Ok(data) => data,
-        Err(_e) => JsonStruct::new(),
-    };
-    Msg::Fetched(Some(result))
-}
 #[derive(Debug, Serialize, Clone)]
 pub struct Account {
     pub name: String,

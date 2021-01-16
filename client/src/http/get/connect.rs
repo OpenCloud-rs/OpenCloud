@@ -7,7 +7,10 @@ pub async fn get_connect(account: Account) -> Msg {
     let ip = format!(
         "{}{}{}",
         "http://".to_owned(),
-        &window().location().host().unwrap_or("127.0.0.1:8081".to_string()),
+        &window()
+            .location()
+            .host()
+            .unwrap_or("127.0.0.1:8081".to_string()),
         "/api/user/login"
     );
     let request = Request::new(ip.as_str())
@@ -18,20 +21,12 @@ pub async fn get_connect(account: Account) -> Msg {
         .unwrap()
         .fetch()
         .await;
-    let token= match request {
-        Ok(r) => {
-            match r.text().await {
-                Ok(s) => {
-                    s
-                },
-                Err(_) => {
-                    String::new()
-                }
-            }
+    let token = match request {
+        Ok(r) => match r.text().await {
+            Ok(s) => s,
+            Err(_) => String::new(),
         },
-        Err(_) => {
-            String::new()
-        }
+        Err(_) => String::new(),
     };
 
     Msg::Token(token)

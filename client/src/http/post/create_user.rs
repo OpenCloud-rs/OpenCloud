@@ -8,7 +8,10 @@ pub async fn create_user(account: Account) -> Msg {
     let ip = format!(
         "{}{}{}",
         "http://".to_owned(),
-        &window().location().host().unwrap_or("127.0.0.1:8081".to_string()),
+        &window()
+            .location()
+            .host()
+            .unwrap_or("127.0.0.1:8081".to_string()),
         "/api/user/create"
     );
     log!(serde_json::to_string(&SignUpAccount::from_account(
@@ -23,19 +26,11 @@ pub async fn create_user(account: Account) -> Msg {
         .fetch()
         .await;
     let e = match request {
-        Ok(e) => {
-            match e.text().await {
-                Ok(e) => {
-                    e
-                },
-                Err(_) => {
-                    String::new()
-                }
-            }
+        Ok(e) => match e.text().await {
+            Ok(e) => e,
+            Err(_) => String::new(),
         },
-        Err(_) => {
-            String::new()
-        }
+        Err(_) => String::new(),
     };
     log!(e);
     Msg::Connect
