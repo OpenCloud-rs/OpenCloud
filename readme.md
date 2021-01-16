@@ -14,7 +14,9 @@
         <h3>Roadmap to 0.9</h3>
         <li>Upload / Download file on Client Web</li>
         <li>Update mobile client</li>
-        <li>Create Desktop Client</li>
+	<h3>Roadmap to 0.9</h3>
+        <li>Include the web client in the binary</li>
+	<li>Create Desktop Client</li>
         <hr>
         <h3>Screenshot (Not the latest version)<h3/>
         <img src="https://raw.githubusercontent.com/OpenCloud-rs/OpenCloud/restruct/asset/OpenCloud-UI.gif">
