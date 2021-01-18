@@ -1,8 +1,8 @@
 use crate::lib::db::conn::*;
+use crate::lib::db::user::hash_password;
 use crate::lib::db::user::model::User;
 use futures::TryStreamExt;
 use sqlx::Row;
-use crate::lib::db::user::hash_password;
 
 pub async fn get_users() -> Vec<User> {
     let mut conn = conn().await;
@@ -15,7 +15,10 @@ pub async fn get_users() -> Vec<User> {
             password: row.try_get("password").expect("Error"),
             token: row.try_get("token").unwrap_or(String::new()),
             email: row.try_get("email").unwrap_or(String::new()),
-            home: format!("./home/{}/",row.try_get::<&str, &str>("name").expect("Error")),
+            home: format!(
+                "./home/{}/",
+                row.try_get::<&str, &str>("name").expect("Error")
+            ),
         });
     }
 
@@ -43,7 +46,6 @@ pub async fn get_user_by_token(token: String) -> Option<User> {
     } else {
         None
     }
-
 }
 
 pub async fn get_id_of_user(name: String, password: String) -> Option<i32> {
@@ -52,16 +54,14 @@ pub async fn get_id_of_user(name: String, password: String) -> Option<i32> {
         .bind(name)
         .bind(hash_password(password))
         .fetch_one(&mut conn)
-        .await {
-            Ok(e) => {
-                e
-            },
-            Err(e) => {
-                eprint!("Error on get_id_of_user : {:?}", e);
-                (-1, )
-            }
-        };
-        
+        .await
+    {
+        Ok(e) => e,
+        Err(e) => {
+            eprint!("Error on get_id_of_user : {:?}", e);
+            (-1,)
+        }
+    };
 
     Some(query.0)
 }

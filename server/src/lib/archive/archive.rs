@@ -89,21 +89,26 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
             FileOptions::default().compression_method(CompressionMethod::Bzip2),
         )
     })
-    .await {
-        Ok(_) => {},
-        Err(e) => {
-            match e {
-                actix_http::error::BlockingError::Error(ziperror) => {
-                    match ziperror {
-                        zip::result::ZipError::Io(_) => {eprintln!("I/O Error")}
-                        zip::result::ZipError::InvalidArchive(_) => {eprintln!("Invalid Archive")}
-                        zip::result::ZipError::UnsupportedArchive(_) => {eprintln!("Unsupported Archive")}
-                        zip::result::ZipError::FileNotFound => {eprintln!("File not found")}
-                    }
+    .await
+    {
+        Ok(_) => {}
+        Err(e) => match e {
+            actix_http::error::BlockingError::Error(ziperror) => match ziperror {
+                zip::result::ZipError::Io(_) => {
+                    eprintln!("I/O Error")
                 }
-                actix_http::error::BlockingError::Canceled => {}
-            }
-        }
+                zip::result::ZipError::InvalidArchive(_) => {
+                    eprintln!("Invalid Archive")
+                }
+                zip::result::ZipError::UnsupportedArchive(_) => {
+                    eprintln!("Unsupported Archive")
+                }
+                zip::result::ZipError::FileNotFound => {
+                    eprintln!("File not found")
+                }
+            },
+            actix_http::error::BlockingError::Canceled => {}
+        },
     };
 
     afs::File::open(format!("./temp/{}.zip", name))

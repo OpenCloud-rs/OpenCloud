@@ -40,15 +40,13 @@ pub fn default() -> Config {
     } else {
         let mut buf = String::new();
         match File::open("./config.yaml") {
-            Ok(mut e) => {
-               match e.read_to_string(&mut buf) {
-                   Ok(_) => {}
-                   Err(_) => {
+            Ok(mut e) => match e.read_to_string(&mut buf) {
+                Ok(_) => {}
+                Err(_) => {
                     eprintln!("Can't read the config");
                     exit(1)
-                   }
-               }
-            }, 
+                }
+            },
             Err(_) => {
                 eprintln!("Can't found the config");
                 exit(1)
