@@ -2,19 +2,28 @@ use crate::lib::config::config::Config;
 use crate::lib::db::log::create::create as create_log_db;
 use crate::lib::db::user::create::create as create_user_db;
 use crate::lib::default::default::default;
-use crate::page::client::client;
 use crate::page::delete::deletef;
 use crate::page::get::{cli, login_user};
 use crate::page::p500::p500;
 use crate::page::post::save_file;
+use actix_http::Error;
 use actix_web::middleware::errhandlers::ErrorHandlers;
 use actix_web::middleware::Logger;
-use actix_web::{http, web, App, HttpServer};
+use actix_web::{http, web, App, HttpResponse, HttpServer};
 use env_logger::Env;
-use page::post::create_user;
+use include_flate::flate;
+use page::{get::default_api_handler, post::create_user};
+
+flate!(pub static INDEX: str from "../client/index.html");
 
 mod lib;
 mod page;
+
+pub async fn indexhtml() -> Result<HttpResponse, Error> {
+    Ok(HttpResponse::Ok()
+        .header("Content-Type", "text/html")
+        .body(format!("{}", *INDEX)))
+}
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
