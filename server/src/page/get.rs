@@ -10,7 +10,7 @@ use crate::lib::{archive::archive::*, http::http::get_args};
 use actix_http::body::Body;
 use actix_web::{get, post, web, HttpRequest, HttpResponse as Response, HttpResponse};
 
-#[get("/api/file/{path:.*}")]
+#[get("/file/{path:.*}")]
 pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<Response<Body>> {
     let result;
     let e = if let Some(e) = req.headers().get("token") {
@@ -24,7 +24,10 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
         if valid_session(e.clone()).await {
             let bvec = get_args(req.clone());
             let user = match get_user_by_token(e.clone()).await {
-            Some(e) => {e}, None => {return Ok(HttpResponse::Ok().body(String::from("Error on get user")));}    
+                Some(e) => e,
+                None => {
+                    return Ok(HttpResponse::Ok().body(String::from("Error on get user")));
+                }
             };
             if bvec.contains_key("download") {
                 match bvec.get("download").unwrap_or(&String::new()).as_ref() {
@@ -74,7 +77,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
     result
 }
 
-#[post("/api/user/login")]
+#[post("/user/login")]
 pub async fn login_user(body: web::Json<LoginUser>) -> std::io::Result<Response<Body>> {
     let token = gen_token();
     println!("name : {}, password: {}", body.name, body.password);
@@ -85,4 +88,8 @@ pub async fn login_user(body: web::Json<LoginUser>) -> std::io::Result<Response<
     } else {
         Ok(HttpResponse::Ok().body("No user was found"))
     }
+}
+
+pub async fn default_api_handler() -> std::io::Result<HttpResponse> {
+    Ok(HttpResponse::BadRequest().body("Bad Usage of Api"))
 }

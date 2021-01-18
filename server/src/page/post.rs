@@ -10,7 +10,7 @@ use actix_web::{post, web, Error, HttpRequest, HttpResponse};
 use std::{eprintln, io::Write};
 use tokio_stream::StreamExt;
 
-#[post("/api/file/{path:.*}")]
+#[post("/file/{path:.*}")]
 pub async fn save_file(
     req: HttpRequest,
     mut payload: Multipart,
@@ -54,19 +54,19 @@ pub async fn save_file(
                     Err(err) => {
                         match err {
                             actix_http::error::BlockingError::Error(e) => {
-                                let string_err = e.kind(); 
+                                let string_err = e.kind();
                                 format!("Error : {:?}", string_err).as_str();
-                                eprintln!("{}",format!("Error : {:?}", string_err).as_str());
+                                eprintln!("{}", format!("Error : {:?}", string_err).as_str());
                             }
                             actix_http::error::BlockingError::Canceled => {
-
                                 eprintln!("Cancelled");
                             }
                         }
-                        
+
                         return Ok(HttpResponse::Ok().body("Error on file upload"));
                     }
                 };
+                println!("{:?}", field.next().await);
                 // Field in turn is stream of *Bytes* object
                 while let Some(Ok(chunk)) = field.next().await {
                     // filesystem operations are blocking, we have to use threadpool
@@ -83,7 +83,7 @@ pub async fn save_file(
     }
 }
 
-#[post("/api/user/create")]
+#[post("/user/create")]
 pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, Error> {
     match insert_user(
         String::from(body.name.clone()),
