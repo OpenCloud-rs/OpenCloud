@@ -93,3 +93,7 @@ pub async fn login_user(body: web::Json<LoginUser>) -> std::io::Result<Response<
 pub async fn default_api_handler() -> std::io::Result<HttpResponse> {
     Ok(HttpResponse::BadRequest().body("Bad Usage of Api"))
 }
+
+pub async fn default_404() -> std::io::Result<HttpResponse> {
+    Ok(HttpResponse::NotFound().body("Oh no, file not found"))
+}

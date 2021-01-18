@@ -6,24 +6,15 @@ use crate::page::delete::deletef;
 use crate::page::get::{cli, login_user};
 use crate::page::p500::p500;
 use crate::page::post::save_file;
-use actix_http::Error;
 use actix_web::middleware::errhandlers::ErrorHandlers;
 use actix_web::middleware::Logger;
-use actix_web::{http, web, App, HttpResponse, HttpServer};
+use actix_web::{http, web, App, HttpServer};
 use env_logger::Env;
-use include_flate::flate;
-use page::{get::default_api_handler, post::create_user};
-
-flate!(pub static INDEX: str from "../client/index.html");
+use lib::file::default_file::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader};
+use page::{get::{default_404, default_api_handler}, post::create_user};
 
 mod lib;
 mod page;
-
-pub async fn indexhtml() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok()
-        .header("Content-Type", "text/html")
-        .body(format!("{}", *INDEX)))
-}
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -39,9 +30,14 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .default_service(web::to(indexhtml))
             .service(
-                actix_files::Files::new("/pkg/", "./client/pkg/")
-                    .show_files_listing()
-                    .use_last_modified(true),
+                web::scope("/pkg/")
+                    .service(web::resource("package.js").to(wasmloader))
+                    .service(web::resource("package_bg.wasm").to(wasm))
+                    .service(web::resource("bulma/bulma.min.css").to(bulma))
+                    .service(web::resource("bulma/bulma.js").to(bulma_js))
+                    .service(web::resource("obj/file.svg").to(folder_svg))
+                    .service(web::resource("obj/folder.svg").to(file_svg))
+                    .default_service(web::to(default_404)),
             )
             .service(
                 web::scope("/api")
