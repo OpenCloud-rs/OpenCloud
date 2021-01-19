@@ -1,6 +1,6 @@
 use rand::Rng;
 
-pub fn gen_token() -> String {
+pub fn generate_token() -> String {
     let charset: &[u8] = b"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYZ123456789";
     let mut rng = rand::thread_rng();
     (0..30)

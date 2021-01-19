@@ -2,7 +2,7 @@ use crate::lib::db::log::insert::insert;
 use crate::lib::db::log::model::ActionType;
 use crate::lib::db::user::get::{get_id_of_user, get_user_by_token};
 use crate::lib::db::user::model::LoginUser;
-use crate::lib::db::user::token::gen_token;
+use crate::lib::db::user::token::generate_token;
 use crate::lib::db::user::update::update_token;
 use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::file::file::{get_dir, get_file_preview, Sort};
@@ -79,7 +79,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
 
 #[post("/user/login")]
 pub async fn login_user(body: web::Json<LoginUser>) -> std::io::Result<Response<Body>> {
-    let token = gen_token();
+    let token = generate_token();
     println!("name : {}, password: {}", body.name, body.password);
     if let Some(id) = get_id_of_user(body.name.clone(), body.password.clone()).await {
         update_token(token.clone(), id.to_owned()).await;
