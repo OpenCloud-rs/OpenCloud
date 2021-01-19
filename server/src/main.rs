@@ -24,8 +24,7 @@ async fn main() -> std::io::Result<()> {
     create_user_db().await;
     let server_ip: &str = &config.get_server();
     lib::db::user::get::get_users().await;
-
-    //TODO: Reformat
+    
     HttpServer::new(move || {
         App::new()
             .default_service(web::to(indexhtml))
