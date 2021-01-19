@@ -33,7 +33,10 @@ pub fn default() -> Config {
         };
         let mut ff = File::create("./config.yaml").unwrap();
         match ff.write_all(serde_yaml::to_string(&config).unwrap().as_bytes()) {
-            Err(why) => panic!("couldn't write to config : {}", why.to_string()),
+            Err(why) => {
+                eprintln!("couldn't write to config : {}", why.to_string());
+                exit(1)
+            },
             Ok(_) => println!("successfully wrote to config"),
         }
         config
