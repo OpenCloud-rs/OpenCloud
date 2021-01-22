@@ -81,7 +81,9 @@ pub async fn get_tar(path: String) -> std::io::Result<Response> {
 async fn async_zip_archive(name: String, dir: String) -> afs::File {
     let file_name = format!("./temp/{}.zip", name);
     File::create(file_name.clone()).unwrap();
-    println!("filename => {}", dir);
+    if cfg!(debug_assertions) {
+        println!("filename => {}", dir);
+    }   
     match web::block(|| {
         zip_create_from_directory_with_options(
             &PathBuf::from(file_name),
@@ -118,7 +120,9 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
 
 async fn async_tar_archive(name: String, dir: String) -> afs::File {
     let file_name = format!("./temp/{}.tar.gz", name);
-    println!("{} dir : {}", file_name, dir);
+    if cfg!(debug_assertions) {
+        println!("{} dir : {}", file_name, dir);
+    }
     File::create(&file_name).expect("Error");
     let file = afs::File::open(&file_name);
     tar::Builder::new(File::open(&file_name).expect("no file found"))
@@ -159,7 +163,9 @@ impl _ArchiveFile {
         let file_name = format!("./temp/{}.zip", &self.name);
         let mut vec = Vec::new();
         let _ = afs::File::create(file_name.clone()).await?;
-        println!("filename => {}", &self.src_path);
+        if cfg!(debug_assertions) {
+            println!("filename => {}", &self.src_path);
+        }
         let _ = web::block(move || {
             zip_create_from_directory_with_options(
                 &PathBuf::from(file_name),

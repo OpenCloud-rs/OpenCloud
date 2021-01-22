@@ -44,10 +44,12 @@ pub async fn save_file(
                     filename
                 );
                 // File::create is blocking operation, use threadpool
+                if cfg!(debug_assertions) {
                 println!(
                     "--------------------- Url : {}, Name: {}, Path: {} ---------------------------",
                     url, filename, filepath
                 );
+            }
                 // let mut f = web::block(|| std::fs::File::create(filepath)).await;
                 let mut f = match web::block(|| std::fs::File::create(filepath)).await {
                     Ok(e) => e,

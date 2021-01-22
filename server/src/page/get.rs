@@ -80,10 +80,14 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
 #[post("/user/login")]
 pub async fn login_user(body: web::Json<LoginUser>) -> std::io::Result<Response<Body>> {
     let token = generate_token();
-    println!("name : {}, password: {}", body.name, body.password);
+    if cfg!(debug_assertions) {
+        println!("name : {}, password: {}", body.name, body.password);
+    }
     if let Some(id) = get_id_of_user(body.name.clone(), body.password.clone()).await {
         update_token(token.clone(), id.to_owned()).await;
-        println!("{}", valid_session(token.clone()).await);
+        if cfg!(debug_assertions) {
+            println!("{}", valid_session(token.clone()).await);
+        }
         Ok(HttpResponse::Ok().body(&token))
     } else {
         Ok(HttpResponse::Ok().body("No user was found"))

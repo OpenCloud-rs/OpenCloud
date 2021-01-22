@@ -217,13 +217,15 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                     _ => random_archive("zip".to_string(), filename),
                 }
                 .await;
-
-                println!("{}", file.metadata().await.unwrap().len());
-
+                if cfg!(debug_assertions) {
+                    println!("{}", file.metadata().await.unwrap().len());
+                }
                 let mut buf: Vec<u8> = Vec::new();
                 match file.read_to_end(&mut buf).await {
                     Ok(e) => {
-                        println!("{}", e);
+                        if cfg!(debug_assertions) {
+                            println!("{}", e);
+                        }
                     }
                     Err(e) => error(format!("{:?}", e)),
                 };
@@ -293,7 +295,9 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
     if let Ok(mut f) = try_file {
         match f.read_to_end(&mut buf).await {
             Ok(e) => {
-                println!("{}", e);
+                if cfg!(debug_assertions) {
+                    println!("{}", e);
+                }
             }
             Err(e) => error(format!("{:?}", e)),
         };

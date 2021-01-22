@@ -31,7 +31,9 @@ impl fmt::Display for State {
     }
 }
 pub fn upload_file(state: State, url: &String) -> Node<Msg> {
-    println!("{}", url);
+    if cfg!(debug_assertions) {
+        println!("{}", url);
+    }
     // let e = ev(Ev::Input, |e| {let value = e.target().unwrap().dyn_into::<web_sys::HtmlInputElement>().unwrap().;Msg::Log(format!{"{:?}", value})});
     div![
         div![

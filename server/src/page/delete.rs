@@ -23,7 +23,9 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
     if !e.is_empty() {
         if valid_session(String::from(e.clone())).await {
             let user = get_user_by_token(e.clone()).await.unwrap();
-            println!("./home/{}/{}", user.name, path.0);
+            if cfg!(debug_assertions) {
+                println!("./home/{}/{}", user.name, path.0);
+            }
             if async_std::fs::metadata(format!("./home/{}/{}", user.name, path.0))
                 .await
                 .unwrap()
