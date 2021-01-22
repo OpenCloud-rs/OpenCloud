@@ -7,7 +7,7 @@ use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::{db::log::insert::insert, http::http::get_args};
 use actix_multipart::Multipart;
 use actix_web::{post, web, Error, HttpRequest, HttpResponse};
-use std::{eprintln, io::Write};
+use std::io::Write;
 use tokio_stream::StreamExt;
 
 #[post("/file/{path:.*}")]
