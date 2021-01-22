@@ -206,7 +206,7 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                             error("Read Error".to_string())
                         };
                     }
-                    Err(e) => {
+                    Err(_) => {
                         error(format!("Error : Can't Opening file"));
                     }
                 }
