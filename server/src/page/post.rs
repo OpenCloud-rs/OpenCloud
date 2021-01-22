@@ -1,4 +1,4 @@
-use crate::lib::db::log::model::ActionType;
+use crate::lib::{db::log::model::ActionType, log::log::error};
 use crate::lib::db::user::create_home::create_home;
 use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::insert::insert_user;
@@ -55,18 +55,19 @@ pub async fn save_file(
                         match err {
                             actix_http::error::BlockingError::Error(e) => {
                                 let string_err = e.kind();
-                                format!("Error : {:?}", string_err).as_str();
-                                eprintln!("{}", format!("Error : {:?}", string_err).as_str());
+                                error(format!("Error : {:?}", string_err).as_str());
                             }
                             actix_http::error::BlockingError::Canceled => {
-                                eprintln!("Cancelled");
+                                error("Cancelled");
                             }
                         }
 
                         return Ok(HttpResponse::Ok().body("Error on file upload"));
                     }
                 };
-                println!("{:?}", field.next().await);
+                if cfg!(debug_assertions) {
+                    println!("{:?}", field.next().await);
+                }
                 // Field in turn is stream of *Bytes* object
                 while let Some(Ok(chunk)) = field.next().await {
                     // filesystem operations are blocking, we have to use threadpool

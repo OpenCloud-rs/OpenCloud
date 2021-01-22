@@ -18,7 +18,7 @@ pub async fn create() {
     {
         Ok(_) => {}
         Err(_) => {
-            eprintln!("Error on create the database")
+            error("Error on create the database")
         }
     }
 }

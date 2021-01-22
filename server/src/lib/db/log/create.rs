@@ -16,6 +16,6 @@ pub async fn create() {
         .await
     {
         Ok(_) => {}
-        Err(_) => eprintln!("Error on create the log database"),
+        Err(_) => error("Error on create the log database"),
     };
 }

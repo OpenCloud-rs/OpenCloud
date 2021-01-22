@@ -207,7 +207,7 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                         };
                     }
                     Err(e) => {
-                        println!("{} => {}", filename.clone(), e);
+                        error(format!("Error : Can't Opening file"));
                     }
                 }
                 buf

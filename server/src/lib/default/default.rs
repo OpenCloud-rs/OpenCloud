@@ -2,7 +2,7 @@ use std::fs::{read_dir, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
-use crate::lib::config::config::Config;
+use crate::lib::{config::config::Config, log::log::{error, info}};
 use std::process::exit;
 
 pub fn default() -> Config {
@@ -34,10 +34,10 @@ pub fn default() -> Config {
         let mut ff = File::create("./config.yaml").unwrap();
         match ff.write_all(serde_yaml::to_string(&config).unwrap().as_bytes()) {
             Err(why) => {
-                eprintln!("couldn't write to config : {}", why.to_string());
+                error(format!("couldn't write to config : {}", why.to_string()));
                 exit(1)
             },
-            Ok(_) => println!("successfully wrote to config"),
+            Ok(_) => info("successfully wrote to config"),
         }
         config
     } else {
@@ -46,19 +46,19 @@ pub fn default() -> Config {
             Ok(mut e) => match e.read_to_string(&mut buf) {
                 Ok(_) => {}
                 Err(_) => {
-                    eprintln!("Can't read the config");
+                    error("Can't read the config");
                     exit(1)
                 }
             },
             Err(_) => {
-                eprintln!("Can't found the config");
+                error("Can't found the config");
                 exit(1)
             }
         };
         match serde_yaml::from_str(&buf) {
             Ok(o) => o,
             Err(_) => {
-                println!("Config Error");
+                error("Config Error");
                 exit(1);
             }
         }
