@@ -1,4 +1,4 @@
-use crate::lib::archive::archive::random_archive;
+use crate::lib::{archive::archive::random_archive, log::log::{error, warn}};
 use actix_files::file_extension_to_mime;
 use actix_utils::mpsc;
 use actix_web::body::Body;
@@ -160,7 +160,7 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                             ftype: String::from("Error"),
                             modified: String::from("0-0-0000 00:00:00"),
                         });
-                        println!("Le dossier est inexistant");
+                        warn("Le dossier est inexistant".to_string());
                     }
                 }
             }
@@ -203,7 +203,7 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                     Ok(mut o) => {
                         if let Ok(_) = o.read(&mut buf).await {
                         } else {
-                            eprint!("Read Error")
+                            error("Read Error".to_string())
                         };
                     }
                     Err(e) => {
@@ -225,7 +225,7 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                     Ok(e) => {
                         println!("{}", e);
                     }
-                    Err(e) => println!("{:?}", e),
+                    Err(e) => error(format!("{:?}", e)),
                 };
                 buf
             } else {
@@ -282,6 +282,7 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
 
     let try_file = async_std::fs::File::open(path.clone()).await;
     if try_file.is_err() {
+        
         return Ok(Response::Ok()
             .header("Access-Control-Allow-Origin", "*")
             .header("charset", "utf-8")
@@ -294,7 +295,7 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
             Ok(e) => {
                 println!("{}", e);
             }
-            Err(e) => println!("{:?}", e),
+            Err(e) => error(format!("{:?}", e)),
         };
     }
 

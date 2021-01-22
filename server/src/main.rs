@@ -6,11 +6,9 @@ use crate::page::delete::deletef;
 use crate::page::get::{cli, login_user};
 use crate::page::p500::p500;
 use crate::page::post::save_file;
-use actix_web::middleware::errhandlers::ErrorHandlers;
-use actix_web::middleware::Logger;
+use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
-use env_logger::Env;
-use lib::file::default_file::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader};
+use lib::{file::default_file::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader}, log::log::info};
 use page::{get::{default_404, default_api_handler}, post::create_user};
 
 mod lib;
@@ -18,13 +16,12 @@ mod page;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
-    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     let config: Config = default();
     create_log_db().await;
     create_user_db().await;
     let server_ip: &str = &config.get_server();
     lib::db::user::get::get_users().await;
-    
+    info(format!("Server listening on {}:{}", config.server_ip, config.server_port));
     HttpServer::new(move || {
         App::new()
             .default_service(web::to(indexhtml))
@@ -47,7 +44,15 @@ async fn main() -> std::io::Result<()> {
                     .service(deletef)
                     .service(login_user),
             )
-            .wrap(Logger::new("%s : %r in %T"))
+            .wrap_fn(|req, srv| {
+                let fut = srv.call(req);
+                async move {
+                    let res = fut.await.unwrap();
+                    let e = res.request();
+                    info(format!("[{}] {}:{} {}",time::PrimitiveDateTime::from(std::time::SystemTime::now()).format("%F %T"),&e.method(), &res.status(), &e.path()));
+                    Ok(res)
+                }
+            })
             .wrap(ErrorHandlers::new().handler(http::StatusCode::INTERNAL_SERVER_ERROR, p500))
     })
     .bind(server_ip)?

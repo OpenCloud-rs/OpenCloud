@@ -1,4 +1,4 @@
-use crate::lib::file::file::{get_file_as_byte_vec, get_file_preview};
+use crate::lib::{file::file::{get_file_as_byte_vec, get_file_preview}, log::log::error};
 use actix_files::file_extension_to_mime;
 use actix_http::Response;
 use actix_utils::mpsc;
@@ -95,16 +95,16 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
         Err(e) => match e {
             actix_http::error::BlockingError::Error(ziperror) => match ziperror {
                 zip::result::ZipError::Io(_) => {
-                    eprintln!("I/O Error")
+                    error("I/O Error")
                 }
                 zip::result::ZipError::InvalidArchive(_) => {
-                    eprintln!("Invalid Archive")
+                    error("Invalid Archive")
                 }
                 zip::result::ZipError::UnsupportedArchive(_) => {
-                    eprintln!("Unsupported Archive")
+                    error("Unsupported Archive")
                 }
                 zip::result::ZipError::FileNotFound => {
-                    eprintln!("File not found")
+                    error("File not found")
                 }
             },
             actix_http::error::BlockingError::Canceled => {}
