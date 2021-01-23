@@ -5,7 +5,7 @@ pub fn get_args(req: HttpRequest) -> BTreeMap<String, String> {
     let mut bvec: BTreeMap<String, String> = BTreeMap::new();
     let vec: Vec<&str> = req.query_string().split(|c| c == '&').collect();
     for i in 0..vec.len() {
-        if let Some(_u) = vec[i].rfind("=") {
+        if let Some(_) = vec[i].rfind("=") {
             let e: Vec<&str> = vec[i].split("=").collect();
             if e[0].is_empty() {
                 continue;
