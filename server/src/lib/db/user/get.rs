@@ -1,4 +1,4 @@
-use crate::lib::db::conn::*;
+use crate::lib::{db::conn::*, log::log::error};
 use crate::lib::db::user::hash_password;
 use crate::lib::db::user::model::User;
 use futures::TryStreamExt;
@@ -58,7 +58,7 @@ pub async fn get_id_of_user(name: String, password: String) -> Option<i32> {
     {
         Ok(e) => e,
         Err(e) => {
-            eprint!("Error on get_id_of_user : {:?}", e);
+            error(format!("Error on get_id_of_user : {:?}", e));
             (-1,)
         }
     };

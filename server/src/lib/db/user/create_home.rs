@@ -1,5 +1,7 @@
 use async_std::fs::*;
 
+use crate::lib::log::log::error;
+
 pub struct Result {
     pub result: bool,
     pub body: String,
@@ -11,17 +13,17 @@ pub async fn create_home(name: String) -> Result {
             if let Err(_) =
                 create_dir(format!("./home/{}/{}", name.clone(), "photo".to_string())).await
             {
-                eprint!("Error on create photo folder")
+                error("Error on create photo folder")
             }
             if let Err(_) =
                 create_dir(format!("./home/{}/{}", name.clone(), "video".to_string())).await
             {
-                eprint!("Error on create video folder")
+                error("Error on create video folder")
             }
             if let Err(_) =
                 create_dir(format!("./home/{}/{}", name.clone(), "music".to_string())).await
             {
-                eprint!("Error on create music folder")
+                error("Error on create music folder")
             }
             if let Err(_) = create_dir(format!(
                 "./home/{}/{}",
@@ -30,7 +32,7 @@ pub async fn create_home(name: String) -> Result {
             ))
             .await
             {
-                eprint!("Error on create document folder")
+                error("Error on create document folder")
             }
 
             Result {
