@@ -1,6 +1,6 @@
-use crate::lib::{db::conn::*, log::log::error};
 use crate::lib::db::user::hash_password;
 use crate::lib::db::user::model::User;
+use crate::lib::{db::conn::*, log::log::error};
 use futures::TryStreamExt;
 use sqlx::Row;
 

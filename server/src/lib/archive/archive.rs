@@ -1,4 +1,7 @@
-use crate::lib::{file::file::{get_file_as_byte_vec, get_file_preview}, log::log::error};
+use crate::lib::{
+    file::file::{get_file_as_byte_vec, get_file_preview},
+    log::log::error,
+};
 use actix_files::file_extension_to_mime;
 use actix_http::Response;
 use actix_utils::mpsc;
@@ -83,7 +86,7 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
     File::create(file_name.clone()).unwrap();
     if cfg!(debug_assertions) {
         println!("filename => {}", dir);
-    }   
+    }
     match web::block(|| {
         zip_create_from_directory_with_options(
             &PathBuf::from(file_name),
@@ -96,18 +99,10 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
         Ok(_) => {}
         Err(e) => match e {
             actix_http::error::BlockingError::Error(ziperror) => match ziperror {
-                zip::result::ZipError::Io(_) => {
-                    error("I/O Error")
-                }
-                zip::result::ZipError::InvalidArchive(_) => {
-                    error("Invalid Archive")
-                }
-                zip::result::ZipError::UnsupportedArchive(_) => {
-                    error("Unsupported Archive")
-                }
-                zip::result::ZipError::FileNotFound => {
-                    error("File not found")
-                }
+                zip::result::ZipError::Io(_) => error("I/O Error"),
+                zip::result::ZipError::InvalidArchive(_) => error("Invalid Archive"),
+                zip::result::ZipError::UnsupportedArchive(_) => error("Unsupported Archive"),
+                zip::result::ZipError::FileNotFound => error("File not found"),
             },
             actix_http::error::BlockingError::Canceled => {}
         },

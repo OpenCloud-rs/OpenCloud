@@ -22,14 +22,12 @@ pub async fn wasmloader() -> Result<HttpResponse, Error> {
         .body(format!("{}", *PACKAGE_JS)))
 }
 
-
 pub async fn wasm() -> Result<HttpResponse, Error> {
     let body = Vec::from(PACKAGE_BG.clone());
     Ok(HttpResponse::Ok()
         .header("Content-Type", "application/wasm")
         .body(body))
 }
-
 
 pub async fn bulma() -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok()

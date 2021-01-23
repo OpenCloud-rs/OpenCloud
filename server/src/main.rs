@@ -8,8 +8,14 @@ use crate::page::p500::p500;
 use crate::page::post::save_file;
 use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
-use lib::{file::default_file::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader}, log::log::info};
-use page::{get::{default_404, default_api_handler}, post::create_user};
+use lib::{
+    file::default_file::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader},
+    log::log::info,
+};
+use page::{
+    get::{default_404, default_api_handler},
+    post::create_user,
+};
 
 mod lib;
 mod page;
@@ -21,7 +27,10 @@ async fn main() -> std::io::Result<()> {
     create_user_db().await;
     let server_ip: &str = &config.get_server();
     lib::db::user::get::get_users().await;
-    info(format!("Server listening on {}:{}", config.server_ip, config.server_port));
+    info(format!(
+        "Server listening on {}:{}",
+        config.server_ip, config.server_port
+    ));
     HttpServer::new(move || {
         App::new()
             .default_service(web::to(indexhtml))
@@ -49,7 +58,13 @@ async fn main() -> std::io::Result<()> {
                 async move {
                     let res = fut.await.unwrap();
                     let e = res.request();
-                    info(format!("[{}] {}:{} {}",time::PrimitiveDateTime::from(std::time::SystemTime::now()).format("%F %T"),&e.method(), &res.status(), &e.path()));
+                    info(format!(
+                        "[{}] {}:{} {}",
+                        time::PrimitiveDateTime::from(std::time::SystemTime::now()).format("%F %T"),
+                        &e.method(),
+                        &res.status(),
+                        &e.path()
+                    ));
                     Ok(res)
                 }
             })

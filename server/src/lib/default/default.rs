@@ -2,7 +2,10 @@ use std::fs::{read_dir, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
 
-use crate::lib::{config::config::Config, log::log::{error, info}};
+use crate::lib::{
+    config::config::Config,
+    log::log::{error, info},
+};
 use std::process::exit;
 
 pub fn default() -> Config {
@@ -36,7 +39,7 @@ pub fn default() -> Config {
             Err(why) => {
                 error(format!("couldn't write to config : {}", why.to_string()));
                 exit(1)
-            },
+            }
             Ok(_) => info("successfully wrote to config"),
         }
         config

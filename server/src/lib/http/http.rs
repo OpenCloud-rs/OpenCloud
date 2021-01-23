@@ -17,6 +17,6 @@ pub fn get_args(req: HttpRequest) -> BTreeMap<String, String> {
             continue;
         }
         bvec.insert(vec[i].to_string(), String::from(""));
-    } 
+    }
     bvec
 }

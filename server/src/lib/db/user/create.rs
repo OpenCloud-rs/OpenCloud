@@ -17,8 +17,6 @@ pub async fn create() {
         .await
     {
         Ok(_) => {}
-        Err(_) => {
-            error("Error on create the database")
-        }
+        Err(_) => error("Error on create the database"),
     }
 }

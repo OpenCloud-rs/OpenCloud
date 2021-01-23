@@ -1,4 +1,7 @@
-use crate::lib::{archive::archive::random_archive, log::log::{error, warn}};
+use crate::lib::{
+    archive::archive::random_archive,
+    log::log::{error, warn},
+};
 use actix_files::file_extension_to_mime;
 use actix_utils::mpsc;
 use actix_web::body::Body;
@@ -284,7 +287,6 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
 
     let try_file = async_std::fs::File::open(path.clone()).await;
     if try_file.is_err() {
-        
         return Ok(Response::Ok()
             .header("Access-Control-Allow-Origin", "*")
             .header("charset", "utf-8")

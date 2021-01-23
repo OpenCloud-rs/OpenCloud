@@ -22,7 +22,7 @@ pub async fn download(url: String, dtype: String, token: String) {
     } else {
         url_string.push_str("?download");
     }
-    
+
     window()
         .open_with_url_and_target(
             format! {"{}&token={}", url_string.clone(), token.clone()}.as_str(),
