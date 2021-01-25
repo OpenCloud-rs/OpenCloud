@@ -60,7 +60,7 @@ pub async fn save_file(
                             f = f.write_all(&e).await.map(|_| f).unwrap();
                         }
                         Err(e) => {
-                            println!("{:?}", e);
+                            error(format!("{:?}", e));
                         }
                     }
                 }
