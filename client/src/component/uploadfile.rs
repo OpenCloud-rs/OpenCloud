@@ -1,5 +1,5 @@
 use crate::Msg;
-use seed::{prelude::*, *};
+use seed::{*, prelude::{*, web_sys::File}};
 use std::fmt;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -30,50 +30,25 @@ impl fmt::Display for State {
         write!(f, "{}", state)
     }
 }
-pub fn upload_file(state: State, url: &String) -> Node<Msg> {
+pub fn get_name_of_file(file: &Result<File, seed::prelude::JsValue>) -> String {
+    if let Ok(e) = file {
+        e.name()
+    } else {
+        String::new()
+    }
+}
+pub fn upload_file(file_name: String, url: &String) -> Node<Msg> {
     if cfg!(debug_assertions) {
         println!("{}", url);
     }
-    // let e = ev(Ev::Input, |e| {let value = e.target().unwrap().dyn_into::<web_sys::HtmlInputElement>().unwrap().;Msg::Log(format!{"{:?}", value})});
+    let button = if !file_name.is_empty() {
+        button![C!["button is-link"], ev(Ev::Click, |_| Msg::CallUploadFile),  format!("Upload : {}", file_name)]
+    } else {
+        span![]
+    };
+
     div![
         div![
-            C!["mt-2 is-centered is-mobile columns"],
-            button![
-                C!["columns button is-centered"],
-                format![
-                    "{}",
-                    match state {
-                        self::State::Hidden => {
-                            "Show the upload menu"
-                        }
-                        self::State::Show => {
-                            "Hidden the upload menu"
-                        }
-                    }
-                ],
-                ev(Ev::Click, |_| Msg::UploadNext)
-            ],
-        ],
-        div![
-            /*form![
-                    input![
-                        C!["file-input"],
-                        attrs!{
-                            At::Name => "file"
-                            At::Value => "File"
-                            At::Type => "file"
-                        }
-                    ],
-                    span!("Hey"),
-                    input![
-                        C!["button"],
-                        attrs!{
-                            At::Type => "submit"
-                        }
-                    ]
-
-            ],*/
-            attrs! {At::from("style") => format!["visibility: {}", state]},
             div![
                 C!["file columns is-centered"],
                 label![
@@ -99,7 +74,7 @@ pub fn upload_file(state: State, url: &String) -> Node<Msg> {
                     ],
                     span![C!["file-cta"], span![C!["file-label"], "Choose a file"]]
                 ],
-                button![C!["button is-link"], ev(Ev::Click, |_| Msg::CallUploadFile)]
+                button
             ]
         ]
     ]

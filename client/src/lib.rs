@@ -1,5 +1,6 @@
 use crate::component::footer::footer;
 use account::{login::login, signup::signup};
+use component::uploadfile::get_name_of_file;
 use http::{get::refresh::refresh, post::create_user::create_user};
 use shared::{FType, JsonStruct};
 mod account;
@@ -240,7 +241,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                             breadcrumb((&model.route).parse().unwrap()),
                             div![
                                 C!["columns has-text-centered"],
-                                div![C!["column"], upload_file(model.upload_toggle, &model.route),],
+                                div![C!["column"], upload_file(get_name_of_file(&model.file),&model.route),],
                             ],
                             component::folder_list::folder_list(
                                 model.api.content.clone(),
