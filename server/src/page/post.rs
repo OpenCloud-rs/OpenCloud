@@ -32,11 +32,13 @@ pub async fn save_file(
                     return Ok(HttpResponse::Ok().body("Can't get user"));
                 }
             };
-            while let Ok(Some(mut field)) = StreamExt::try_next(&mut payload).await {
+            insert(user.id, ActionType::Upload).await;
+            while let Ok(Some(mut field)) = payload.try_next().await {
                 let filename = field
                     .content_disposition()
-                    .and_then(|cd| cd.get_name().map(ToString::to_string))
+                    .and_then(|cd| cd.get_filename().map(ToString::to_string))
                     .expect("Can't get field name!");
+                info("No panic");
                 let filepath = format!(
                     "./home/{}/{}/{}",
                     user.name,
