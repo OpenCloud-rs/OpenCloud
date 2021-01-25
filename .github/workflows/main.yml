@@ -48,7 +48,7 @@ jobs:
         with:
               name: 'macOS-release'
               path: "/Users/runner/work/OpenCloud/OpenCloud/target/release/server" 
-      - if: matrix.os == 'MacOS-latest'
+      - if: matrix.os == 'windows-latest'
         name: upload artifact
         uses: actions/upload-artifact@v2
         with:
