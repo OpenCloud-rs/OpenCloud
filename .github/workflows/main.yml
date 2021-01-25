@@ -40,7 +40,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v2
         with:
-              name: Test-Artefact
+              name: Test-Artifact
               path: "/home/runner/work/OpenCloud/OpenCloud/target/release/server" 
         
       
