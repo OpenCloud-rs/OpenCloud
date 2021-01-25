@@ -37,7 +37,7 @@ jobs:
           command: make
           args: build_release
       - name: upload artefact 
-        if: matrix.os == "ubuntu-latest"
+        if: matrix.os == ubuntu-latest
         uses: actions/upload-artifact@v2
         with:
               name: Test-Artefact
