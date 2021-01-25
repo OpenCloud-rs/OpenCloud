@@ -36,11 +36,23 @@ jobs:
         with:
           command: make
           args: build_release
-      - name: upload artefact 
-        if: matrix.os == 'ubuntu-latest'
+      - if: matrix.os == 'ubuntu-latest'
+        name: upload artifact
         uses: actions/upload-artifact@v2
         with:
-              name: Test-Artifact
+              name: 'Linux-release'
               path: "/home/runner/work/OpenCloud/OpenCloud/target/release/server" 
+      - if: matrix.os == 'MacOS-latest'
+        name: upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+              name: 'macOS-release'
+              path: "/Users/runner/work/OpenCloud/OpenCloud/target/release/server" 
+      - if: matrix.os == 'MacOS-latest'
+        name: upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+              name: 'windows-release'
+              path: 'D:\a\OpenCloud\OpenCloud\target\release\server.exe'
         
       
