@@ -35,4 +35,12 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: make
-          args: build
+          args: build_release
+      - name: upload artefact 
+        if: matrix.os == "ubuntu-latest"
+        uses: actions/upload-artifact@v2
+        with:
+              name: Test-Artefact
+              path: "/home/runner/work/OpenCloud/OpenCloud/target/release/server" 
+        
+      
