@@ -1,13 +1,13 @@
-use crate::lib::db::user::create_home::create_home;
 use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::insert::insert_user;
 use crate::lib::db::user::model::MinimalUser;
 use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::{db::log::insert::insert, http::http::get_args};
 use crate::lib::{db::log::model::ActionType, log::log::error};
+use crate::lib::{db::user::create_home::create_home, log::log::info};
 use actix_multipart::Multipart;
 use actix_web::{post, web, Error, HttpRequest, HttpResponse};
-use std::io::Write;
+use async_std::io::prelude::WriteExt;
 use tokio_stream::StreamExt;
 
 #[post("/file/{path:.*}")]
@@ -52,33 +52,19 @@ pub async fn save_file(
                     url, filename, filepath
                 );
                 }
-                // let mut f = web::block(|| std::fs::File::create(filepath)).await;
-                let mut f = match web::block(|| std::fs::File::create(filepath)).await {
-                    Ok(e) => e,
-                    Err(err) => {
-                        match err {
-                            actix_http::error::BlockingError::Error(e) => {
-                                let string_err = e.kind();
-                                error(format!("Error : {:?}", string_err).as_str());
-                            }
-                            actix_http::error::BlockingError::Canceled => {
-                                error("Cancelled");
-                            }
-                        }
-
-                        return Ok(HttpResponse::Ok().body("Error on file upload"));
-                    }
-                };
-                if cfg!(debug_assertions) {
-                    println!("{:?}", field.next().await);
-                }
+                let mut f = async_std::fs::File::create(filepath.clone()).await.unwrap();
                 // Field in turn is stream of *Bytes* object
-                while let Some(Ok(chunk)) = field.next().await {
-                    // filesystem operations are blocking, we have to use threadpool
-                    f = web::block(move || f.write_all(&chunk).map(|_| f)).await?;
+                while let Some(chunk) = field.next().await {
+                    match chunk {
+                        Ok(e) => {
+                            f = f.write_all(&e).await.map(|_| f).unwrap();
+                        }
+                        Err(e) => {
+                            println!("{:?}", e);
+                        }
+                    }
                 }
             }
-            insert(user.id, ActionType::Upload).await;
             return Ok(HttpResponse::Ok().body("The file is uploaded"));
         } else {
             Ok(HttpResponse::Ok().body("The token provided isn't valid"))
