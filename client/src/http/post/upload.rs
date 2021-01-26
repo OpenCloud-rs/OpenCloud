@@ -4,16 +4,18 @@ use seed::{
     *,
 };
 
-pub async fn upload_file(token: String, file: File) -> Msg {
+pub async fn upload_file(token: String, file: File, path: String) -> Msg {
+
     let ip = format!(
-        "{}{}{}",
+        "{}{}{}{}",
         "http://".to_owned(),
         &window()
             .location()
             .host()
             .unwrap_or("127.0.0.1:8081".to_string()),
-        "/api/file/"
+        "/api/file/", path
     );
+
     let formdata = web_sys::FormData::new().unwrap();
     formdata.set_with_blob("file", &file).unwrap();
 
