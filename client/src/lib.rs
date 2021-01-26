@@ -96,7 +96,6 @@ pub enum Msg {
     CallDownload(String),
     SignUp,
     CallSignUp,
-    Log(String),
     FileSelect(File),
     CallUploadFile,
     CallbackUploadFile(bool, String),
@@ -109,9 +108,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             error!(format!("Fetch error - Fetching folder info failed",));
             orders.skip();
         }
-        Msg::Log(e) => log!(e),
         Msg::ChangeState(e) => model.state = e,
-        Msg::UploadNext => model.upload_toggle = model.upload_toggle.next(),
         Msg::InputChange(e, it) => match it {
             InputType::Name => model.account.name = e,
             InputType::Password => model.account.password = e,
