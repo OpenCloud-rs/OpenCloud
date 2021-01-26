@@ -48,6 +48,7 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
         route: "".to_string(),
         delete: (false, "".to_string()),
         file: File::new_with_str_sequence(&JsValue::from_str(&"Hello"), "Default"),
+        notification: Vec::new(),
     }
 }
 // ------ ------
@@ -59,6 +60,7 @@ pub struct Model {
     pub api: JsonStruct,
     pub uri: String,
     pub url: Url,
+    pub notification: Vec<(bool, String)>,
     pub upload_toggle: component::uploadfile::State,
     pub name: String,
     pub pass: String,
@@ -84,8 +86,9 @@ pub enum InputType {
 // ------ ------
 pub enum Msg {
     Fetched(Option<JsonStruct>),
-    UploadNext,
     InputChange(String, InputType),
+    AddNotification(bool, String),
+    RemoveNotification(i32),
     Connect,
     Refresh,
     ChangeState(StateApp),
@@ -164,7 +167,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 re.0 = true;
                 orders.skip().perform_cmd(refresh());
             }
-            model.delete = re;
+            model.notification.push(re);
         }
         Msg::SignUp => {
             model.account = Account::new();
@@ -180,11 +183,18 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip().perform_cmd(http::post::upload::upload_file(
                 model.token.clone(),
                 model.file.clone().unwrap(),
+                model.route.clone()
             ));
         }
         Msg::CallbackUploadFile(e, msg) => {
             log!(format! {"{} / {}",e , msg});
             orders.skip().perform_cmd(refresh());
+        }
+        Msg::AddNotification(status, content) => {
+            model.notification.push((status, content))
+        }
+        Msg::RemoveNotification(index) => {
+            model.notification.remove(index as usize);
         }
     }
 }
@@ -204,29 +214,35 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                 div![C!["container is-align-items-center is-flex is-justify-content-center is-align-content-center"], signup()]]
         }
         StateApp::Logged => {
-            let delete = if model.delete.1.is_empty() {
-                div![""]
-            } else {
-                match model.delete.0 {
+            let mut notifs: Vec<Node<Msg>> = Vec::new();
+            let mut n = 0;
+            for i in model.notification.clone() {
+                let child = match i.0 {
                     true => {
                         div![
                             C!["notification is-success"],
                             button![
                                 C!["delete"],
-                                ev(Ev::Click, |_| Msg::DeleteFile(Err(1), "".to_string()))
+                                ev(Ev::Click, move |_| Msg::RemoveNotification(n.clone()))
                             ],
-                            format! {"Delete succesfully"}
+                            i.1
                         ]
                     }
                     false => {
                         div![
                             C!["notification is-danger"],
-                            button![C!["delete"],],
-                            format! {"Delete unsuccessfully"}
+                            button![
+                                C!["delete"],
+                                ev(Ev::Click, move |_| Msg::RemoveNotification(n.clone()))
+                            ],
+                            i.1
                         ]
                     }
-                }
-            };
+                };
+                notifs.push(child);
+                n+=1;
+            }
+
             vec![
                 div![
                     attrs! {At::Id => "wrapper"},
@@ -234,7 +250,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                         C!["container"],
                         div![
                             C!["column"],
-                            delete,
+                            notifs,
                             breadcrumb((&model.route).parse().unwrap()),
                             div![
                                 C!["columns has-text-centered"],
