@@ -40,8 +40,8 @@ async fn main() -> std::io::Result<()> {
                     .service(web::resource("package_bg.wasm").to(wasm))
                     .service(web::resource("bulma/bulma.min.css").to(bulma))
                     .service(web::resource("bulma/bulma.js").to(bulma_js))
-                    .service(web::resource("obj/file.svg").to(folder_svg))
-                    .service(web::resource("obj/folder.svg").to(file_svg))
+                    .service(web::resource("obj/file.svg").to(file_svg))
+                    .service(web::resource("obj/folder.svg").to(folder_svg))
                     .default_service(web::to(default_404)),
             )
             .service(
