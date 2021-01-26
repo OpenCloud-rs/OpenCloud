@@ -21,10 +21,10 @@ pub async fn delete(token: String, name: String) -> Msg {
         .header(Header::custom("Token", token.as_str()))
         .fetch()
         .await;
-    let result = match e {
-        Ok(_) => Ok(200),
-        Err(_) => Err(500),
-    };
+    match e {
+        Ok(_) => Msg::DeleteFile(Ok(200), "Delete successfully".to_string()),
+        Err(_) =>  Msg::DeleteFile(Err(500), "Delete unsuccessfully".to_string()),
+    }
 
-    Msg::DeleteFile(result, "name".to_string())
+    
 }
