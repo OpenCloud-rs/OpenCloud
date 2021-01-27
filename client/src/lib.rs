@@ -38,7 +38,6 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
             content: vec![],
         },
         uri: "".to_string(),
-        url: Url::new(),
         upload_toggle: component::uploadfile::State::Hidden,
         name: String::new(),
         pass: String::new(),
@@ -60,7 +59,6 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
 pub struct Model {
     pub api: JsonStruct,
     pub uri: String,
-    pub url: Url,
     pub notification: Vec<(bool, String)>,
     pub upload_toggle: component::uploadfile::State,
     pub name: String,
@@ -74,9 +72,6 @@ pub struct Model {
     pub file: Result<File, seed::prelude::JsValue>,
 }
 
-// ------ ------
-//  After Mount
-// ------ ------
 pub enum InputType {
     Name,
     Password,
@@ -98,7 +93,6 @@ pub enum Msg {
     DeleteFile(Result<u16, u16>, String),
     CallDelete(String),
     CallDownload(String),
-    SignUp,
     CallSignUp,
     FileSelect(File),
     CallUploadFile,
@@ -169,10 +163,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 orders.skip().perform_cmd(refresh());
             }
             model.notification.push(re);
-        }
-        Msg::SignUp => {
-            model.account = Account::new();
-            model.state = StateApp::SignUp;
         }
         Msg::CallSignUp => {
             orders
