@@ -28,6 +28,7 @@ pub enum ChangeRouteType {
     Remove,
     Add,
 }
+
 fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
     Model {
         api: JsonStruct {
@@ -183,16 +184,14 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip().perform_cmd(http::post::upload::upload_file(
                 model.token.clone(),
                 model.file.clone().unwrap(),
-                model.route.clone()
+                model.route.clone(),
             ));
         }
         Msg::CallbackUploadFile(e, msg) => {
             log!(format! {"{} / {}",e , msg});
             orders.skip().perform_cmd(refresh());
         }
-        Msg::AddNotification(status, content) => {
-            model.notification.push((status, content))
-        }
+        Msg::AddNotification(status, content) => model.notification.push((status, content)),
         Msg::RemoveNotification(index) => {
             model.notification.remove(index as usize);
         }
@@ -204,7 +203,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 // ------ ------
 
 fn view(model: &Model) -> Vec<Node<Msg>> {
-    log!(model.route);
     match model.state {
         StateApp::Login => {
             vec![div![C!["container is-align-items-center is-flex is-justify-content-center is-align-content-center"], login()]]
@@ -240,7 +238,7 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                     }
                 };
                 notifs.push(child);
-                n+=1;
+                n += 1;
             }
 
             vec![
@@ -254,7 +252,10 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                             breadcrumb((&model.route).parse().unwrap()),
                             div![
                                 C!["columns has-text-centered"],
-                                div![C!["column"], upload_file(get_name_of_file(&model.file),&model.route),],
+                                div![
+                                    C!["column"],
+                                    upload_file(get_name_of_file(&model.file), &model.route),
+                                ],
                             ],
                             component::folder_list::folder_list(
                                 model.api.content.clone(),

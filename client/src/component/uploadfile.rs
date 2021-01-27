@@ -1,5 +1,8 @@
 use crate::Msg;
-use seed::{*, prelude::{*, web_sys::File}};
+use seed::{
+    prelude::{web_sys::File, *},
+    *,
+};
 use std::fmt;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -42,40 +45,40 @@ pub fn upload_file(file_name: String, url: &String) -> Node<Msg> {
         println!("{}", url);
     }
     let button = if !file_name.is_empty() {
-        button![C!["button is-link"], ev(Ev::Click, |_| Msg::CallUploadFile),  format!("Upload : {}", file_name)]
+        button![
+            C!["button is-link"],
+            ev(Ev::Click, |_| Msg::CallUploadFile),
+            format!("Upload : {}", file_name)
+        ]
     } else {
         span![]
     };
 
-    div![
-        div![
-            div![
-                C!["file columns is-centered"],
-                label![
-                    C!["file-label"],
-                    input![
-                        C!["file-input"],
-                        attrs! {
-                            At::from("name") => "file",
-                            At::from("type") => "file",
-                        },
-                        ev(Ev::Input, |e| {
-                            let value = e
-                                .target()
-                                .unwrap()
-                                .dyn_into::<web_sys::HtmlInputElement>()
-                                .unwrap()
-                                .files()
-                                .unwrap()
-                                .get(0)
-                                .unwrap();
-                            Msg::FileSelect(value)
-                        })
-                    ],
-                    span![C!["file-cta"], span![C!["file-label"], "Choose a file"]]
-                ],
-                button
-            ]
-        ]
-    ]
+    div![div![div![
+        C!["file columns is-centered"],
+        label![
+            C!["file-label"],
+            input![
+                C!["file-input"],
+                attrs! {
+                    At::from("name") => "file",
+                    At::from("type") => "file",
+                },
+                ev(Ev::Input, |e| {
+                    let value = e
+                        .target()
+                        .unwrap()
+                        .dyn_into::<web_sys::HtmlInputElement>()
+                        .unwrap()
+                        .files()
+                        .unwrap()
+                        .get(0)
+                        .unwrap();
+                    Msg::FileSelect(value)
+                })
+            ],
+            span![C!["file-cta"], span![C!["file-label"], "Choose a file"]]
+        ],
+        button
+    ]]]
 }

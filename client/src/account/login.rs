@@ -8,12 +8,12 @@ pub fn login() -> Node<Msg> {
         form![
             input![
                 C!["input mt-2"],
-                attrs! {At::Type => "text", At::Name => "name"},
+                attrs! {At::Type => "text", At::Name => "name", At::Placeholder => "Name"},
                 input_ev(Ev::Input, |e| Msg::InputChange(e, crate::InputType::Name))
             ],
             input![
                 C!["input mt-2"],
-                attrs! {At::Type => "text", At::Name => "password"},
+                attrs! {At::Type => "password", At::Name => "password", At::Placeholder => "Password"},
                 input_ev(Ev::Input, |e| Msg::InputChange(
                     e,
                     crate::InputType::Password
