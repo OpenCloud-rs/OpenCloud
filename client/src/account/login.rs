@@ -35,7 +35,7 @@ pub fn login() -> Node<Msg> {
                 button![
                     C!["button is-white"],
                     "Sign Up",
-                    ev(Ev::Click, |_| Msg::SignUp)
+                    ev(Ev::Click, |_| Msg::ChangeState(StateApp::SignUp))
                 ]
             ]
         ],
