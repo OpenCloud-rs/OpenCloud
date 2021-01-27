@@ -13,17 +13,17 @@ pub fn signup() -> Node<Msg> {
         form![
             input![
                 C!["input mt-2"],
-                attrs! {At::Type => "text", At::Name => "name", At::Placeholder => "Name"},
+                attrs! {At::Type => "text", At::Id => "signup-name", At::Placeholder => "Name"},
                 input_ev(Ev::Input, |e| Msg::InputChange(e, crate::InputType::Name))
             ],
             input![
                 C!["input mt-2"],
-                attrs! {At::Type => "email", At::Name => "email",At::Placeholder => "email"},
+                attrs! {At::Type => "email", At::Id => "signup-email",At::Placeholder => "email"},
                 input_ev(Ev::Input, |e| Msg::InputChange(e, crate::InputType::Mail))
             ],
             input![
                 C!["input mt-2"],
-                attrs! {At::Type => "password", At::Name => "password",At::Placeholder => "password"},
+                attrs! {At::Type => "password", At::Id => "signup-password",At::Placeholder => "password"},
                 input_ev(Ev::Input, |e| Msg::InputChange(
                     e,
                     crate::InputType::Password

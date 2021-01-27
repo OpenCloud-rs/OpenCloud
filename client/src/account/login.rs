@@ -1,6 +1,6 @@
 use seed::{prelude::*, *};
 
-use crate::Msg;
+use crate::{Msg, StateApp};
 
 pub fn login() -> Node<Msg> {
     div![
@@ -8,16 +8,13 @@ pub fn login() -> Node<Msg> {
         form![
             input![
                 C!["input mt-2"],
-                attrs! {At::Type => "text", At::Name => "name", At::Placeholder => "Name"},
+                attrs! {At::Type => "text", At::Id => "login-name", At::Placeholder => "Name"},
                 input_ev(Ev::Input, |e| Msg::InputChange(e, crate::InputType::Name))
             ],
             input![
                 C!["input mt-2"],
-                attrs! {At::Type => "password", At::Name => "password", At::Placeholder => "Password"},
-                input_ev(Ev::Input, |e| Msg::InputChange(
-                    e,
-                    crate::InputType::Password
-                ))
+                attrs! {At::Type => "password", At::Id => "login-password", At::Placeholder => "Password"},
+                input_ev(Ev::Input, |e| Msg::InputChange(e, crate::InputType::Password))
             ],
         ],
         div![
