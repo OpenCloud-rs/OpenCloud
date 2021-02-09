@@ -5,8 +5,8 @@ use crate::lib::db::user::model::LoginUser;
 use crate::lib::db::user::token::generate_token;
 use crate::lib::db::user::update::update_token;
 use crate::lib::db::user::valid_session::valid_session;
-use crate::lib::file::file::{get_dir, get_file_preview, Sort};
-use crate::lib::{archive::archive::*, http::http::get_args};
+use crate::lib::file::{get_dir, get_file_preview, Sort};
+use crate::lib::{archive::*, http::get_args};
 use actix_http::body::Body;
 use actix_web::{get, post, web, HttpRequest, HttpResponse as Response, HttpResponse};
 
@@ -20,8 +20,9 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
     } else {
         String::new()
     };
-    if !e.is_empty() {
-        if valid_session(e.clone()).await {
+    if e.is_empty() {
+        result = Ok(HttpResponse::Ok().body(String::from("No token provided")));
+    } else if valid_session(e.clone()).await {
             let bvec = get_args(req.clone());
             let user = match get_user_by_token(e.clone()).await {
                 Some(e) => e,
@@ -70,9 +71,6 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<R
         } else {
             result = Ok(HttpResponse::Ok().body("The token provided isn't valid"))
         }
-    } else {
-        result = Ok(HttpResponse::Ok().body(String::from("No token provided")));
-    }
 
     result
 }

@@ -1,7 +1,7 @@
-use crate::lib::config::config::Config;
+use crate::lib::config::Config;
 use crate::lib::db::log::create::create as create_log_db;
 use crate::lib::db::user::create::create as create_user_db;
-use crate::lib::default::default::default;
+use crate::lib::default::default;
 use crate::page::delete::deletef;
 use crate::page::get::{cli, login_user};
 use crate::page::p500::p500;
@@ -9,8 +9,8 @@ use crate::page::post::save_file;
 use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
 use lib::{
-    file::default_file::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader},
-    log::log::info,
+    file::default::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader},
+    log::info,
 };
 use page::{
     get::{default_404, default_api_handler},

@@ -6,7 +6,16 @@ pub struct JsonStruct {
     pub ftype: FType,
     pub content: Vec<Folder>,
 }
-
+impl Default for JsonStruct {
+    fn default() -> Self {
+        Self {
+            result: false,
+            lenght: 0,
+            ftype: FType::Error,
+            content: Vec::new(),
+        }
+    }
+}
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Folder {
     pub result: bool,
@@ -27,15 +36,4 @@ pub enum FType {
 pub struct HTTPQuery {
     pub rtype: String,
     pub download: String,
-}
-
-impl JsonStruct {
-    pub fn new() -> JsonStruct {
-        JsonStruct {
-            result: false,
-            lenght: 0,
-            ftype: FType::Error,
-            content: Vec::new(),
-        }
-    }
 }

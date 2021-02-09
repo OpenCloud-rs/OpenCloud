@@ -1,7 +1,7 @@
 use crate::lib::db::log::model::ActionType;
 use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::valid_session::valid_session;
-use crate::lib::{db::log::insert::insert, http::http::get_args};
+use crate::lib::{db::log::insert::insert, http::get_args};
 use actix_web::{delete, web, Error, HttpRequest, HttpResponse};
 use shared::{FType, Folder, JsonStruct};
 
@@ -20,8 +20,9 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
     } else {
         String::new()
     };
-    if !e.is_empty() {
-        if valid_session(String::from(e.clone())).await {
+    if e.is_empty() {
+        Ok(HttpResponse::Ok().body(String::from("No token provided")))
+    } else if valid_session(String::from(e.clone())).await {
             let user = get_user_by_token(e.clone()).await.unwrap();
             if cfg!(debug_assertions) {
                 println!("./home/{}/{}", user.name, path.0);
@@ -86,7 +87,4 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
         } else {
             Ok(HttpResponse::Ok().body("The token provided isn't valid"))
         }
-    } else {
-        Ok(HttpResponse::Ok().body(String::from("No token provided")))
-    }
 }

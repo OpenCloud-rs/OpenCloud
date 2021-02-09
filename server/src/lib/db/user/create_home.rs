@@ -1,6 +1,6 @@
 use async_std::fs::*;
 
-use crate::lib::log::log::error;
+use crate::lib::log::error;
 
 pub struct Result {
     pub result: bool,

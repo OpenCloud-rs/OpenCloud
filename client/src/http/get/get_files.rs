@@ -13,12 +13,12 @@ pub async fn get_files(from: String, token: String) -> Msg {
             Ok(json) => json,
             Err(e) => {
                 log!(format! {"{:?}", e});
-                JsonStruct::new()
+                JsonStruct::default()
             }
         },
         Err(e) => {
             log!(format! {"{:?}", e});
-            JsonStruct::new()
+            JsonStruct::default()
         }
     };
 

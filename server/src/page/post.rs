@@ -2,9 +2,9 @@ use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::insert::insert_user;
 use crate::lib::db::user::model::MinimalUser;
 use crate::lib::db::user::valid_session::valid_session;
-use crate::lib::{db::log::insert::insert, http::http::get_args};
-use crate::lib::{db::log::model::ActionType, log::log::error};
-use crate::lib::{db::user::create_home::create_home, log::log::info};
+use crate::lib::{db::log::insert::insert, http::get_args};
+use crate::lib::{db::log::model::ActionType, log::error};
+use crate::lib::{db::user::create_home::create_home, log::info};
 use actix_multipart::Multipart;
 use actix_web::{post, web, Error, HttpRequest, HttpResponse};
 use async_std::io::prelude::WriteExt;
@@ -23,7 +23,9 @@ pub async fn save_file(
     } else {
         String::new()
     };
-    if !e.is_empty() {
+    if e.is_empty() {
+        Ok(HttpResponse::Ok().body("No token provided"))
+    } else {
         let url = format!("/{}", path.0);
         if valid_session(e.clone()).await {
             let user = match get_user_by_token(e.clone()).await {
@@ -69,8 +71,6 @@ pub async fn save_file(
         } else {
             Ok(HttpResponse::Ok().body("The token provided isn't valid"))
         }
-    } else {
-        Ok(HttpResponse::Ok().body("No token provided"))
     }
 }
 
