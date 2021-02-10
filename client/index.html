@@ -1,9 +1,13 @@
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
+    <script type="module">
+      import init from '/pkg/package.js';
+      init('/pkg/package_bg.wasm');
+    </script>
     <link rel="stylesheet" href="/pkg/bulma/bulma.min.css">
     <script src="/pkg/bulma/bulma.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenCloud</title>
     <style type="text/css" media="screen">
         body {
@@ -16,10 +20,6 @@
           flex: 1;
         }
       </style>
-    <script type="module">
-    import init from '/pkg/package.js';
-    init('/pkg/package_bg.wasm');
-</script>
 </head>
 <body id="app">
 </body>

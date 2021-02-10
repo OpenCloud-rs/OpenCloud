@@ -1,6 +1,10 @@
 use crate::Msg;
-use seed::{prelude::*, *};
+use seed::{
+    prelude::{web_sys::File, *},
+    *,
+};
 use std::fmt;
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum State {
     Show,
@@ -23,44 +27,58 @@ impl Default for State {
 impl fmt::Display for State {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let state = match self {
-            Self::Show => "hidden",
-            Self::Hidden => "visible",
+            Self::Show => "visible",
+            Self::Hidden => "hidden",
         };
         write!(f, "{}", state)
     }
 }
-pub fn upload_file(state: State, url: &String) -> Node<Msg> {
-    div![
+pub fn get_name_of_file(file: &Result<File, seed::prelude::JsValue>) -> String {
+    if let Ok(e) = file {
+        e.name()
+    } else {
+        String::new()
+    }
+}
+pub fn upload_file(file_name: String, url: &String) -> Node<Msg> {
+    if cfg!(debug_assertions) {
+        println!("{}", url);
+    }
+    let button = if !file_name.is_empty() {
         button![
-            format![
-                "{}",
-                match state {
-                    self::State::Show => {
-                        "Show to upload"
-                    }
-                    self::State::Hidden => {
-                        "Hidden the upload menu"
-                    }
-                }
-            ],
-            ev(Ev::Click, |_| Msg::Next)
-        ],
-        div![
-            attrs! {At::from("style") => format!["visibility: {}", state]},
-            form![
+            C!["button is-link"],
+            ev(Ev::Click, |_| Msg::CallUploadFile),
+            format!("Upload : {}", file_name)
+        ]
+    } else {
+        span![]
+    };
+
+    div![div![div![
+        C!["file columns is-centered"],
+        label![
+            C!["file-label"],
+            input![
+                C!["file-input"],
                 attrs! {
-                    At::from("method") => "post",
-                    At::from("enctype") => "multipart/form-data",
-                    At::from("action") => format!["http://127.0.0.1:8080/cli/{}", url],
-                },
-                input![attrs! {
                     At::from("name") => "file",
                     At::from("type") => "file",
-                }],
-                input![attrs! {
-                    At::from("type") => "submit",
-                }]
-            ]
-        ]
-    ]
+                },
+                ev(Ev::Input, |e| {
+                    let value = e
+                        .target()
+                        .unwrap()
+                        .dyn_into::<web_sys::HtmlInputElement>()
+                        .unwrap()
+                        .files()
+                        .unwrap()
+                        .get(0)
+                        .unwrap();
+                    Msg::FileSelect(value)
+                })
+            ],
+            span![C!["file-cta"], span![C!["file-label"], "Choose a file"]]
+        ],
+        button
+    ]]]
 }

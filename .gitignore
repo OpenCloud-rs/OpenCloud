@@ -1,8 +1,15 @@
 target/*
-*.lock
 Cargo.lockclient/.project
 client/.project
 server/.idea/
 OpenCloud/
 .buildconfig
 .idea/
+*config.yaml
+db.sql
+*home/*temp/
+temp/
+home/
+.vscode/
+db.sql-wal
+db.sql-shm

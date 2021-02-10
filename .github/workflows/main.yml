@@ -1,0 +1,58 @@
+# This is a basic workflow to help you get started with Actions
+name: OpenCloud Builder
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ restruct ]
+  pull_request:
+    branches: [ restruct ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    name: Test
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: cargo make
+        uses: actions-rs/cargo@v1
+        with: 
+          command: install
+          args: cargo-make
+      - name: cargo test build
+        uses: actions-rs/cargo@v1
+        with:
+          command: make
+          args: build_release
+      - if: matrix.os == 'ubuntu-latest'
+        name: upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+              name: 'Linux-release'
+              path: "/home/runner/work/OpenCloud/OpenCloud/target/release/server" 
+      - if: matrix.os == 'MacOS-latest'
+        name: upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+              name: 'macOS-release'
+              path: "/Users/runner/work/OpenCloud/OpenCloud/target/release/server" 
+      - if: matrix.os == 'windows-latest'
+        name: upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+              name: 'windows-release'
+              path: 'D:\a\OpenCloud\OpenCloud\target\release\server.exe'
+        
+      

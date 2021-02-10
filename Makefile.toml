@@ -49,6 +49,29 @@ description = "Build and start Actix server with client on port 8000 in release 
 args = ["run", "--package", "server", "--release"]
 dependencies = ["build_release"]
 
+[tasks.start_client]
+description = "start client"
+workspace = false
+install_crate = { crate_name = "wasm-pack", binary = "wasm-pack", test_arg = "-V" }
+command = "wasm-pack"
+args = ["run", "client", "--target", "web", "--out-name", "package", "--dev"]
+
+[tasks.start_client_release]
+extend = "start_client"
+description = "start client in release mode"
+args = ["run", "client", "--target", "web", "--out-name", "package", "--release"]
+
+[tasks.start_server]
+description = "start server"
+workspace = false
+command = "cargo"
+args = ["run", "--package", "server"]
+
+[tasks.start_server_release]
+extend = "start_server"
+description = "start server in release mode"
+args = ["run", "--package", "server", "--release"]
+
 # ---- LINT ----
 
 [tasks.fmt]

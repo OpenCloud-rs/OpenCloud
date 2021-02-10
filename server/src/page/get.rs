@@ -1,82 +1,101 @@
-use std::collections::BTreeMap;
+use crate::lib::db::log::insert::insert;
+use crate::lib::db::log::model::ActionType;
+use crate::lib::db::user::get::{get_id_of_user, get_user_by_token};
+use crate::lib::db::user::model::LoginUser;
+use crate::lib::db::user::token::generate_token;
+use crate::lib::db::user::update::update_token;
+use crate::lib::db::user::valid_session::valid_session;
+use crate::lib::file::{get_dir, get_file_preview, Sort};
+use crate::lib::{archive::*, http::get_args};
+use actix_http::body::Body;
+use actix_web::{get, post, web, HttpRequest, HttpResponse as Response, HttpResponse};
 
-use actix_files::file_extension_to_mime;
-use actix_utils::mpsc;
-use actix_web::dev::BodyEncoding;
-use actix_web::http::ContentEncoding;
-use actix_web::{Error, HttpRequest, HttpResponse as Response};
-use bytes::Bytes;
-
-use crate::lib::file::get_file_as_byte_vec;
-use crate::lib::http::last_cli;
-
-pub async fn cli(req: HttpRequest) -> Result<Response, Error> {
-    crate::lib::http::log(&req);
-    let mut result = Ok(Response::Ok()
-        .header("Access-Control-Allow-Origin", "*")
-        .header("charset", "utf-8")
-        .content_type("application/json")
-        .encoding(ContentEncoding::Gzip)
-        .body(crate::lib::file::dir_content(&req)));
-
-    let mut bvec: BTreeMap<&str, &str> = BTreeMap::new();
-    let vec: Vec<&str> = req.query_string().split(|c| c == '&').collect();
-
-    for i in 0..vec.len() {
-        if let Some(_u) = vec[i].rfind("=") {
-            let e: Vec<&str> = vec[i].split("=").collect();
-            if e[0].is_empty() {
-                continue;
-            }
-            bvec.insert(e[0], e[1]);
-            continue;
-        }
-        if vec[i].is_empty() {
-            continue;
-        }
-        bvec.insert(vec[i], &"");
-    }
+#[get("/file/{path:.*}")]
+pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<Response<Body>> {
+    let result;
+    let e = if let Some(e) = req.headers().get("token") {
+        String::from(e.to_str().unwrap_or_default())
+    } else if let Some(e) = get_args(req.clone()).get("token") {
+        String::from(e)
+    } else {
+        String::new()
+    };
+    if e.is_empty() {
+        result = Ok(HttpResponse::Ok().body(String::from("No token provided")));
+    } else if valid_session(e.clone()).await {
+            let bvec = get_args(req.clone());
+            let user = match get_user_by_token(e.clone()).await {
+                Some(e) => e,
+                None => {
+                    return Ok(HttpResponse::Ok().body(String::from("Error on get user")));
+                }
+            };
             if bvec.contains_key("download") {
-                match bvec.get("download").unwrap().as_ref() {
+                match bvec.get("download").unwrap_or(&String::new()).as_ref() {
                     "tar.gz" => {
-                        let (tx, rx_body) = mpsc::channel();
-                        let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
-                            req.path().parse().unwrap(), &""
-                        ))));
-                        result = Ok(Response::Ok()
-                            .header("Access-Control-Allow-Origin", "*")
-                            .header("charset", "utf-8")
-                            .header(
-                                "Content-Disposition",
-                                format!(
-                                    "\"attachment\";filename=\"{}.zip\"",
-                                    last_cli(req.clone())
-                                ),
-                            )
-                            .content_type(file_extension_to_mime(req.clone().path()).essence_str())
-                            .encoding(ContentEncoding::Gzip)
-                            .streaming(rx_body));
+                        result = download(
+                            format!("{}/{}", user.home, path.0.clone()),
+                            ArchiveType::Targz,
+                        )
+                        .await;
                     }
                     _ => {
-                        let (tx, rx_body) = mpsc::channel();
-                        let _ = tx.send(Ok::<_, Error>(Bytes::from(get_file_as_byte_vec(
-                            req.path().parse().unwrap(), &""
-                        ))));
-                        result = Ok(Response::Ok()
-                            .header("Access-Control-Allow-Origin", "*")
-                            .header("charset", "utf-8")
-                            .header(
-                                "Content-Disposition",
-                                format!(
-                                    "\"attachment\";filename=\"{}.zip\"",
-                                    last_cli(req.clone())
-                                ),
-                            )
-                            .content_type(file_extension_to_mime(req.clone().path()).essence_str())
-                            .encoding(ContentEncoding::Gzip)
-                            .streaming(rx_body));
+                        result = download(
+                            format!("{}/{}", user.home, path.0.clone()),
+                            ArchiveType::Zip,
+                        )
+                        .await;
                     }
                 }
-    }
+            } else if bvec.contains_key("sort") {
+                match bvec.get("sort").unwrap_or(&String::new()).as_ref() {
+                    "by_size" => {
+                        result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Size);
+                    }
+                    "by_name" => {
+                        result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
+                    }
+                    "by_date" => {
+                        result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Date);
+                    }
+                    _ => {
+                        result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Type);
+                    }
+                }
+            } else if bvec.contains_key("preview") {
+                result = get_file_preview(format!("{}/{}", user.home, path.0.clone())).await
+            } else {
+                result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
+            }
+            insert(user.id, ActionType::Get).await;
+        } else {
+            result = Ok(HttpResponse::Ok().body("The token provided isn't valid"))
+        }
+
     result
+}
+
+#[post("/user/login")]
+pub async fn login_user(body: web::Json<LoginUser>) -> std::io::Result<Response<Body>> {
+    let token = generate_token();
+    if cfg!(debug_assertions) {
+        println!("name : {}, password: {}", body.name, body.password);
+    }
+    if let Some(id) = get_id_of_user(body.name.clone(), body.password.clone()).await {
+        update_token(token.clone(), id.to_owned()).await;
+        if cfg!(debug_assertions) {
+            println!("{}", valid_session(token.clone()).await);
+        }
+        Ok(HttpResponse::Ok().body(&token))
+    } else {
+        Ok(HttpResponse::Ok().body("No user was found"))
+    }
+}
+
+pub async fn default_api_handler() -> std::io::Result<HttpResponse> {
+    Ok(HttpResponse::BadRequest().body("Bad Usage of Api"))
+}
+
+pub async fn default_404() -> std::io::Result<HttpResponse> {
+    Ok(HttpResponse::NotFound().body("Oh no, file not found"))
 }
