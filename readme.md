@@ -11,8 +11,7 @@
 		<li>RESTAPI</li>
 		<li><a href="https://github.com/OpenCloud-rs/OpenCloud-Flutter">Mobile app (IOS/ Android)</a></li>
         <hr>
-	<h3>Roadmap to 1.0.0</h3>
-	<li>Create Desktop Client</li>
+	<a href="https://github.com/OpenCloud-rs/OpenCloud/blob/restruct/ROADMAP.md">Roadmap</a>
         <hr>
         <h3>Screenshot (Not the latest version)<h3/>
         <img src="https://raw.githubusercontent.com/OpenCloud-rs/OpenCloud/restruct/asset/OpenCloud-UI.gif">
