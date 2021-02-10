@@ -1,0 +1,28 @@
+on:   
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+name: Rust
+
+jobs:
+  check:
+    name: Rust project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            override: true
+            components: rustfmt, clippy
+
+      # `cargo check` command here will use installed `nightly`
+      # as it is set as an "override" for current directory
+
+      - name: Run build
+        run: cargo build --verbose --release
+      - name: Run tests
+        run: cargo test --verbose
