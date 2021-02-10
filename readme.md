@@ -12,8 +12,6 @@
 		<li><a href="https://github.com/OpenCloud-rs/OpenCloud-Flutter">Mobile app (IOS/ Android)</a></li>
         <hr>
 	<h3>Roadmap to 1.0.0</h3>
-        <li>Include the web client in the binary</li>
-	<li>Update struct of the Rust Source</li>
 	<li>Create Desktop Client</li>
         <hr>
         <h3>Screenshot (Not the latest version)<h3/>
