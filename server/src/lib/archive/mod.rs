@@ -2,15 +2,12 @@ use crate::lib::{
     file::{get_file_as_byte_vec, get_file_preview},
     log::error,
 };
-use actix_files::file_extension_to_mime;
 use actix_http::Response;
 use actix_utils::mpsc;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 use actix_web::web;
 use async_std::fs as afs;
-use bytes::Bytes;
-use futures::AsyncReadExt;
 use std::fs::File;
 use std::io::Error;
 use std::path::PathBuf;
@@ -47,6 +44,7 @@ pub async fn get_zip(path: String) -> std::io::Result<Response> {
     let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(
         get_file_as_byte_vec(path.clone(), &"zip").await,
     )));
+    println!("{}", path.clone());
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
@@ -57,7 +55,7 @@ pub async fn get_zip(path: String) -> std::io::Result<Response> {
                 path.clone().split('/').last().unwrap_or("default_name")
             ),
         )
-        .content_type(file_extension_to_mime(path.clone().as_str()).essence_str())
+        .content_type("application/zip")
         .encoding(ContentEncoding::Gzip)
         .streaming(rx_body))
 }
@@ -77,7 +75,7 @@ pub async fn get_tar(path: String) -> std::io::Result<Response> {
                 path.clone().split('/').last().unwrap_or("default_name")
             ),
         )
-        .content_type(file_extension_to_mime(path.clone().as_str()).essence_str())
+        .content_type("application/x-tar")
         .encoding(ContentEncoding::Gzip)
         .streaming(rx_body))
 }
@@ -147,37 +145,4 @@ fn random_name() -> String {
             charset[idx] as char
         })
         .collect()
-}
-
-pub struct _ArchiveFile {
-    pub src_path: String,
-    pub name: String,
-}
-
-impl _ArchiveFile {
-    pub async fn _read_zip(&'static self) -> std::io::Result<Bytes> {
-        let file_name = format!("./temp/{}.zip", &self.name);
-        let mut vec = Vec::new();
-        let _ = afs::File::create(file_name.clone()).await?;
-        if cfg!(debug_assertions) {
-            println!("filename => {}", &self.src_path);
-        }
-        let _ = web::block(move || {
-            zip_create_from_directory_with_options(
-                &PathBuf::from(file_name),
-                &PathBuf::from(&self.src_path),
-                FileOptions::default().compression_method(CompressionMethod::Bzip2),
-            )
-        })
-        .await;
-
-        let _ = afs::File::open(format!("./temp/{}.zip", &self.name))
-            .await?
-            .read_to_end(&mut vec)
-            .await?;
-
-        Ok(Bytes::from(vec))
-    }
-    pub fn _write_tar(&self) {}
-    pub fn _read_to_bytes(&self) {}
 }
