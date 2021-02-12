@@ -5,7 +5,6 @@ use crate::lib::{
     archive::random_archive,
     log::{error, warn},
 };
-use actix_files::file_extension_to_mime;
 use actix_utils::mpsc;
 use actix_web::body::Body;
 use actix_web::dev::BodyEncoding;
@@ -45,7 +44,7 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                     )
                     .format("%d-%m-%Y %T"),
                     name: String::from(path.split("/").last().unwrap()),
-                    ftype: file_extension_to_mime(path.split("/").last().unwrap()).to_string(),
+                    ftype: mime_guess::from_ext(path.split("/").last().unwrap()).first_or_octet_stream().to_string(),
                     modified: time::PrimitiveDateTime::from(
                         e.modified().unwrap_or(std::time::SystemTime::now()),
                     )
@@ -135,7 +134,7 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                                             });
                                         }
                                     }
-                                    Err(_e) => content.push(Folder {
+                                    Err(_) => content.push(Folder {
                                         result: false,
                                         size: 0,
                                         created: String::from("0-0-0000 00:00:00"),
@@ -144,7 +143,7 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                                         ftype: String::from("Error"),
                                     }),
                                 },
-                                Err(_e) => {
+                                Err(_) => {
                                     content.push(Folder {
                                         result: false,
                                         size: 0,
@@ -157,7 +156,7 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                             }
                         }
                     }
-                    Err(_e) => {
+                    Err(_) => {
                         content.push(Folder {
                             result: false,
                             size: 0,
