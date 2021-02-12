@@ -1,6 +1,6 @@
-use crate::lib::db::user::get::get_user_by_token;
+use crate::lib::db::user::get::{get_user_by_token, get_id_of_user};
 use crate::lib::db::user::insert::insert_user;
-use crate::lib::db::user::model::MinimalUser;
+use crate::lib::db::user::model::{MinimalUser, LoginUser};
 use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::{db::log::insert::insert, http::get_args};
 use crate::lib::{db::log::model::ActionType, log::error};
@@ -9,6 +9,10 @@ use actix_multipart::Multipart;
 use actix_web::{post, web, Error, HttpRequest, HttpResponse};
 use async_std::io::prelude::WriteExt;
 use tokio_stream::StreamExt;
+use crate::lib::db::user::token::generate_token;
+use actix_http::Response;
+use actix_web::body::Body;
+use crate::lib::db::user::update::update_token;
 
 #[post("/file/{path:.*}")]
 pub async fn save_file(
@@ -92,5 +96,22 @@ pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, E
             }
         }
         Err(_) => Ok(HttpResponse::Ok().body("Your request is bad")),
+    }
+}
+
+#[post("/user/login")]
+pub async fn login_user(body: web::Json<LoginUser>) -> Response<Body> {
+    let token = generate_token();
+    if cfg!(debug_assertions) {
+        println!("name : {}, password: {}", body.name, body.password);
+    }
+    if let Some(id) = get_id_of_user(body.name.clone(), body.password.clone()).await {
+        update_token(token.clone(), id.to_owned()).await;
+        if cfg!(debug_assertions) {
+            println!("{}", valid_session(token.clone()).await);
+        }
+        HttpResponse::Ok().body(&token)
+    } else {
+        HttpResponse::BadRequest().body("No user was found")
     }
 }
