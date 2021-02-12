@@ -1,10 +1,10 @@
 use std::fs::{read_dir, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
+use logger::{error, info};
 
 use crate::lib::{
     config::Config,
-    log::{error, info},
 };
 use std::process::exit;
 

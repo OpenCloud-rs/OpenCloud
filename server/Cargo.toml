@@ -33,8 +33,9 @@ shared = {path = "../shared"}
 sqlx = {version = "0.5.1", features = ["sqlite", "runtime-async-std-rustls"]}
 whirlpool = "0.9.0"
 
+logger = {git = "https://github.com/Rheydskey/logger"}
+
 time = "0.2.25"
-colorful = "0.2.1"
 async-std = "1.9.0"
 
 chrono = "0.4.19"

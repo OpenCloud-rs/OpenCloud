@@ -1,8 +1,7 @@
 use crate::lib::{
     file::{get_file_as_byte_vec, get_file_preview},
-    log::error,
 };
-
+use logger::error;
 use actix_web::{HttpResponse, dev::BodyEncoding};
 use actix_utils::mpsc;
 use actix_web::http::ContentEncoding;

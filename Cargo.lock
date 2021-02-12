@@ -1616,6 +1616,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "logger"
+version = "0.1.0"
+source = "git+https://github.com/Rheydskey/logger#ccab7006e08e67eddbcac052aee17278fa3e70d5"
+dependencies = [
+ "colorful",
+]
+
+[[package]]
 name = "lru-cache"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2458,10 +2466,10 @@ dependencies = [
  "async-std",
  "bytes 1.0.1",
  "chrono",
- "colorful",
  "futures",
  "futures-core",
  "include-flate",
+ "logger",
  "mime_guess",
  "rand 0.8.3",
  "serde",
