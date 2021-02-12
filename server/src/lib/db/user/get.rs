@@ -62,6 +62,9 @@ pub async fn get_id_of_user(name: String, password: String) -> Option<i32> {
             (-1,)
         }
     };
-
-    Some(query.0)
+    if query.0 == -1  {
+        None
+    } else {
+        Some(query.0)
+    }
 }
