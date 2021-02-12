@@ -10,8 +10,6 @@ use actix_web::{post, web, Error, HttpRequest, HttpResponse};
 use async_std::io::prelude::WriteExt;
 use tokio_stream::StreamExt;
 use crate::lib::db::user::token::generate_token;
-use actix_http::Response;
-use actix_web::body::Body;
 use crate::lib::db::user::update::update_token;
 
 #[post("/file/{path:.*}")]
@@ -100,7 +98,7 @@ pub async fn create_user(body: web::Json<MinimalUser>) -> Result<HttpResponse, E
 }
 
 #[post("/user/login")]
-pub async fn login_user(body: web::Json<LoginUser>) -> Response<Body> {
+pub async fn login_user(body: web::Json<LoginUser>) -> HttpResponse {
     let token = generate_token();
     if cfg!(debug_assertions) {
         println!("name : {}, password: {}", body.name, body.password);

@@ -2,11 +2,10 @@ use crate::lib::{
     file::{get_file_as_byte_vec, get_file_preview},
     log::error,
 };
-use actix_http::Response;
+
+use actix_web::{HttpResponse, dev::BodyEncoding};
 use actix_utils::mpsc;
-use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
-use actix_web::web;
 use async_std::fs as afs;
 use std::fs::File;
 use std::io::Error;
@@ -33,19 +32,19 @@ pub async fn download(
                     ArchiveType::Zip => get_zip(path.clone()).await,
                 }
             } else {
-                Ok(Response::Ok().body("No file"))
+                Ok(HttpResponse::Ok().body("No file"))
             }
         }
-        Err(_) => Ok(Response::Ok().body("Error")),
+        Err(_) => Ok(HttpResponse::Ok().body("Error")),
     }
 }
-pub async fn get_zip(path: String) -> std::io::Result<Response> {
+pub async fn get_zip(path: String) -> std::io::Result<HttpResponse> {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(
         get_file_as_byte_vec(path.clone(), &"zip").await,
     )));
     println!("{}", path.clone());
-    Ok(Response::Ok()
+    Ok(HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .header(
@@ -60,12 +59,12 @@ pub async fn get_zip(path: String) -> std::io::Result<Response> {
         .streaming(rx_body))
 }
 
-pub async fn get_tar(path: String) -> std::io::Result<Response> {
+pub async fn get_tar(path: String) -> std::io::Result<HttpResponse> {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(
         get_file_as_byte_vec(path.clone(), &"tar").await,
     )));
-    Ok(Response::Ok()
+    Ok(HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .header(
@@ -86,24 +85,20 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
     if cfg!(debug_assertions) {
         println!("filename => {}", dir);
     }
-    match web::block(|| {
+    match async_std::task::block_on(async {
         zip_create_from_directory_with_options(
             &PathBuf::from(file_name),
             &PathBuf::from(dir),
             FileOptions::default().compression_method(CompressionMethod::Bzip2),
         )
     })
-    .await
     {
         Ok(_) => {}
         Err(e) => match e {
-            actix_http::error::BlockingError::Error(ziperror) => match ziperror {
                 zip::result::ZipError::Io(_) => error("I/O Error"),
                 zip::result::ZipError::InvalidArchive(_) => error("Invalid Archive"),
                 zip::result::ZipError::UnsupportedArchive(_) => error("Unsupported Archive"),
                 zip::result::ZipError::FileNotFound => error("File not found"),
-            },
-            actix_http::error::BlockingError::Canceled => {}
         },
     };
 

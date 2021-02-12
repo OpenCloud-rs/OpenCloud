@@ -4,11 +4,10 @@ use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::file::{get_dir, get_file_preview, Sort};
 use crate::lib::{archive::*, http::get_args};
-use actix_http::body::Body;
-use actix_web::{get, web, HttpRequest, HttpResponse as Response, HttpResponse};
+use actix_web::{get, web, HttpRequest, HttpResponse};
 
 #[get("/file/{path:.*}")]
-pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<Response<Body>> {
+pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<HttpResponse> {
     let result;
     let e = if let Some(e) = req.headers().get("token") {
         String::from(e.to_str().unwrap_or_default())

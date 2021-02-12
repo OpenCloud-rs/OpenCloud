@@ -1,4 +1,3 @@
-use actix_http::Error;
 use actix_web::web::HttpResponse;
 use include_flate::flate;
 
@@ -10,45 +9,45 @@ flate!(pub static BULMA_MIN_CSS: str from "../client/pkg/bulma/bulma.min.css");
 flate!(pub static FILE_SVG: str from "../client/pkg/obj/file.svg");
 flate!(pub static FOLDER_SVG: str from "../client/pkg/obj/folder.svg");
 
-pub async fn indexhtml() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok()
+pub async fn indexhtml() -> HttpResponse {
+    HttpResponse::Ok()
         .header("Content-Type", "text/html; charset=utf-8")
-        .body(format!("{}", *INDEX)))
+        .body(format!("{}", *INDEX))
 }
 
-pub async fn wasmloader() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok()
+pub async fn wasmloader() -> HttpResponse {
+    HttpResponse::Ok()
         .header("Content-Type", "application/javascript")
-        .body(format!("{}", *PACKAGE_JS)))
+        .body(format!("{}", *PACKAGE_JS))
 }
 
-pub async fn wasm() -> Result<HttpResponse, Error> {
+pub async fn wasm() -> HttpResponse {
     let body = Vec::from(PACKAGE_BG.clone());
-    Ok(HttpResponse::Ok()
+    HttpResponse::Ok()
         .header("Content-Type", "application/wasm")
-        .body(body))
+        .body(body)
 }
 
-pub async fn bulma() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok()
+pub async fn bulma() -> HttpResponse {
+    HttpResponse::Ok()
         .header("Content-Type", "text/css")
-        .body(format!("{}", *BULMA_MIN_CSS)))
+        .body(format!("{}", *BULMA_MIN_CSS))
 }
 
-pub async fn bulma_js() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok()
+pub async fn bulma_js() -> HttpResponse {
+    HttpResponse::Ok()
         .header("Content-Type", "application/javascript")
-        .body(format!("{}", *BULMA_JS)))
+        .body(format!("{}", *BULMA_JS))
 }
 
-pub async fn file_svg() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok()
+pub async fn file_svg() -> HttpResponse {
+    HttpResponse::Ok()
         .header("Content-Type", "image/svg+xml")
-        .body(format!("{}", *FILE_SVG)))
+        .body(format!("{}", *FILE_SVG))
 }
 
-pub async fn folder_svg() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok()
+pub async fn folder_svg() -> HttpResponse{
+    HttpResponse::Ok()
         .header("Content-Type", "image/svg+xml")
-        .body(format!("{}", *FOLDER_SVG)))
+        .body(format!("{}", *FOLDER_SVG))
 }
