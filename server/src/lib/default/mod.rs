@@ -1,11 +1,9 @@
+use logger::{error, info};
 use std::fs::{read_dir, File};
 use std::io::{Read, Write};
 use std::path::PathBuf;
-use logger::{error, info};
 
-use crate::lib::{
-    config::Config,
-};
+use crate::lib::config::Config;
 use std::process::exit;
 
 pub fn default() -> Config {

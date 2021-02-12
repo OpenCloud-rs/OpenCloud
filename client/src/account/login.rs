@@ -14,7 +14,10 @@ pub fn login() -> Node<Msg> {
             input![
                 C!["input mt-2"],
                 attrs! {At::Type => "password", At::Id => "login-password", At::Placeholder => "Password"},
-                input_ev(Ev::Input, |e| Msg::InputChange(e, crate::InputType::Password))
+                input_ev(Ev::Input, |e| Msg::InputChange(
+                    e,
+                    crate::InputType::Password
+                ))
             ],
         ],
         div![

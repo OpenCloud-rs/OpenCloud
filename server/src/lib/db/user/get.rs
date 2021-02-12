@@ -1,8 +1,8 @@
+use crate::lib::db::conn::*;
 use crate::lib::db::user::hash_password;
 use crate::lib::db::user::model::User;
-use crate::lib::db::conn::*;
-use logger::error;
 use futures::TryStreamExt;
+use logger::error;
 use sqlx::Row;
 
 pub async fn get_users() -> Vec<User> {
@@ -63,7 +63,7 @@ pub async fn get_id_of_user(name: String, password: String) -> Option<i32> {
             (-1,)
         }
     };
-    if query.0 == -1  {
+    if query.0 == -1 {
         None
     } else {
         Some(query.0)

@@ -46,7 +46,7 @@ pub async fn file_svg() -> HttpResponse {
         .body(format!("{}", *FILE_SVG))
 }
 
-pub async fn folder_svg() -> HttpResponse{
+pub async fn folder_svg() -> HttpResponse {
     HttpResponse::Ok()
         .header("Content-Type", "image/svg+xml")
         .body(format!("{}", *FOLDER_SVG))

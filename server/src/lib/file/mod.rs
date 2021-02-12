@@ -1,15 +1,13 @@
 pub mod default;
 
-use logger::{error, warn};
-use crate::lib::{
-    archive::random_archive,
-};
+use crate::lib::archive::random_archive;
 use actix_utils::mpsc;
 use actix_web::body::Body;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 use actix_web::{Error, HttpResponse as Response};
 use async_std::io::ReadExt;
+use logger::{error, warn};
 use shared::{FType, Folder, JsonStruct};
 use std::fs;
 use std::fs::{metadata, read_dir};
@@ -43,7 +41,9 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                     )
                     .format("%d-%m-%Y %T"),
                     name: String::from(path.split("/").last().unwrap()),
-                    ftype: mime_guess::from_ext(path.split("/").last().unwrap()).first_or_octet_stream().to_string(),
+                    ftype: mime_guess::from_ext(path.split("/").last().unwrap())
+                        .first_or_octet_stream()
+                        .to_string(),
                     modified: time::PrimitiveDateTime::from(
                         e.modified().unwrap_or(std::time::SystemTime::now()),
                     )
@@ -340,4 +340,3 @@ pub fn inhome(path: String) -> bool {
         false
     }
 }
-

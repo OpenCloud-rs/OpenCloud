@@ -1,6 +1,6 @@
-use sqlx::Executor;
-use logger::error;
 use crate::lib::db::conn::conn;
+use logger::error;
+use sqlx::Executor;
 
 pub async fn create() {
     let mut conn = conn().await;

@@ -5,12 +5,10 @@ use crate::lib::default::default;
 use crate::page::delete::deletef;
 use crate::page::get::cli;
 use crate::page::p500::p500;
-use crate::page::post::{save_file, login_user};
+use crate::page::post::{login_user, save_file};
 use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
-use lib::{
-    file::default::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader},
-};
+use lib::file::default::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader};
 use logger::info;
 use page::{
     get::{default_404, default_api_handler},

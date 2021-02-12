@@ -1,17 +1,17 @@
-use crate::lib::db::user::get::{get_user_by_token, get_id_of_user};
+use crate::lib::db::log::model::ActionType;
+use crate::lib::db::user::create_home::create_home;
+use crate::lib::db::user::get::{get_id_of_user, get_user_by_token};
 use crate::lib::db::user::insert::insert_user;
-use crate::lib::db::user::model::{MinimalUser, LoginUser};
+use crate::lib::db::user::model::{LoginUser, MinimalUser};
+use crate::lib::db::user::token::generate_token;
+use crate::lib::db::user::update::update_token;
 use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::{db::log::insert::insert, http::get_args};
-use crate::lib::{db::log::model::ActionType};
-use logger::{info, error};
-use crate::lib::{db::user::create_home::create_home};
 use actix_multipart::Multipart;
 use actix_web::{post, web, Error, HttpRequest, HttpResponse};
 use async_std::io::prelude::WriteExt;
+use logger::{error, info};
 use tokio_stream::StreamExt;
-use crate::lib::db::user::token::generate_token;
-use crate::lib::db::user::update::update_token;
 
 #[post("/file/{path:.*}")]
 pub async fn save_file(

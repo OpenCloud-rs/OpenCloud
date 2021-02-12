@@ -1,11 +1,9 @@
-use crate::lib::{
-    file::{get_file_as_byte_vec, get_file_preview},
-};
-use logger::error;
-use actix_web::{HttpResponse, dev::BodyEncoding};
+use crate::lib::file::{get_file_as_byte_vec, get_file_preview};
 use actix_utils::mpsc;
 use actix_web::http::ContentEncoding;
+use actix_web::{dev::BodyEncoding, HttpResponse};
 use async_std::fs as afs;
+use logger::error;
 use std::fs::File;
 use std::io::Error;
 use std::path::PathBuf;
@@ -14,7 +12,7 @@ use zip::CompressionMethod;
 use zip_extensions::zip_create_from_directory_with_options;
 pub enum ArchiveType {
     Targz,
-    Zip
+    Zip,
 }
 
 pub async fn download(
@@ -90,14 +88,13 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
             &PathBuf::from(dir),
             FileOptions::default().compression_method(CompressionMethod::Bzip2),
         )
-    })
-    {
+    }) {
         Ok(_) => {}
         Err(e) => match e {
-                zip::result::ZipError::Io(_) => error("I/O Error"),
-                zip::result::ZipError::InvalidArchive(_) => error("Invalid Archive"),
-                zip::result::ZipError::UnsupportedArchive(_) => error("Unsupported Archive"),
-                zip::result::ZipError::FileNotFound => error("File not found"),
+            zip::result::ZipError::Io(_) => error("I/O Error"),
+            zip::result::ZipError::InvalidArchive(_) => error("Invalid Archive"),
+            zip::result::ZipError::UnsupportedArchive(_) => error("Unsupported Archive"),
+            zip::result::ZipError::FileNotFound => error("File not found"),
         },
     };
 
