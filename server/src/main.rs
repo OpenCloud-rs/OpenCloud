@@ -20,7 +20,7 @@ use page::{
 mod lib;
 mod page;
 
-#[actix_rt::main]
+#[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let config: Config = default();
     create_log_db().await;
