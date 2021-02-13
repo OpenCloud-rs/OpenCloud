@@ -30,7 +30,7 @@ pub async fn save_file(
     };
     let mut database = data.get_ref().clone();
     if e.is_empty() {
-        Ok(HttpResponse::Ok().body("No token provided"))
+        Ok(HttpResponse::BadRequest().body("No token provided"))
     } else {
         let url = format!("/{}", path.0);
         if valid_session(&mut database,e.clone()).await {
@@ -81,7 +81,7 @@ pub async fn save_file(
                 return Ok(HttpResponse::BadRequest().body("Error on uploading the file"));
             }
         } else {
-            Ok(HttpResponse::Ok().body("The token provided isn't valid"))
+            Ok(HttpResponse::BadRequest().body("The token provided isn't valid"))
         }
     }
 }
@@ -105,7 +105,7 @@ pub async fn create_user(body: web::Json<MinimalUser>, data: web::Data<DatabaseP
                 Ok(HttpResponse::Ok().body(e.body))
             }
         }
-        Err(_) => Ok(HttpResponse::Ok().body("Your request is bad")),
+        Err(_) => Ok(HttpResponse::BadRequest().body("Your request is bad")),
     }
 }
 

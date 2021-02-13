@@ -85,6 +85,6 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>, data: web::Data<
             .header("Access-Control-Allow-Origin", "*")
             .body(serde_json::to_string(&result).unwrap()))
     } else {
-        Ok(HttpResponse::Ok().body("The token provided isn't valid"))
+        Ok(HttpResponse::BadRequest().body("The token provided isn't valid"))
     }
 }

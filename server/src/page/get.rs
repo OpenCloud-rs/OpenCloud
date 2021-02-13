@@ -19,13 +19,13 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>, data: web::Data<Data
         String::new()
     };
     if e.is_empty() {
-        result = Ok(HttpResponse::Ok().body(String::from("No token provided")));
+        result = Ok(HttpResponse::BadRequest().body(String::from("No token provided")));
     } else if valid_session(&mut database,e.clone()).await {
         let bvec = get_args(req.clone());
         let user = match get_user_by_token(&mut database, e.clone()).await {
             Some(e) => e,
             None => {
-                return Ok(HttpResponse::Ok().body(String::from("Error on get user")));
+                return Ok(HttpResponse::BadRequest().body(String::from("Error on get user")));
             }
         };
         if bvec.contains_key("download") {
@@ -67,7 +67,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>, data: web::Data<Data
         }
         insert(&mut database, user.id, ActionType::Get).await;
     } else {
-        result = Ok(HttpResponse::Ok().body("The token provided isn't valid"))
+        result = Ok(HttpResponse::BadRequest().body("The token provided isn't valid"))
     }
 
     result
