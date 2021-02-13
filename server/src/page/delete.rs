@@ -3,16 +3,18 @@ use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::{db::log::insert::insert, http::get_args};
 use actix_web::{delete, web, Error, HttpRequest, HttpResponse};
+use datagn::DatabasePool;
 use shared::{FType, Folder, JsonStruct};
 
 #[delete("/file/{path:.*}")]
-pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpResponse, Error> {
+pub async fn deletef(req: HttpRequest, path: web::Path<String>, data: web::Data<DatabasePool>) -> Result<HttpResponse, Error> {
     let mut result = JsonStruct {
         result: false,
         lenght: 0,
         ftype: FType::File,
         content: Vec::new(),
     };
+    let mut database = data.get_ref().clone();
     let e = if let Some(e) = req.headers().get("token") {
         String::from(e.to_str().unwrap_or(""))
     } else if let Some(e) = get_args(req).get("token") {
@@ -22,8 +24,8 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
     };
     if e.is_empty() {
         Ok(HttpResponse::Ok().body(String::from("No token provided")))
-    } else if valid_session(String::from(e.clone())).await {
-        let user = get_user_by_token(e.clone()).await.unwrap();
+    } else if valid_session(&mut database, String::from(e.clone())).await {
+        let user = get_user_by_token(&mut database,e.clone()).await.unwrap();
         if cfg!(debug_assertions) {
             println!("./home/{}/{}", user.name, path.0);
         }
@@ -43,7 +45,7 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
                         ftype: "File".to_string(),
                         modified: String::from("0-0-0000 00:00:00"),
                     });
-                    insert(user.id, ActionType::Delete).await;
+                    insert(&mut database, user.id, ActionType::Delete).await;
                 }
                 Err(e) => result.content.push(Folder {
                     result: false,
@@ -66,7 +68,7 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>) -> Result<HttpRe
                         ftype: "File".to_string(),
                         modified: String::from("0-0-0000 00:00:00"),
                     });
-                    insert(user.id, ActionType::Delete).await;
+                    insert(&mut database,user.id, ActionType::Delete).await;
                 }
                 Err(e) => result.content.push(Folder {
                     result: false,

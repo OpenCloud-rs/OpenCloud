@@ -21,14 +21,17 @@ mod page;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let config: Config = default();
-    create_log_db().await;
-    create_user_db().await;
+    let mut database = config.get_db_config().to_datapool().await;
+    create_log_db(&mut database).await;
+    create_user_db(&mut database).await;
     let server_ip: &str = &config.get_server();
-    lib::db::user::get::get_users().await;
+    lib::db::user::get::get_users(&mut database).await;
     info(format!(
         "Server listening on {}:{}",
         config.server_ip, config.server_port
     ));
+
+
     HttpServer::new(move || {
         App::new()
             .default_service(web::to(indexhtml))
@@ -50,7 +53,7 @@ async fn main() -> std::io::Result<()> {
                     .service(save_file)
                     .service(deletef)
                     .service(login_user),
-            )
+            ).data(database.clone())
             .wrap_fn(|req, srv| {
                 let fut = srv.call(req);
                 async move {

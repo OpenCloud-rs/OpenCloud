@@ -1,3 +1,4 @@
+use datagn::database::DatabaseType;
 use logger::{error, info};
 use std::fs::{read_dir, File};
 use std::io::{Read, Write};
@@ -24,24 +25,6 @@ pub fn default() -> Config {
         std::fs::create_dir("./home").expect("Failed to create the home folder");
     }
     if vec.contains(&String::from("config.yaml")) {
-        let config = Config {
-            server_ip: "0.0.0.0".to_string(),
-            server_port: 8081,
-            folder_root: "/".to_string(),
-            db_server: "".to_string(),
-            db_type: "".to_string(),
-            db_port: 0,
-        };
-        let mut ff = File::create("./config.yaml").unwrap();
-        match ff.write_all(serde_yaml::to_string(&config).unwrap().as_bytes()) {
-            Err(why) => {
-                error(format!("couldn't write to config : {}", why.to_string()));
-                exit(1)
-            }
-            Ok(_) => info("successfully wrote to config"),
-        }
-        config
-    } else {
         let mut buf = String::new();
         match File::open("./config.yaml") {
             Ok(mut e) => match e.read_to_string(&mut buf) {
@@ -63,5 +46,26 @@ pub fn default() -> Config {
                 exit(1);
             }
         }
+    } else {
+        let config = Config {
+            server_ip: "0.0.0.0".to_string(),
+            server_port: 8081,
+            folder_root: "/".to_string(),
+            db_type: DatabaseType::Mysql,
+            db_port: None,
+            db_ip: String::new(),
+            db_user: None,
+            db_password: None,
+        };
+        let mut ff = File::create("./config.yaml").unwrap();
+        println!("{}", serde_yaml::to_string(&config).unwrap());
+        match ff.write(serde_yaml::to_string(&config).unwrap().as_bytes()) {
+            Err(why) => {
+                error(format!("couldn't write to config : {}", why.to_string()));
+                exit(1)
+            }
+            Ok(_) => info("successfully wrote to config"),
+        }
+        config
     }
 }

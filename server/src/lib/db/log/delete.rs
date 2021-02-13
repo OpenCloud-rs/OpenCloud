@@ -1,5 +1,4 @@
-use crate::lib::db::conn::conn;
-use sqlx::Executor;
+/*use sqlx::Executor;
 
 pub async fn _delete(id: i32) -> bool {
     let mut conn = conn().await;
@@ -11,3 +10,4 @@ pub async fn _delete(id: i32) -> bool {
         Err(_) => false,
     }
 }
+*/

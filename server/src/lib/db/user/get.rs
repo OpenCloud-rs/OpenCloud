@@ -1,44 +1,40 @@
-use crate::lib::db::conn::*;
 use crate::lib::db::user::hash_password;
 use crate::lib::db::user::model::User;
-use futures::TryStreamExt;
+use datagn::DatabasePool;
 use logger::error;
 use sqlx::Row;
 
-pub async fn get_users() -> Vec<User> {
-    let mut conn = conn().await;
-    let mut response = sqlx::query("SELECT * FROM User").fetch(&mut conn);
+pub async fn get_users(database: &mut DatabasePool) -> Vec<User> {
+    let response = database.execute_and_fetch_all("SELECT * FROM User").await.unwrap();
     let mut person_vec: Vec<User> = Vec::new();
-    while let Ok(Some(row)) = response.try_next().await {
+
+    for row in response {
+        let name: String = row.try_get("name").expect("Error");
         person_vec.push(User {
             id: row.try_get("id").expect("Error"),
-            name: row.try_get("name").expect("Error"),
+            name: name.clone(),
             password: row.try_get("password").expect("Error"),
             token: row.try_get("token").unwrap_or(String::new()),
             email: row.try_get("email").unwrap_or(String::new()),
-            home: format!(
-                "./home/{}/",
-                row.try_get::<&str, &str>("name").expect("Error")
-            ),
+            home:  format!("./home/{}", name),
         });
     }
 
     person_vec
 }
-pub async fn get_user_by_token(token: String) -> Option<User> {
-    let mut conn = conn().await;
-    let mut query = sqlx::query("SELECT * FROM User WHERE token = ?")
-        .bind(token)
-        .fetch(&mut conn);
+
+pub async fn get_user_by_token(database: &mut DatabasePool, token: String) -> Option<User> {
+    let query = database.execute_and_fetch_all_with_bind("SELECT * FROM User WHERE token = ?1", &[token]).await.expect("Error");
     let mut user_vec: Vec<User> = Vec::new();
-    while let Ok(Some(row)) = query.try_next().await {
+    for row in query {
+        let name: String = row.try_get(1).expect("Error");
         user_vec.push(User {
             id: row.try_get(0).expect("Error"),
-            name: row.try_get(1).expect("Error"),
+            name: name.clone(),
             password: row.try_get(2).expect("Error"),
             token: row.try_get(3).unwrap_or(String::new()),
             email: row.try_get(4).unwrap_or(String::new()),
-            home: format!("./home/{}", row.try_get::<&str, usize>(1).expect("Error")),
+            home: format!("./home/{}", name),
         });
     }
 
@@ -49,23 +45,18 @@ pub async fn get_user_by_token(token: String) -> Option<User> {
     }
 }
 
-pub async fn get_id_of_user(name: String, password: String) -> Option<i32> {
-    let mut conn = conn().await;
-    let query: (i32,) = match sqlx::query_as("SELECT id FROM User WHERE name=? AND password=?")
-        .bind(name)
-        .bind(hash_password(password))
-        .fetch_one(&mut conn)
-        .await
+pub async fn get_id_of_user(database: &mut DatabasePool, name: String, password: String) -> Option<i32> {
+    let query: i32 = match database.execute_and_fetch_one_with_bind("SELECT id FROM User WHERE name=?1 AND password=?2", &[name, hash_password(password)]).await
     {
-        Ok(e) => e,
+        Ok(e) => e.try_get::<i32, &str>("id").unwrap(),
         Err(e) => {
             error(format!("Error on get_id_of_user : {:?}", e));
-            (-1,)
+            -1
         }
     };
-    if query.0 == -1 {
+    if query == -1 {
         None
     } else {
-        Some(query.0)
+        Some(query)
     }
 }

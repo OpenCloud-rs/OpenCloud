@@ -1,11 +1,8 @@
-use crate::lib::db::conn::conn;
-use sqlx::Executor;
+use datagn::DatabasePool;
 
-pub async fn update_token(token: String, id: i32) -> bool {
-    let mut conn = conn().await;
-
-    match conn
-        .execute(format!("UPDATE User SET token=\"{}\" WHERE id=\"{}\"", token, id).as_ref())
+pub async fn update_token(database: &mut DatabasePool, token: String, id: i32) -> bool {
+    match database
+        .execute_with_bind("UPDATE User SET token=?1 WHERE id=?2", &[token, id.to_string()])
         .await
     {
         Ok(_) => true,

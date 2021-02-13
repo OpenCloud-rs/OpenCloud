@@ -1,14 +1,9 @@
-use crate::lib::db::conn::conn;
-use sqlx::Executor;
+use datagn::DatabasePool;
 
-pub async fn valid_session(token: String) -> bool {
+pub async fn valid_session(data: &mut DatabasePool, token: String) -> bool {
     let mut result = false;
     if !token.is_empty() {
-        let mut conn = conn().await;
-        let query = conn
-            .execute(format!("SELECT * FROM `User` WHERE token = \"{}\"", token).as_ref())
-            .await;
-        match query {
+        match data.execute_with_bind("SELECT * FROM `User` WHERE token =?1",&[token]).await {
             Ok(_) => result = true,
             Err(_) => {}
         };

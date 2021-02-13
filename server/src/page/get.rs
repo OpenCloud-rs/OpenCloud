@@ -5,10 +5,12 @@ use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::file::{get_dir, get_file_preview, Sort};
 use crate::lib::{archive::*, http::get_args};
 use actix_web::{get, web, HttpRequest, HttpResponse};
+use datagn::DatabasePool;
 
 #[get("/file/{path:.*}")]
-pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<HttpResponse> {
+pub async fn cli(req: HttpRequest, path: web::Path<String>, data: web::Data<DatabasePool>) -> std::io::Result<HttpResponse> {
     let result;
+    let mut database = data.get_ref().clone();
     let e = if let Some(e) = req.headers().get("token") {
         String::from(e.to_str().unwrap_or_default())
     } else if let Some(e) = get_args(req.clone()).get("token") {
@@ -18,9 +20,9 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<H
     };
     if e.is_empty() {
         result = Ok(HttpResponse::Ok().body(String::from("No token provided")));
-    } else if valid_session(e.clone()).await {
+    } else if valid_session(&mut database,e.clone()).await {
         let bvec = get_args(req.clone());
-        let user = match get_user_by_token(e.clone()).await {
+        let user = match get_user_by_token(&mut database, e.clone()).await {
             Some(e) => e,
             None => {
                 return Ok(HttpResponse::Ok().body(String::from("Error on get user")));
@@ -63,7 +65,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>) -> std::io::Result<H
         } else {
             result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
         }
-        insert(user.id, ActionType::Get).await;
+        insert(&mut database, user.id, ActionType::Get).await;
     } else {
         result = Ok(HttpResponse::Ok().body("The token provided isn't valid"))
     }
