@@ -47,12 +47,20 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                                         if e.is_file() == true {
                                             content.push(Folder::from_metadata(
                                                 e.clone(),
-                                                f.file_name().to_str().unwrap_or("Bad Name").to_string(),
+                                                format!(
+                                                    "{}{}",
+                                                    path,
+                                                    f.file_name().to_str().unwrap_or("Bad Name")
+                                                ),
                                             ));
                                         } else {
                                             content.push(Folder::from_metadata(
                                                 e.clone(),
-                                                f.file_name().to_str().unwrap_or("Bad Name").to_string(),
+                                                format!(
+                                                    "{}{}",
+                                                    path,
+                                                    f.file_name().to_str().unwrap_or("Bad Name")
+                                                ),
                                             ));
                                         }
                                     }
@@ -105,66 +113,40 @@ pub fn dir_content(path: String, sort: Sort) -> String {
 }
 
 pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
-    match metadata(filename.clone()) {
-        Ok(e) => {
-            if e.is_file() {
-                let mut buf: Vec<u8> = Vec::new();
-                match async_std::fs::File::open(filename.clone()).await {
-                    Ok(mut o) => {
-                        if let Ok(_) = o.read(&mut buf).await {
-                        } else {
-                            if cfg!(feature = "log") {
-                                error("Read Error".to_string())
-                            }
-                        };
-                    }
-                    Err(_) => {
-                        if cfg!(feature = "log") {
-                            error(format!("Error : Can't Opening file"));
-                        }
-                    }
-                }
-                buf
-            } else if e.is_dir() {
-                let mut file = match compress.to_lowercase().as_str() {
-                    "tar" => random_archive("tar.gz".to_string(), filename),
-                    _ => random_archive("zip".to_string(), filename),
-                }
-                .await;
-                if cfg!(debug_assertions) {
-                    println!("{}", file.metadata().await.unwrap().len());
-                }
-                let mut buf: Vec<u8> = Vec::new();
-                match file.read_to_end(&mut buf).await {
-                    Ok(e) => {
-                        if cfg!(debug_assertions) {
-                            println!("{}", e);
-                        }
-                    }
-                    Err(e) => {
-                        if cfg!(feature = "log") {
-                            error(format!("{:?}", e))
-                        }
-                    }
-                };
-                buf
-            } else {
-                let buf: Vec<u8> = String::from("Error").as_bytes().to_vec();
-                buf
+    let mut buf: Vec<u8> = Vec::new();
+    if let Ok(e) = metadata(filename.clone()) {
+        if e.is_file() {
+            if let Ok(mut file) = async_std::fs::File::open(filename.clone()).await {
+                if let Ok(_) = file.read(&mut buf).await {}
             }
-        }
-        Err(e) => {
-            println!("{:?}", e);
-            let buf: Vec<u8> = String::from("Error").as_bytes().to_vec();
-            buf
+        } else {
+            let mut file = match compress.to_lowercase().as_str() {
+                "tar" => random_archive("tar.gz".to_string(), filename),
+                _ => random_archive("zip".to_string(), filename),
+            }
+            .await;
+            if cfg!(debug_assertions) {
+                println!("{}", file.metadata().await.unwrap().len());
+            }
+            match file.read_to_end(&mut buf).await {
+                Ok(e) => {
+                    if cfg!(debug_assertions) {
+                        println!("{}", e);
+                    }
+                }
+                Err(e) => {
+                    if cfg!(feature = "log") {
+                        error(format!("{:?}", e))
+                    }
+                }
+            };
         }
     }
-}
-
-pub fn get_mime(file: &str) -> String {
-    mime_guess::from_path(file)
-        .first_or_octet_stream()
-        .to_string()
+    if buf.is_empty() {
+        let vec: Vec<u8> = String::from("Error").as_bytes().to_vec();
+        buf = vec;
+    }
+    buf
 }
 
 pub fn get_dir(path: String, sort: Sort) -> std::io::Result<Response<Body>> {
@@ -178,22 +160,16 @@ pub fn get_dir(path: String, sort: Sort) -> std::io::Result<Response<Body>> {
 
 pub fn get_size_dir(path: String) -> u64 {
     let mut size: u64 = 0;
-    match read_dir(path) {
-        Ok(e) => {
-            for entry in e {
-                match entry {
-                    Ok(dentry) => match dentry.metadata() {
-                        Ok(e) => {
-                            size += e.len();
-                        }
-                        Err(_) => {}
-                    },
-                    Err(_) => {}
+    if let Ok(readdir) = read_dir(path) {
+        for i in readdir {
+            if let Ok(dentry) = i {
+                if let Ok(e) = dentry.metadata() {
+                    size += e.len()
                 }
             }
         }
-        Err(_e) => {}
     }
+
     size
 }
 
@@ -225,7 +201,11 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
     Ok(Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
-        .content_type(get_mime(path.clone().as_str()))
+        .content_type(
+            mime_guess::from_ext(path.split("/").last().unwrap())
+                .first_or_octet_stream()
+                .to_string(),
+        )
         .streaming(rx_body))
 }
 
@@ -263,40 +243,27 @@ trait TraitFolder {
 impl TraitFolder for Folder {
     fn from_metadata(e: Metadata, path: String) -> Folder {
         println!("{}", path);
-        if e.is_dir() {
-            Folder {
-                result: true,
-                size: get_size_dir(path.clone()),
-                created: time::PrimitiveDateTime::from(
-                    e.created().unwrap_or(std::time::SystemTime::now()),
-                )
-                .format("%d-%m-%Y %T"),
-                name: String::from(path.trim_end_matches("/").split("/").last().unwrap()),
-                ftype: mime_guess::from_ext(path.split("/").last().unwrap())
-                    .first_or_octet_stream()
-                    .to_string(),
-                modified: time::PrimitiveDateTime::from(
-                    e.modified().unwrap_or(std::time::SystemTime::now()),
-                )
-                .format("%d-%m-%Y %T"),
-            }
+        let size = if e.is_dir() {
+            get_size_dir(path.clone())
         } else {
-            Folder {
-                result: true,
-                size: e.len(),
-                created: time::PrimitiveDateTime::from(
-                    e.created().unwrap_or(std::time::SystemTime::now()),
-                )
-                .format("%d-%m-%Y %T"),
-                name: String::from(path.trim_end_matches("/").split("/").last().unwrap()),
-                ftype: mime_guess::from_ext(path.split("/").last().unwrap())
-                    .first_or_octet_stream()
-                    .to_string(),
-                modified: time::PrimitiveDateTime::from(
-                    e.modified().unwrap_or(std::time::SystemTime::now()),
-                )
-                .format("%d-%m-%Y %T"),
-            }
+            e.len()
+        };
+        println!("{} => {}", path, size);
+        Folder {
+            result: true,
+            size,
+            created: time::PrimitiveDateTime::from(
+                e.created().unwrap_or(std::time::SystemTime::now()),
+            )
+            .format("%d-%m-%Y %T"),
+            name: String::from(path.trim_end_matches("/").split("/").last().unwrap()),
+            ftype: mime_guess::from_ext(path.split("/").last().unwrap())
+                .first_or_octet_stream()
+                .to_string(),
+            modified: time::PrimitiveDateTime::from(
+                e.modified().unwrap_or(std::time::SystemTime::now()),
+            )
+            .format("%d-%m-%Y %T"),
         }
     }
     fn error(error: String) -> Folder {
