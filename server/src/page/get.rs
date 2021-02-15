@@ -8,7 +8,11 @@ use actix_web::{get, web, HttpRequest, HttpResponse};
 use datagn::DatabasePool;
 
 #[get("/file/{path:.*}")]
-pub async fn cli(req: HttpRequest, path: web::Path<String>, data: web::Data<DatabasePool>) -> std::io::Result<HttpResponse> {
+pub async fn cli(
+    req: HttpRequest,
+    path: web::Path<String>,
+    data: web::Data<DatabasePool>,
+) -> std::io::Result<HttpResponse> {
     let result;
     let mut database = data.get_ref().clone();
     let e = if let Some(e) = req.headers().get("token") {
@@ -20,7 +24,7 @@ pub async fn cli(req: HttpRequest, path: web::Path<String>, data: web::Data<Data
     };
     if e.is_empty() {
         result = Ok(HttpResponse::BadRequest().body(String::from("No token provided")));
-    } else if valid_session(&mut database,e.clone()).await {
+    } else if valid_session(&mut database, e.clone()).await {
         let bvec = get_args(req.clone());
         let user = match get_user_by_token(&mut database, e.clone()).await {
             Some(e) => e,

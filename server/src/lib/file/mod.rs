@@ -237,7 +237,11 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                             println!("{}", e);
                         }
                     }
-                    Err(e) => if cfg!(feature = "log") {error(format!("{:?}", e))},
+                    Err(e) => {
+                        if cfg!(feature = "log") {
+                            error(format!("{:?}", e))
+                        }
+                    }
                 };
                 buf
             } else {

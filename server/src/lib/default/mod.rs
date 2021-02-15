@@ -72,7 +72,11 @@ pub fn default() -> Config {
                 }
                 exit(1)
             }
-            Ok(_) => if cfg!(feature = "log") {info("successfully wrote to config")},
+            Ok(_) => {
+                if cfg!(feature = "log") {
+                    info("successfully wrote to config")
+                }
+            }
         }
         config
     }

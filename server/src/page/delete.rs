@@ -7,7 +7,11 @@ use datagn::DatabasePool;
 use shared::{FType, Folder, JsonStruct};
 
 #[delete("/file/{path:.*}")]
-pub async fn deletef(req: HttpRequest, path: web::Path<String>, data: web::Data<DatabasePool>) -> Result<HttpResponse, Error> {
+pub async fn deletef(
+    req: HttpRequest,
+    path: web::Path<String>,
+    data: web::Data<DatabasePool>,
+) -> Result<HttpResponse, Error> {
     let mut result = JsonStruct {
         result: false,
         lenght: 0,
@@ -25,7 +29,7 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>, data: web::Data<
     if e.is_empty() {
         Ok(HttpResponse::Ok().body(String::from("No token provided")))
     } else if valid_session(&mut database, String::from(e.clone())).await {
-        let user = get_user_by_token(&mut database,e.clone()).await.unwrap();
+        let user = get_user_by_token(&mut database, e.clone()).await.unwrap();
         if cfg!(debug_assertions) {
             println!("./home/{}/{}", user.name, path.0);
         }
@@ -68,7 +72,7 @@ pub async fn deletef(req: HttpRequest, path: web::Path<String>, data: web::Data<
                         ftype: "File".to_string(),
                         modified: String::from("0-0-0000 00:00:00"),
                     });
-                    insert(&mut database,user.id, ActionType::Delete).await;
+                    insert(&mut database, user.id, ActionType::Delete).await;
                 }
                 Err(e) => result.content.push(Folder {
                     result: false,

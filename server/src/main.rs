@@ -9,11 +9,11 @@ use crate::page::post::{login_user, save_file};
 use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
 use lib::file::default::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader};
+use logger::info;
 use page::{
     get::{default_404, default_api_handler},
     post::create_user,
 };
-use logger::info;
 mod lib;
 mod page;
 
