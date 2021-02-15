@@ -164,7 +164,9 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                             ftype: String::from("Error"),
                             modified: String::from("0-0-0000 00:00:00"),
                         });
-                        warn("Le dossier est inexistant".to_string());
+                        if cfg!(feature = "log") {
+                            warn("Le dossier est inexistant".to_string());
+                        }
                     }
                 }
             }
@@ -207,11 +209,15 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                     Ok(mut o) => {
                         if let Ok(_) = o.read(&mut buf).await {
                         } else {
-                            error("Read Error".to_string())
+                            if cfg!(feature = "log") {
+                                error("Read Error".to_string())
+                            }
                         };
                     }
                     Err(_) => {
-                        error(format!("Error : Can't Opening file"));
+                        if cfg!(feature = "log") {
+                            error(format!("Error : Can't Opening file"));
+                        }
                     }
                 }
                 buf
@@ -231,7 +237,7 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                             println!("{}", e);
                         }
                     }
-                    Err(e) => error(format!("{:?}", e)),
+                    Err(e) => if cfg!(feature = "log") {error(format!("{:?}", e))},
                 };
                 buf
             } else {

@@ -1,5 +1,4 @@
 use async_std::fs::*;
-
 use logger::error;
 
 pub struct Result {
@@ -13,17 +12,23 @@ pub async fn create_home(name: String) -> Result {
             if let Err(_) =
                 create_dir(format!("./home/{}/{}", name.clone(), "photo".to_string())).await
             {
-                error("Error on create photo folder")
+                if cfg!(feature = "log") {
+                    error("Error on create photo folder")
+                }
             }
             if let Err(_) =
                 create_dir(format!("./home/{}/{}", name.clone(), "video".to_string())).await
             {
-                error("Error on create video folder")
+                if cfg!(feature = "log") {
+                    error("Error on create video folder")
+                }
             }
             if let Err(_) =
                 create_dir(format!("./home/{}/{}", name.clone(), "music".to_string())).await
             {
-                error("Error on create music folder")
+                if cfg!(feature = "log") {
+                    error("Error on create music folder")
+                }
             }
             if let Err(_) = create_dir(format!(
                 "./home/{}/{}",
@@ -32,7 +37,9 @@ pub async fn create_home(name: String) -> Result {
             ))
             .await
             {
-                error("Error on create document folder")
+                if cfg!(feature = "log") {
+                    error("Error on create document folder")
+                }
             }
 
             Result {

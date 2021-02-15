@@ -30,19 +30,25 @@ pub fn default() -> Config {
             Ok(mut e) => match e.read_to_string(&mut buf) {
                 Ok(_) => {}
                 Err(_) => {
-                    error("Can't read the config");
+                    if cfg!(feature = "log") {
+                        error("Can't read the config");
+                    }
                     exit(1)
                 }
             },
             Err(_) => {
-                error("Can't found the config");
+                if cfg!(feature = "log") {
+                    error("Can't found the config");
+                }
                 exit(1)
             }
         };
         match serde_yaml::from_str(&buf) {
             Ok(o) => o,
             Err(_) => {
-                error("Config Error");
+                if cfg!(feature = "log") {
+                    error("Config Error");
+                }
                 exit(1);
             }
         }
@@ -61,10 +67,12 @@ pub fn default() -> Config {
         println!("{}", serde_yaml::to_string(&config).unwrap());
         match ff.write(serde_yaml::to_string(&config).unwrap().as_bytes()) {
             Err(why) => {
-                error(format!("couldn't write to config : {}", why.to_string()));
+                if cfg!(feature = "log") {
+                    error(format!("couldn't write to config : {}", why.to_string()));
+                }
                 exit(1)
             }
-            Ok(_) => info("successfully wrote to config"),
+            Ok(_) => if cfg!(feature = "log") {info("successfully wrote to config")},
         }
         config
     }

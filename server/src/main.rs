@@ -9,12 +9,11 @@ use crate::page::post::{login_user, save_file};
 use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
 use lib::file::default::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader};
-use logger::info;
 use page::{
     get::{default_404, default_api_handler},
     post::create_user,
 };
-
+use logger::info;
 mod lib;
 mod page;
 
@@ -26,11 +25,14 @@ async fn main() -> std::io::Result<()> {
     create_user_db(&mut database).await;
     let server_ip: &str = &config.get_server();
     lib::db::user::get::get_users(&mut database).await;
-    info(format!(
-        "Server listening on {}:{}",
-        config.server_ip, config.server_port
-    ));
-
+    if cfg!(features = "log") {
+        info(format!(
+            "Server listening on {}:{}",
+            config.server_ip, config.server_port
+        ));
+    } else {
+        println!("Server running");
+    }
 
     HttpServer::new(move || {
         App::new()
@@ -53,19 +55,23 @@ async fn main() -> std::io::Result<()> {
                     .service(save_file)
                     .service(deletef)
                     .service(login_user),
-            ).data(database.clone())
+            )
+            .data(database.clone())
             .wrap_fn(|req, srv| {
                 let fut = srv.call(req);
                 async move {
                     let res = fut.await.unwrap();
                     let e = res.request();
-                    info(format!(
-                        "[{}] {}:{} {}",
-                        time::PrimitiveDateTime::from(std::time::SystemTime::now()).format("%F %T"),
-                        &e.method(),
-                        &res.status(),
-                        &e.path()
-                    ));
+                    if cfg!(feature = "log") {
+                        info(format!(
+                            "[{}] {}:{} {}",
+                            time::PrimitiveDateTime::from(std::time::SystemTime::now())
+                                .format("%F %T"),
+                            &e.method(),
+                            &res.status(),
+                            &e.path()
+                        ));
+                    }
                     Ok(res)
                 }
             })

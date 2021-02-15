@@ -90,12 +90,16 @@ async fn async_zip_archive(name: String, dir: String) -> afs::File {
         )
     }) {
         Ok(_) => {}
-        Err(e) => match e {
-            zip::result::ZipError::Io(_) => error("I/O Error"),
-            zip::result::ZipError::InvalidArchive(_) => error("Invalid Archive"),
-            zip::result::ZipError::UnsupportedArchive(_) => error("Unsupported Archive"),
-            zip::result::ZipError::FileNotFound => error("File not found"),
-        },
+        Err(e) => {
+            if cfg!(all(feature = "log")) {
+                match e {
+                    zip::result::ZipError::Io(_) => error("I/O Error"),
+                    zip::result::ZipError::InvalidArchive(_) => error("Invalid Archive"),
+                    zip::result::ZipError::UnsupportedArchive(_) => error("Unsupported Archive"),
+                    zip::result::ZipError::FileNotFound => error("File not found"),
+                }
+            }
+        }
     };
 
     afs::File::open(format!("./temp/{}.zip", name))
