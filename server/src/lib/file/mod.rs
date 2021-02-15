@@ -7,6 +7,7 @@ use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 use actix_web::{Error, HttpResponse as Response};
 use async_std::io::ReadExt;
+use fs::Metadata;
 use logger::{error, warn};
 use shared::{FType, Folder, JsonStruct};
 use std::fs;
@@ -23,32 +24,17 @@ pub fn dir_content(path: String, sort: Sort) -> String {
     let mut content: Vec<Folder> = Vec::new();
     let mut result: bool = false;
     let mut ftype: FType = FType::Error;
+
     let root = if cfg!(windows) { "C:" } else { "" };
-    if inhome(path.clone()) {
-    } else {
-        return String::from("Error");
-    };
+    if !inhome(path.clone()) {
+        return String::from("Stay at home please");
+    }
     match fs::metadata(format!("{}{}", root, path.clone())) {
         Ok(e) => {
             if e.is_file() == true {
                 result = true;
                 ftype = FType::File;
-                content.push(Folder {
-                    result: true,
-                    size: e.len(),
-                    created: time::PrimitiveDateTime::from(
-                        e.created().unwrap_or(std::time::SystemTime::now()),
-                    )
-                    .format("%d-%m-%Y %T"),
-                    name: String::from(path.split("/").last().unwrap()),
-                    ftype: mime_guess::from_ext(path.split("/").last().unwrap())
-                        .first_or_octet_stream()
-                        .to_string(),
-                    modified: time::PrimitiveDateTime::from(
-                        e.modified().unwrap_or(std::time::SystemTime::now()),
-                    )
-                    .format("%d-%m-%Y %T"),
-                });
+                content.push(Folder::from_metadata(e.clone(), path.clone()));
             } else if e.is_dir() == true {
                 match fs::read_dir(path.clone()) {
                     Ok(e) => {
@@ -59,111 +45,27 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                                 Ok(f) => match f.metadata() {
                                     Ok(e) => {
                                         if e.is_file() == true {
-                                            content.push(Folder {
-                                                result: true,
-                                                name: String::from(
-                                                    f.file_name().to_str().unwrap_or("Bad Name"),
-                                                ),
-                                                ftype: get_mime(
-                                                    f.file_name().to_str().unwrap_or("Bad Type"),
-                                                ),
-                                                size: e.len(),
-                                                created: time::PrimitiveDateTime::from(
-                                                    match f.metadata() {
-                                                        Ok(e) => {
-                                                            e.created().unwrap_or(
-                                                                std::time::SystemTime::now(),
-                                                            )
-                                                        }
-                                                        Err(_) => std::time::SystemTime::now(),
-                                                    },
-                                                )
-                                                .format("%d-%m-%Y %T"),
-                                                modified: time::PrimitiveDateTime::from(
-                                                    match f.metadata() {
-                                                        Ok(e) => {
-                                                            e.modified().unwrap_or(
-                                                                std::time::SystemTime::now(),
-                                                            )
-                                                        }
-                                                        Err(_) => std::time::SystemTime::now(),
-                                                    },
-                                                )
-                                                .format("%d-%m-%Y %T"),
-                                            });
+                                            content.push(Folder::from_metadata(
+                                                e.clone(),
+                                                f.file_name().to_str().unwrap_or("Bad Name").to_string(),
+                                            ));
                                         } else {
-                                            content.push(Folder {
-                                                result: true,
-                                                name: String::from(
-                                                    f.file_name()
-                                                        .to_str()
-                                                        .unwrap_or("Bad File Type"),
-                                                ),
-                                                size: get_size_dir(format!(
-                                                    "{}{}/{}",
-                                                    root,
-                                                    path.clone(),
-                                                    f.file_name()
-                                                        .to_str()
-                                                        .unwrap_or("Bad File Type")
-                                                )),
-                                                created: time::PrimitiveDateTime::from(
-                                                    match f.metadata() {
-                                                        Ok(e) => {
-                                                            e.created().unwrap_or(
-                                                                std::time::SystemTime::now(),
-                                                            )
-                                                        }
-                                                        Err(_) => std::time::SystemTime::now(),
-                                                    },
-                                                )
-                                                .format("%d-%m-%Y %T"),
-                                                modified: time::PrimitiveDateTime::from(
-                                                    match f.metadata() {
-                                                        Ok(e) => {
-                                                            e.modified().unwrap_or(
-                                                                std::time::SystemTime::now(),
-                                                            )
-                                                        }
-                                                        Err(_) => std::time::SystemTime::now(),
-                                                    },
-                                                )
-                                                .format("%d-%m-%Y %T"),
-                                                ftype: String::from("Folder"),
-                                            });
+                                            content.push(Folder::from_metadata(
+                                                e.clone(),
+                                                f.file_name().to_str().unwrap_or("Bad Name").to_string(),
+                                            ));
                                         }
                                     }
-                                    Err(_) => content.push(Folder {
-                                        result: false,
-                                        size: 0,
-                                        created: String::from("0-0-0000 00:00:00"),
-                                        modified: String::from("0-0-0000 00:00:00"),
-                                        name: String::from("Error"),
-                                        ftype: String::from("Error"),
-                                    }),
+                                    Err(_) => content.push(Folder::error("Error".to_string())),
                                 },
                                 Err(_) => {
-                                    content.push(Folder {
-                                        result: false,
-                                        size: 0,
-                                        created: String::from("0-0-0000 00:00:00"),
-                                        modified: String::from("0-0-0000 00:00:00"),
-                                        name: String::from("Error"),
-                                        ftype: String::from("Error"),
-                                    });
+                                    content.push(Folder::error("Error".to_string()));
                                 }
                             }
                         }
                     }
                     Err(_) => {
-                        content.push(Folder {
-                            result: false,
-                            size: 0,
-                            created: String::from("0-0-0000 00:00:00"),
-                            name: String::from("Folder Not Work"),
-                            ftype: String::from("Error"),
-                            modified: String::from("0-0-0000 00:00:00"),
-                        });
+                        content.push(Folder::error("Folder not work".to_string()));
                         if cfg!(feature = "log") {
                             warn("Le dossier est inexistant".to_string());
                         }
@@ -171,7 +73,9 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                 }
             }
         }
-        Err(_e) => {}
+        Err(_) => {
+            content.push(Folder::error("Error".to_string()));
+        }
     }
 
     match sort {
@@ -348,5 +252,61 @@ pub fn inhome(path: String) -> bool {
         true
     } else {
         false
+    }
+}
+
+trait TraitFolder {
+    fn from_metadata(e: Metadata, path: String) -> Folder;
+    fn error(error: String) -> Folder;
+}
+
+impl TraitFolder for Folder {
+    fn from_metadata(e: Metadata, path: String) -> Folder {
+        println!("{}", path);
+        if e.is_dir() {
+            Folder {
+                result: true,
+                size: get_size_dir(path.clone()),
+                created: time::PrimitiveDateTime::from(
+                    e.created().unwrap_or(std::time::SystemTime::now()),
+                )
+                .format("%d-%m-%Y %T"),
+                name: String::from(path.trim_end_matches("/").split("/").last().unwrap()),
+                ftype: mime_guess::from_ext(path.split("/").last().unwrap())
+                    .first_or_octet_stream()
+                    .to_string(),
+                modified: time::PrimitiveDateTime::from(
+                    e.modified().unwrap_or(std::time::SystemTime::now()),
+                )
+                .format("%d-%m-%Y %T"),
+            }
+        } else {
+            Folder {
+                result: true,
+                size: e.len(),
+                created: time::PrimitiveDateTime::from(
+                    e.created().unwrap_or(std::time::SystemTime::now()),
+                )
+                .format("%d-%m-%Y %T"),
+                name: String::from(path.trim_end_matches("/").split("/").last().unwrap()),
+                ftype: mime_guess::from_ext(path.split("/").last().unwrap())
+                    .first_or_octet_stream()
+                    .to_string(),
+                modified: time::PrimitiveDateTime::from(
+                    e.modified().unwrap_or(std::time::SystemTime::now()),
+                )
+                .format("%d-%m-%Y %T"),
+            }
+        }
+    }
+    fn error(error: String) -> Folder {
+        Folder {
+            result: false,
+            size: 0,
+            created: String::from("0-0-0000 00:00:00"),
+            modified: String::from("0-0-0000 00:00:00"),
+            name: String::from(error),
+            ftype: String::from("Error"),
+        }
     }
 }
