@@ -31,7 +31,7 @@ pub fn back(url: String) -> String {
     let mut result = String::new();
     log!(ur.len() - 1);
     for u in ur.clone() {
-        if n == ur.len() - 1 {
+        if n >= ur.len() - 1 {
             break;
         } else {
             result.push_str(format!("{}/", u).as_str());
