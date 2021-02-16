@@ -44,25 +44,14 @@ pub fn dir_content(path: String, sort: Sort) -> String {
                             match dpath {
                                 Ok(f) => match f.metadata() {
                                     Ok(e) => {
-                                        if e.is_file() == true {
-                                            content.push(Folder::from_metadata(
-                                                e.clone(),
-                                                format!(
-                                                    "{}{}",
-                                                    path,
-                                                    f.file_name().to_str().unwrap_or("Bad Name")
-                                                ),
-                                            ));
-                                        } else {
-                                            content.push(Folder::from_metadata(
-                                                e.clone(),
-                                                format!(
-                                                    "{}{}",
-                                                    path,
-                                                    f.file_name().to_str().unwrap_or("Bad Name")
-                                                ),
-                                            ));
-                                        }
+                                        content.push(Folder::from_metadata(
+                                            e.clone(),
+                                            format!(
+                                                "{}{}",
+                                                path,
+                                                f.file_name().to_str().unwrap_or("Bad Name")
+                                            ),
+                                        ));
                                     }
                                     Err(_) => content.push(Folder::error("Error".to_string())),
                                 },
