@@ -5,6 +5,8 @@ authors = ["Rheydskey <matgag02@gmail.com>"]
 edition = "2018"
 
 [features]
+default = ["log"]
+
 log = []
 
 
@@ -39,7 +41,7 @@ sqlx = {version = "=0.5.1", features = ["sqlite", "runtime-async-std-rustls"]}
 whirlpool = "0.9.0"
 funty="=1.1.0"
 
-logger = {git = "https://github.com/Rheydskey/logger"}
+logger = {git = "https://github.com/Rheydskey/logger", branch="master"}
 
 time = "0.2.25"
 async-std = "1.9.0"
