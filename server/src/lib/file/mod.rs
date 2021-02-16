@@ -231,13 +231,15 @@ trait TraitFolder {
 
 impl TraitFolder for Folder {
     fn from_metadata(e: Metadata, path: String) -> Folder {
-        println!("{}", path);
-        let size = if e.is_dir() {
-            get_size_dir(path.clone())
+        let ftype;
+        let size;
+        if e.is_dir() {
+            ftype = "Folder".to_string();
+            size = get_size_dir(path.clone())
         } else {
-            e.len()
+            ftype = mime_guess::from_path(path.split("/").last().unwrap()).first_or_octet_stream().to_string();
+            size = e.len()
         };
-        println!("{} => {}", path, size);
         Folder {
             result: true,
             size,
@@ -246,9 +248,7 @@ impl TraitFolder for Folder {
             )
             .format("%d-%m-%Y %T"),
             name: String::from(path.trim_end_matches("/").split("/").last().unwrap()),
-            ftype: mime_guess::from_ext(path.split("/").last().unwrap())
-                .first_or_octet_stream()
-                .to_string(),
+            ftype,
             modified: time::PrimitiveDateTime::from(
                 e.modified().unwrap_or(std::time::SystemTime::now()),
             )
