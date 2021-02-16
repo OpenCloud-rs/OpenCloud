@@ -51,9 +51,6 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
         notification: Vec::new(),
     }
 }
-// ------ ------
-//     Model
-// ------ ------
 
 #[derive(Debug, Clone)]
 pub struct Model {
@@ -77,9 +74,7 @@ pub enum InputType {
     Password,
     Mail,
 }
-// ------ ------
-//    Update
-// ------ ------
+
 pub enum Msg {
     Fetched(Option<JsonStruct>),
     InputChange(String, InputType),
@@ -133,6 +128,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 .perform_cmd(get_files(model.clone().route, model.clone().token));
         }
         Msg::ChangeRoute(s, crt) => {
+            let old_path = model.route.clone();
             match crt {
                 ChangeRouteType::Remove => {
                     model.route = back(model.clone().route);
@@ -141,9 +137,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     model.route.push_str(format!("{}/", s).as_str());
                 }
             };
-            orders
-                .skip()
-                .perform_cmd(get_files(model.clone().route, model.clone().token));
+            if !(model.route == old_path) {
+                orders.skip().perform_cmd(refresh());
+            }
         }
         Msg::CallDelete(e) => {
             orders
@@ -186,10 +182,6 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         }
     }
 }
-
-// ------ ------
-//     View
-// ------ ------
 
 fn view(model: &Model) -> Vec<Node<Msg>> {
     match model.state {
@@ -258,8 +250,6 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
         }
     }
 }
-//     Start
-// ------ ------
 
 #[wasm_bindgen(start)]
 pub fn render() {
