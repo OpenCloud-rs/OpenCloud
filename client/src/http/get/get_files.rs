@@ -10,28 +10,28 @@ pub async fn get_files(from: String, token: String) -> Msg {
 
     let json = match reqwest {
         Ok(e) => match e.json::<JsonStruct>().await {
-            Ok(json) => json,
+            Ok(json) => Some(json),
             Err(e) => {
                 log!(format! {"{:?}", e});
-                JsonStruct::default()
+                None
             }
         },
         Err(e) => {
             log!(format! {"{:?}", e});
-            JsonStruct::default()
+            None
         }
     };
 
-    Msg::Fetched(Some(json))
+    Msg::Fetched(json)
 }
 
 pub fn back(url: String) -> String {
     let ur: Vec<&str> = url.split("/").collect();
     let mut n = 1;
     let mut result = String::new();
-    log!(ur.len() - 1);
-    for u in ur.clone() {
-        if n >= ur.len() - 1 {
+    let lenght = ur.len() - 1;
+    for u in ur {
+        if n >= lenght {
             break;
         } else {
             result.push_str(format!("{}/", u).as_str());
