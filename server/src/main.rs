@@ -25,7 +25,7 @@ async fn main() -> std::io::Result<()> {
     create_user_db(&mut database).await;
     let server_ip: &str = &config.get_server();
     lib::db::user::get::get_users(&mut database).await;
-    if cfg!(features = "log") {
+    if cfg!(feature = "log") {
         info(format!(
             "Server listening on {}:{}",
             config.server_ip, config.server_port
