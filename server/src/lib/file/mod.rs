@@ -5,6 +5,7 @@ use actix_utils::mpsc;
 use actix_web::body::Body;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
+use actix_web::web::Bytes;
 use actix_web::{Error, HttpResponse as Response};
 use async_std::io::ReadExt;
 use fs::Metadata;
@@ -12,6 +13,8 @@ use logger::{error, warn};
 use shared::{FType, Folder, JsonStruct};
 use std::fs;
 use std::fs::{metadata, read_dir};
+
+use super::archive::ArchiveType;
 
 pub enum Sort {
     Name,
@@ -101,7 +104,7 @@ pub fn dir_content(path: String, sort: Sort) -> String {
     }
 }
 
-pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
+pub async fn get_file_as_byte_vec(filename: String, compress: ArchiveType) -> Bytes {
     let mut buf: Vec<u8> = Vec::new();
     if let Ok(e) = metadata(filename.clone()) {
         if e.is_file() {
@@ -109,9 +112,9 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
                 if let Ok(_) = file.read(&mut buf).await {}
             }
         } else {
-            let mut file = match compress.to_lowercase().as_str() {
-                "tar" => random_archive("tar.gz".to_string(), filename),
-                _ => random_archive("zip".to_string(), filename),
+            let mut file = match compress {
+                ArchiveType::Targz => random_archive("tar.gz".to_string(), filename),
+                ArchiveType::Zip => random_archive("zip".to_string(), filename),
             }
             .await;
             if cfg!(debug_assertions) {
@@ -135,7 +138,7 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
         let vec: Vec<u8> = String::from("Error").as_bytes().to_vec();
         buf = vec;
     }
-    buf
+    actix_web::web::Bytes::from(buf)
 }
 
 pub fn get_dir(path: String, sort: Sort) -> Response<Body> {

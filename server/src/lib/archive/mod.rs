@@ -34,9 +34,9 @@ pub async fn download(path: String, atype: ArchiveType) -> HttpResponse {
 }
 pub async fn get_zip(path: String) -> HttpResponse {
     let (tx, rx_body) = mpsc::channel();
-    let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(
-        get_file_as_byte_vec(path.clone(), &"zip").await,
-    )));
+    let _ = tx.send(Ok::<_, Error>(
+        get_file_as_byte_vec(path.clone(), ArchiveType::Zip).await,
+    ));
     println!("{}", path.clone());
     HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
@@ -55,9 +55,9 @@ pub async fn get_zip(path: String) -> HttpResponse {
 
 pub async fn get_tar(path: String) -> HttpResponse {
     let (tx, rx_body) = mpsc::channel();
-    let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(
-        get_file_as_byte_vec(path.clone(), &"tar").await,
-    )));
+    let _ = tx.send(Ok::<_, Error>(
+        get_file_as_byte_vec(path.clone(), ArchiveType::Targz).await,
+    ));
     HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
