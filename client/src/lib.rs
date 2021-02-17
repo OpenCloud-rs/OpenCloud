@@ -98,7 +98,10 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
         Msg::Fetched(Some(folder)) => model.api = folder,
         Msg::Fetched(_) => {
-            model.notification.push((false, "Fetch error - Fetching folder info failed".to_string()));
+            model.notification.push((
+                false,
+                "Fetch error - Fetching folder info failed".to_string(),
+            ));
         }
         Msg::ChangeState(e) => model.state = e,
         Msg::InputChange(e, it) => match it {
