@@ -34,7 +34,7 @@ pub async fn cli(
         };
         if bvec.contains_key("download") {
             match bvec.get("download").unwrap_or(&String::new()).as_ref() {
-                "tar.gz" => {
+                "tar.gz" | "tar" => {
                     result = download(
                         format!("{}/{}", user.home, path.0.clone()),
                         ArchiveType::Targz,
