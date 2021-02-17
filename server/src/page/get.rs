@@ -12,7 +12,7 @@ pub async fn cli(
     req: HttpRequest,
     path: web::Path<String>,
     data: web::Data<DatabasePool>,
-) -> std::io::Result<HttpResponse> {
+) -> HttpResponse {
     let result;
     let mut database = data.get_ref().clone();
     let e = if let Some(e) = req.headers().get("token") {
@@ -23,13 +23,13 @@ pub async fn cli(
         String::new()
     };
     if e.is_empty() {
-        result = Ok(HttpResponse::BadRequest().body(String::from("No token provided")));
+        result = HttpResponse::BadRequest().body(String::from("No token provided"));
     } else if valid_session(&mut database, e.clone()).await {
         let bvec = get_args(req.clone());
         let user = match get_user_by_token(&mut database, e.clone()).await {
             Some(e) => e,
             None => {
-                return Ok(HttpResponse::BadRequest().body(String::from("Error on get user")));
+                return HttpResponse::BadRequest().body(String::from("Error on get user"));
             }
         };
         if bvec.contains_key("download") {
@@ -71,16 +71,16 @@ pub async fn cli(
         }
         insert(&mut database, user.id, ActionType::Get).await;
     } else {
-        result = Ok(HttpResponse::BadRequest().body("The token provided isn't valid"))
+        result = HttpResponse::BadRequest().body("The token provided isn't valid")
     }
 
     result
 }
 
-pub async fn default_api_handler() -> std::io::Result<HttpResponse> {
-    Ok(HttpResponse::BadRequest().body("Bad Usage of Api"))
+pub async fn default_api_handler() -> HttpResponse {
+    HttpResponse::BadRequest().body("Bad Usage of Api")
 }
 
-pub async fn default_404() -> std::io::Result<HttpResponse> {
-    Ok(HttpResponse::NotFound().body("Oh no, file not found"))
+pub async fn default_404() -> HttpResponse {
+    HttpResponse::NotFound().body("Oh no, file not found")
 }

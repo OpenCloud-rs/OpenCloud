@@ -15,10 +15,7 @@ pub enum ArchiveType {
     Zip,
 }
 
-pub async fn download(
-    path: String,
-    atype: ArchiveType,
-) -> Result<actix_web::HttpResponse, std::io::Error> {
+pub async fn download(path: String, atype: ArchiveType) -> HttpResponse {
     match async_std::fs::metadata(path.clone()).await {
         Ok(e) => {
             if e.is_file() {
@@ -29,19 +26,19 @@ pub async fn download(
                     ArchiveType::Zip => get_zip(path.clone()).await,
                 }
             } else {
-                Ok(HttpResponse::Ok().body("No file"))
+                HttpResponse::Ok().body("No file")
             }
         }
-        Err(_) => Ok(HttpResponse::Ok().body("Error")),
+        Err(_) => HttpResponse::Ok().body("Error"),
     }
 }
-pub async fn get_zip(path: String) -> std::io::Result<HttpResponse> {
+pub async fn get_zip(path: String) -> HttpResponse {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(
         get_file_as_byte_vec(path.clone(), &"zip").await,
     )));
     println!("{}", path.clone());
-    Ok(HttpResponse::Ok()
+    HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .header(
@@ -53,15 +50,15 @@ pub async fn get_zip(path: String) -> std::io::Result<HttpResponse> {
         )
         .content_type("application/zip")
         .encoding(ContentEncoding::Gzip)
-        .streaming(rx_body))
+        .streaming(rx_body)
 }
 
-pub async fn get_tar(path: String) -> std::io::Result<HttpResponse> {
+pub async fn get_tar(path: String) -> HttpResponse {
     let (tx, rx_body) = mpsc::channel();
     let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(
         get_file_as_byte_vec(path.clone(), &"tar").await,
     )));
-    Ok(HttpResponse::Ok()
+    HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .header(
@@ -73,7 +70,7 @@ pub async fn get_tar(path: String) -> std::io::Result<HttpResponse> {
         )
         .content_type("application/x-tar")
         .encoding(ContentEncoding::Gzip)
-        .streaming(rx_body))
+        .streaming(rx_body)
 }
 
 async fn async_zip_archive(name: String, dir: String) -> afs::File {

@@ -138,13 +138,13 @@ pub async fn get_file_as_byte_vec(filename: String, compress: &str) -> Vec<u8> {
     buf
 }
 
-pub fn get_dir(path: String, sort: Sort) -> std::io::Result<Response<Body>> {
-    Ok(Response::Ok()
+pub fn get_dir(path: String, sort: Sort) -> Response<Body> {
+    Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .content_type("application/json")
         .encoding(ContentEncoding::Gzip)
-        .body(crate::lib::file::dir_content(path, sort)))
+        .body(crate::lib::file::dir_content(path, sort))
 }
 
 pub fn get_size_dir(path: String) -> u64 {
@@ -162,15 +162,15 @@ pub fn get_size_dir(path: String) -> u64 {
     size
 }
 
-pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
+pub async fn get_file_preview(path: String) -> Response<Body> {
     let (tx, rx_body) = mpsc::channel();
 
     let try_file = async_std::fs::File::open(path.clone()).await;
     if try_file.is_err() {
-        return Ok(Response::Ok()
+        return Response::Ok()
             .header("Access-Control-Allow-Origin", "*")
             .header("charset", "utf-8")
-            .body("Error"));
+            .body("Error");
     }
 
     let mut buf: Vec<u8> = Vec::new();
@@ -187,7 +187,7 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
 
     let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(buf.clone())));
 
-    Ok(Response::Ok()
+    Response::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .content_type(
@@ -195,7 +195,7 @@ pub async fn get_file_preview(path: String) -> std::io::Result<Response<Body>> {
                 .first_or_octet_stream()
                 .to_string(),
         )
-        .streaming(rx_body))
+        .streaming(rx_body)
 }
 
 pub fn inhome(path: String) -> bool {
@@ -237,7 +237,9 @@ impl TraitFolder for Folder {
             ftype = "Folder".to_string();
             size = get_size_dir(path.clone())
         } else {
-            ftype = mime_guess::from_path(path.split("/").last().unwrap()).first_or_octet_stream().to_string();
+            ftype = mime_guess::from_path(path.split("/").last().unwrap())
+                .first_or_octet_stream()
+                .to_string();
             size = e.len()
         };
         Folder {
