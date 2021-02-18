@@ -1,12 +1,11 @@
 pub mod default;
 
 use crate::lib::archive::random_archive;
-use actix_utils::mpsc;
 use actix_web::body::Body;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
 use actix_web::web::Bytes;
-use actix_web::{Error, HttpResponse as Response};
+use actix_web::HttpResponse;
 use async_std::io::ReadExt;
 use fs::Metadata;
 use logger::{error, warn};
@@ -141,8 +140,8 @@ pub async fn get_file_as_byte_vec(filename: String, compress: ArchiveType) -> By
     actix_web::web::Bytes::from(buf)
 }
 
-pub fn get_dir(path: String, sort: Sort) -> Response<Body> {
-    Response::Ok()
+pub fn get_dir(path: String, sort: Sort) -> HttpResponse<Body> {
+    HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
         .content_type("application/json")
@@ -165,11 +164,10 @@ pub fn get_size_dir(path: String) -> u64 {
     size
 }
 
-pub async fn get_file_preview(path: String) -> Response<Body> {
+pub async fn get_file_preview(path: String) -> HttpResponse<Body> {
     match async_std::fs::File::open(path.clone()).await {
-        Ok(f) => {
+        Ok(mut f) => {
             let mut buf: Vec<u8> = Vec::new();
-            if let Ok(mut f) = try_file {
                 match f.read_to_end(&mut buf).await {
                     Ok(e) => {
                         if cfg!(debug_assertions) {
@@ -177,10 +175,9 @@ pub async fn get_file_preview(path: String) -> Response<Body> {
                         }
                     }
                     Err(e) => error(format!("{:?}", e)),
-                };
             }
 
-            Response::Ok()
+            HttpResponse::Ok()
                 .header("Access-Control-Allow-Origin", "*")
                 .header("charset", "utf-8")
                 .content_type(
@@ -190,7 +187,7 @@ pub async fn get_file_preview(path: String) -> Response<Body> {
                 )
                 .body(buf)
         }
-        Err(_) => Response::Ok()
+        Err(_) => HttpResponse::Ok()
             .header("Access-Control-Allow-Origin", "*")
             .header("charset", "utf-8")
             .body("Error"),
