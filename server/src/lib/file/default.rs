@@ -103,6 +103,7 @@ pub async fn folder_svg() -> HttpResponse {
     disable()
 }
 
+#[cfg(not(feature = "webclient"))]
 pub fn disable() -> HttpResponse {
     HttpResponse::BadRequest().body("The webclient feature is disable")
 }
