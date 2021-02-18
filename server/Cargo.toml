@@ -5,7 +5,7 @@ authors = ["Rheydskey <matgag02@gmail.com>"]
 edition = "2018"
 
 [features]
-default = ["log"]
+default = ["log", "webclient"]
 
 log = []
 
