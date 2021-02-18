@@ -93,12 +93,9 @@ pub async fn file_svg() -> HttpResponse {
 
 #[cfg(feature = "webclient")]
 pub async fn folder_svg() -> HttpResponse {
-    if cfg!(feature = "webclient") {
     HttpResponse::Ok()
         .header("Content-Type", "image/svg+xml")
-        .body(format!("{}", *FOLDER_SVG))} else {
-            disable()
-        }
+        .body(format!("{}", *FOLDER_SVG))
 }
 
 #[cfg(not(feature = "webclient"))]

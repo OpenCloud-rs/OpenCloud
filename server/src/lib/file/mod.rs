@@ -168,13 +168,13 @@ pub async fn get_file_preview(path: String) -> HttpResponse<Body> {
     match async_std::fs::File::open(path.clone()).await {
         Ok(mut f) => {
             let mut buf: Vec<u8> = Vec::new();
-                match f.read_to_end(&mut buf).await {
-                    Ok(e) => {
-                        if cfg!(debug_assertions) {
-                            println!("{}", e);
-                        }
+            match f.read_to_end(&mut buf).await {
+                Ok(e) => {
+                    if cfg!(debug_assertions) {
+                        println!("{}", e);
                     }
-                    Err(e) => error(format!("{:?}", e)),
+                }
+                Err(e) => error(format!("{:?}", e)),
             }
 
             HttpResponse::Ok()
@@ -197,7 +197,6 @@ pub async fn get_file_preview(path: String) -> HttpResponse<Body> {
 pub fn inhome(path: String) -> bool {
     let split: Vec<&str> = path.split("/").collect();
     let mut n = 0;
-    // let clean_path = path.replace("/..", "");
     for a in split.clone() {
         if a == ".." {
             n += 1;
