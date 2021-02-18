@@ -36,6 +36,7 @@ impl Config {
     }
     pub fn get_db_config(&self) -> datagn::config::DatabaseConfig {
         match self.db_type {
+            #[cfg(feature = "sqlite")]
             DatabaseType::Sqlite => DatabaseConfig {
                 database_type: DatabaseType::Sqlite,
                 ip: self.db_ip.clone(),
@@ -43,6 +44,7 @@ impl Config {
                 user: String::new(),
                 password: String::new(),
             },
+            #[cfg(feature = "mysql")]
             DatabaseType::Mysql => DatabaseConfig {
                 database_type: DatabaseType::Mysql,
                 ip: self.db_ip.clone(),
@@ -50,6 +52,7 @@ impl Config {
                 user: self.db_user.clone().unwrap(),
                 password: self.db_password.clone().unwrap(),
             },
+            #[cfg(feature = "postgres")]
             DatabaseType::Postgresql => DatabaseConfig {
                 database_type: DatabaseType::Postgresql,
                 ip: self.db_ip.clone(),

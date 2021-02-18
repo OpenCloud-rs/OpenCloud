@@ -53,11 +53,19 @@ pub fn default() -> Config {
             }
         }
     } else {
+        let db_type = match () {
+            #[cfg(feature = "mysql")]
+            () => DatabaseType::Mysql,
+            #[cfg(feature = "sqlite")]
+            () => DatabaseType::Sqlite,
+            #[cfg(feature = "postgres")]
+            () => DatabaseType::Postgresql,
+        };
         let config = Config {
             server_ip: "0.0.0.0".to_string(),
             server_port: 8081,
             folder_root: "/".to_string(),
-            db_type: DatabaseType::Mysql,
+            db_type,
             db_port: None,
             db_ip: String::new(),
             db_user: None,
