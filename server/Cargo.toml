@@ -9,6 +9,8 @@ default = ["log"]
 
 log = []
 
+webclient = []
+
 
 [dependencies]
 actix-web = "3.3.2"
