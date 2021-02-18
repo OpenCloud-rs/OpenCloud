@@ -166,39 +166,35 @@ pub fn get_size_dir(path: String) -> u64 {
 }
 
 pub async fn get_file_preview(path: String) -> Response<Body> {
-    let (tx, rx_body) = mpsc::channel();
+    match async_std::fs::File::open(path.clone()).await {
+        Ok(f) => {
+            let mut buf: Vec<u8> = Vec::new();
+            if let Ok(mut f) = try_file {
+                match f.read_to_end(&mut buf).await {
+                    Ok(e) => {
+                        if cfg!(debug_assertions) {
+                            println!("{}", e);
+                        }
+                    }
+                    Err(e) => error(format!("{:?}", e)),
+                };
+            }
 
-    let try_file = async_std::fs::File::open(path.clone()).await;
-    if try_file.is_err() {
-        return Response::Ok()
+            Response::Ok()
+                .header("Access-Control-Allow-Origin", "*")
+                .header("charset", "utf-8")
+                .content_type(
+                    mime_guess::from_ext(path.split("/").last().unwrap())
+                        .first_or_octet_stream()
+                        .to_string(),
+                )
+                .body(buf)
+        }
+        Err(_) => Response::Ok()
             .header("Access-Control-Allow-Origin", "*")
             .header("charset", "utf-8")
-            .body("Error");
+            .body("Error"),
     }
-
-    let mut buf: Vec<u8> = Vec::new();
-    if let Ok(mut f) = try_file {
-        match f.read_to_end(&mut buf).await {
-            Ok(e) => {
-                if cfg!(debug_assertions) {
-                    println!("{}", e);
-                }
-            }
-            Err(e) => error(format!("{:?}", e)),
-        };
-    }
-
-    let _ = tx.send(Ok::<_, Error>(actix_web::web::Bytes::from(buf.clone())));
-
-    Response::Ok()
-        .header("Access-Control-Allow-Origin", "*")
-        .header("charset", "utf-8")
-        .content_type(
-            mime_guess::from_ext(path.split("/").last().unwrap())
-                .first_or_octet_stream()
-                .to_string(),
-        )
-        .streaming(rx_body)
 }
 
 pub fn inhome(path: String) -> bool {
