@@ -11,23 +11,23 @@ pub fn folder_list(mut content: Vec<Folder>, url: String) -> Node<Msg> {
         let path = format!("{}{}", url.clone(), name.clone());
         let path_download = format!("{}{}", url.clone(), name.clone());
         folder_list.push(tr![
-            th![if t.ftype.to_string() == "Folder".to_string() {
-                img![attrs! {At::Src => format!["/pkg/obj/folder.svg"]}]
+            th![if t.ftype == *"Folder" {
+                img![attrs! {At::Src => "/pkg/obj/folder.svg"}]
             } else {
-                img![attrs! {At::Src => format!["/pkg/obj/file.svg"]}]
+                img![attrs! {At::Src => "/pkg/obj/file.svg"}]
             }],
-            th![if t.ftype.to_string() == "Folder".to_string() {
+            th![if t.ftype == *"Folder" {
                 a![
                     format!["{}/", &t.name.to_string()],
                     ev(Ev::Click, move |_| Msg::ChangeRoute(
-                        format!("{}", name),
+                        name,
                         ChangeRouteType::Add
                     ))
                 ]
             } else {
                 a![
-                    format!["{}", &t.name.to_string()],
-                    attrs! {At::Href => format!["{}",t.name.to_string()]}
+                    t.name.to_string(),
+                    attrs! {At::Href => t.name.to_string()}
                 ]
             }],
             th![&t.ftype],
@@ -35,12 +35,12 @@ pub fn folder_list(mut content: Vec<Folder>, url: String) -> Node<Msg> {
                 button![
                     C!["button mr-2 is-link"],
                     "Delete",
-                    ev(Ev::Click, move |_| Msg::CallDelete(path.clone()))
+                    ev(Ev::Click, move |_| Msg::CallDelete(path))
                 ],
                 button![
                     C!["button is-link"],
                     "Download",
-                    ev(Ev::Click, move |_| Msg::CallDownload(path_download.clone()))
+                    ev(Ev::Click, move |_| Msg::CallDownload(path_download))
                 ],
             ]
         ])

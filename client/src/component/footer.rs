@@ -8,12 +8,12 @@ pub fn footer() -> Node<Msg> {
             C!["content has-text-centered"],
             p![
                 strong!["OpenCloud"],
-                format![" by "],
-                a![format!["Rheydskey"]],
-                format![". The source code is licensed "],
+                " by ".to_string(),
+                a!["Rheydskey"],
+                ". The source code is licensed ",
                 a![
-                    attrs! {At::Href => format!["https://opensource.org/licenses/GPL-3.0"]},
-                    format!["GPL v3"]
+                    attrs! {At::Href => "https://opensource.org/licenses/GPL-3.0"},
+                    "GPL v3"
                 ],
             ]
         ]

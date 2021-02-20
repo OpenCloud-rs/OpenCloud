@@ -2,7 +2,7 @@ use crate::Msg;
 use seed::{prelude::*, *};
 
 pub fn breadcrumb(url: String) -> Node<Msg> {
-    let vec: Vec<&str> = url.split("/").collect();
+    let vec: Vec<&str> = url.split('/').collect();
     let mut n = 0;
     nav![
         C!["breadcrumb is-centered bd-snippet notification has-text-black has-background-link-light"],
@@ -20,7 +20,7 @@ pub fn breadcrumb(url: String) -> Node<Msg> {
                     n+= 1;
                     li![
                         a![
-                            format!{"{}", t}
+                            t.to_string()
                           ]
                         ]
                 })

@@ -40,7 +40,7 @@ pub fn get_name_of_file(file: &Result<File, seed::prelude::JsValue>) -> String {
         String::new()
     }
 }
-pub fn upload_file(file_name: String, url: &String) -> Node<Msg> {
+pub fn upload_file(file_name: String, url: &str) -> Node<Msg> {
     if cfg!(debug_assertions) {
         println!("{}", url);
     }

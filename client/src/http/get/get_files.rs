@@ -26,7 +26,7 @@ pub async fn get_files(from: String, token: String) -> Msg {
 }
 
 pub fn back(url: String) -> String {
-    let ur: Vec<&str> = url.split("/").collect();
+    let ur: Vec<&str> = url.split('/').collect();
     let mut n = 1;
     let mut result = String::new();
     let lenght = ur.len() - 1;

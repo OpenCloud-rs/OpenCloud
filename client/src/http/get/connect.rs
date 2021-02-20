@@ -10,7 +10,7 @@ pub async fn get_connect(account: Account) -> Msg {
         &window()
             .location()
             .host()
-            .unwrap_or("127.0.0.1:8081".to_string()),
+            .unwrap_or_else(|_| "127.0.0.1:8081".to_string()),
         "/api/user/login"
     );
     let request = Request::new(ip.as_str())

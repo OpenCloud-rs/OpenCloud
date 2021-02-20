@@ -11,7 +11,7 @@ pub async fn create_user(account: Account) -> Msg {
         &window()
             .location()
             .host()
-            .unwrap_or("127.0.0.1:8081".to_string()),
+            .unwrap_or_else(|_| "127.0.0.1:8081".to_string()),
         "/api/user/create"
     );
     log!(serde_json::to_string(&SignUpAccount::from_account(

@@ -1,3 +1,5 @@
+use std::convert::TryInto;
+
 use crate::component::footer::footer;
 use account::{login::login, signup::signup};
 use component::uploadfile::get_name_of_file;
@@ -122,7 +124,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 model.state = StateApp::Logged;
                 orders
                     .skip()
-                    .perform_cmd(get_files("".to_string(), e.clone()));
+                    .perform_cmd(get_files("".to_string(), e));
             }
         }
         Msg::Refresh => {
@@ -140,14 +142,14 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                     model.route.push_str(format!("{}/", s).as_str());
                 }
             };
-            if !(model.route == old_path) {
+            if model.route != old_path {
                 orders.skip().perform_cmd(refresh());
             }
         }
         Msg::CallDelete(e) => {
             orders
                 .skip()
-                .perform_cmd(http::delete::delete::delete(model.clone().token, e));
+                .perform_cmd(http::delete::delete(model.clone().token, e));
         }
         Msg::CallDownload(e) => {
             orders
@@ -197,15 +199,15 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
         }
         StateApp::Logged => {
             let mut notifs: Vec<Node<Msg>> = Vec::new();
-            let mut n = 0;
-            for i in model.notification.clone() {
+            for (n, i) in model.notification.clone().into_iter().enumerate() {
+                let n = n.try_into().unwrap_or(-1);
                 let child = match i.0 {
                     true => {
                         div![
                             C!["notification is-success"],
                             button![
                                 C!["delete"],
-                                ev(Ev::Click, move |_| Msg::RemoveNotification(n.clone()))
+                                ev(Ev::Click, move |_| Msg::RemoveNotification(n))
                             ],
                             i.1
                         ]
@@ -215,14 +217,13 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
                             C!["notification is-danger"],
                             button![
                                 C!["delete"],
-                                ev(Ev::Click, move |_| Msg::RemoveNotification(n.clone()))
+                                ev(Ev::Click, move |_| Msg::RemoveNotification(n))
                             ],
                             i.1
                         ]
                     }
                 };
                 notifs.push(child);
-                n += 1;
             }
 
             vec![

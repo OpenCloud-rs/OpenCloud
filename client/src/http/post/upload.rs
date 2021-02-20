@@ -11,7 +11,7 @@ pub async fn upload_file(token: String, file: File, path: String) -> Msg {
         &window()
             .location()
             .host()
-            .unwrap_or("127.0.0.1:8081".to_string()),
+            .unwrap_or_else(|_| "127.0.0.1:8081".to_string()),
         "/api/file/",
         path
     );
