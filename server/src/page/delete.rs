@@ -28,7 +28,7 @@ pub async fn deletef(
     };
     if e.is_empty() {
         Ok(HttpResponse::Ok().body(String::from("No token provided")))
-    } else if valid_session(&mut database, String::from(e.clone())).await {
+    } else if valid_session(&mut database, e.clone()).await {
         let user = get_user_by_token(&mut database, e.clone()).await.unwrap();
         if cfg!(debug_assertions) {
             println!("./home/{}/{}", user.name, path.0);

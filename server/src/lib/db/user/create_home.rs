@@ -9,37 +9,34 @@ pub struct Result {
 pub async fn create_home(name: String) -> Result {
     match create_dir(format!("./home/{}", name.clone())).await {
         Ok(_) => {
-            if let Err(_) =
-                create_dir(format!("./home/{}/{}", name.clone(), "photo".to_string())).await
+            if create_dir(format!("./home/{}/{}", name.clone(), "photo".to_string()))
+                .await
+                .is_err() && cfg!(feature = "log")
             {
-                if cfg!(feature = "log") {
                     error("Error on create photo folder")
-                }
             }
-            if let Err(_) =
-                create_dir(format!("./home/{}/{}", name.clone(), "video".to_string())).await
+            if create_dir(format!("./home/{}/{}", name.clone(), "video".to_string()))
+                .await
+                .is_err() && cfg!(feature = "log")
             {
-                if cfg!(feature = "log") {
                     error("Error on create video folder")
-                }
             }
-            if let Err(_) =
-                create_dir(format!("./home/{}/{}", name.clone(), "music".to_string())).await
+            if create_dir(format!("./home/{}/{}", name.clone(), "music".to_string()))
+                .await
+                .is_err() && cfg!(feature = "log")
             {
-                if cfg!(feature = "log") {
                     error("Error on create music folder")
-                }
             }
-            if let Err(_) = create_dir(format!(
+            if create_dir(format!(
                 "./home/{}/{}",
                 name.clone(),
                 "document".to_string()
             ))
             .await
+            .is_err() && cfg!(feature = "log")
             {
-                if cfg!(feature = "log") {
+            
                     error("Error on create document folder")
-                }
             }
 
             Result {

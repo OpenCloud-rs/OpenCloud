@@ -1,5 +1,4 @@
 use actix_web::web::HttpResponse;
-
 #[cfg(feature = "webclient")]
 use include_flate::flate;
 
@@ -22,7 +21,7 @@ flate!(pub static FOLDER_SVG: str from "../client/pkg/obj/folder.svg");
 pub async fn indexhtml() -> HttpResponse {
     HttpResponse::Ok()
         .header("Content-Type", "text/html; charset=utf-8")
-        .body(format!("{}", *INDEX))
+        .body(INDEX.to_string())
 }
 
 #[cfg(not(feature = "webclient"))]
@@ -34,7 +33,7 @@ pub async fn indexhtml() -> HttpResponse {
 pub async fn wasmloader() -> HttpResponse {
     HttpResponse::Ok()
         .header("Content-Type", "application/javascript")
-        .body(format!("{}", *PACKAGE_JS))
+        .body(PACKAGE_JS.to_string())
 }
 
 #[cfg(not(feature = "webclient"))]
@@ -44,7 +43,7 @@ pub async fn wasmloader() -> HttpResponse {
 
 #[cfg(feature = "webclient")]
 pub async fn wasm() -> HttpResponse {
-    let body = Vec::from(PACKAGE_BG.clone());
+    let body = PACKAGE_BG.clone();
     HttpResponse::Ok()
         .header("Content-Type", "application/wasm")
         .body(body)
@@ -59,7 +58,7 @@ pub async fn wasm() -> HttpResponse {
 pub async fn bulma() -> HttpResponse {
     HttpResponse::Ok()
         .header("Content-Type", "text/css")
-        .body(format!("{}", *BULMA_MIN_CSS))
+        .body(BULMA_MIN_CSS.to_string())
 }
 
 #[cfg(not(feature = "webclient"))]
@@ -71,7 +70,7 @@ pub async fn bulma() -> HttpResponse {
 pub async fn bulma_js() -> HttpResponse {
     HttpResponse::Ok()
         .header("Content-Type", "application/javascript")
-        .body(format!("{}", *BULMA_JS))
+        .body(BULMA_JS.to_string())
 }
 
 #[cfg(not(feature = "webclient"))]
@@ -83,7 +82,7 @@ pub async fn bulma_js() -> HttpResponse {
 pub async fn file_svg() -> HttpResponse {
     HttpResponse::Ok()
         .header("Content-Type", "image/svg+xml")
-        .body(format!("{}", *FILE_SVG))
+        .body(FILE_SVG.to_string())
 }
 
 #[cfg(not(feature = "webclient"))]
@@ -95,7 +94,7 @@ pub async fn file_svg() -> HttpResponse {
 pub async fn folder_svg() -> HttpResponse {
     HttpResponse::Ok()
         .header("Content-Type", "image/svg+xml")
-        .body(format!("{}", *FOLDER_SVG))
+        .body(FOLDER_SVG.to_string())
 }
 
 #[cfg(not(feature = "webclient"))]

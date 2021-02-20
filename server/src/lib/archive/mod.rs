@@ -120,7 +120,7 @@ async fn async_tar_archive(name: String, dir: String) -> afs::File {
 pub async fn random_archive(extention: String, dir: String) -> afs::File {
     let name: String = random_name();
     let dir: &str = dir.as_ref();
-    if extention == String::from("tar.gz") {
+    if extention == *"tar.gz" {
         async_tar_archive(name, dir.to_string()).await
     } else {
         async_zip_archive(name, dir.to_string()).await

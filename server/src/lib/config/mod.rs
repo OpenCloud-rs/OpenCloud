@@ -20,7 +20,7 @@ impl Config {
         self.server_ip.clone()
     }
     pub fn get_server_port(&self) -> i64 {
-        self.server_port.clone()
+        self.server_port
     }
     pub fn _get_folder_root(&self) -> String {
         self.folder_root.clone()
@@ -29,7 +29,7 @@ impl Config {
         self.db_ip.clone()
     }
     pub fn _get_db_port(&self) -> Option<i64> {
-        self.db_port.clone()
+        self.db_port
     }
     pub fn _get_db_type(&self) -> DatabaseType {
         self.db_type.clone()

@@ -31,13 +31,13 @@ pub fn dir_content(path: String, sort: Sort) -> String {
     if !inhome(path.clone()) {
         return String::from("Stay at home please");
     }
-    match fs::metadata(format!("{}{}", root, path.clone())) {
+    match fs::metadata(format!("{}{}", root, path)) {
         Ok(e) => {
-            if e.is_file() == true {
+            if e.is_file() {
                 result = true;
                 ftype = FType::File;
-                content.push(Folder::from_metadata(e.clone(), path.clone()));
-            } else if e.is_dir() == true {
+                content.push(Folder::from_metadata(e, path));
+            } else if e.is_dir() {
                 match fs::read_dir(path.clone()) {
                     Ok(e) => {
                         result = true;
@@ -108,7 +108,7 @@ pub async fn get_file_as_byte_vec(filename: String, compress: ArchiveType) -> By
     if let Ok(e) = metadata(filename.clone()) {
         if e.is_file() {
             if let Ok(mut file) = async_std::fs::File::open(filename.clone()).await {
-                if let Ok(_) = file.read(&mut buf).await {}
+                if file.read(&mut buf).await.is_ok() {}
             }
         } else {
             let mut file = match compress {
@@ -181,7 +181,7 @@ pub async fn get_file_preview(path: String) -> HttpResponse<Body> {
                 .header("Access-Control-Allow-Origin", "*")
                 .header("charset", "utf-8")
                 .content_type(
-                    mime_guess::from_ext(path.split("/").last().unwrap())
+                    mime_guess::from_ext(path.split('/').last().unwrap())
                         .first_or_octet_stream()
                         .to_string(),
                 )
@@ -195,7 +195,7 @@ pub async fn get_file_preview(path: String) -> HttpResponse<Body> {
 }
 
 pub fn inhome(path: String) -> bool {
-    let split: Vec<&str> = path.split("/").collect();
+    let split: Vec<&str> = path.split('/').collect();
     let mut n = 0;
     for a in split.clone() {
         if a == ".." {
@@ -203,20 +203,14 @@ pub fn inhome(path: String) -> bool {
         };
     }
     let mut result = String::new();
-    let mut e = 0;
-    for a in split.clone() {
+    for (e,a) in split.clone().into_iter().enumerate() {
         if e == n && n != 0 {
             break;
         } else {
             result.push_str(format!("{}/", a).as_str());
         }
-        e += 1;
     }
-    if result.contains(format!("./home/{}", split[2]).as_str()) {
-        true
-    } else {
-        false
-    }
+    result.contains(format!("./home/{}", split[2]).as_str())
 }
 
 trait TraitFolder {
@@ -232,7 +226,7 @@ impl TraitFolder for Folder {
             ftype = "Folder".to_string();
             size = get_size_dir(path.clone())
         } else {
-            ftype = mime_guess::from_path(path.split("/").last().unwrap())
+            ftype = mime_guess::from_path(path.split('/').last().unwrap())
                 .first_or_octet_stream()
                 .to_string();
             size = e.len()
@@ -241,13 +235,13 @@ impl TraitFolder for Folder {
             result: true,
             size,
             created: time::PrimitiveDateTime::from(
-                e.created().unwrap_or(std::time::SystemTime::now()),
+                e.created().unwrap_or_else(|_| std::time::SystemTime::now()),
             )
             .format("%d-%m-%Y %T"),
-            name: String::from(path.trim_end_matches("/").split("/").last().unwrap()),
+            name: String::from(path.trim_end_matches('/').split('/').last().unwrap()),
             ftype,
             modified: time::PrimitiveDateTime::from(
-                e.modified().unwrap_or(std::time::SystemTime::now()),
+                e.modified().unwrap_or_else(|_| std::time::SystemTime::now()),
             )
             .format("%d-%m-%Y %T"),
         }
@@ -258,7 +252,7 @@ impl TraitFolder for Folder {
             size: 0,
             created: String::from("0-0-0000 00:00:00"),
             modified: String::from("0-0-0000 00:00:00"),
-            name: String::from(error),
+            name: error,
             ftype: String::from("Error"),
         }
     }

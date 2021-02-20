@@ -95,19 +95,15 @@ pub async fn create_user(
     let mut database = data.get_ref().clone();
     match insert_user(
         &mut database,
-        String::from(body.name.clone()),
-        String::from(body.clone().email.unwrap_or_default()),
-        String::from(body.password.clone()),
+        body.name.clone(),
+        body.clone().email.unwrap_or_default(),
+            body.password.clone(),
     )
     .await
     {
         Ok(_) => {
             let e = create_home(body.name.clone()).await;
-            if e.result {
-                Ok(HttpResponse::Ok().body(e.body))
-            } else {
-                Ok(HttpResponse::Ok().body(e.body))
-            }
+            Ok(HttpResponse::Ok().body(e.body))
         }
         Err(_) => Ok(HttpResponse::BadRequest().body("Your request is bad")),
     }

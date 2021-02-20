@@ -53,7 +53,7 @@ pub fn default() -> Config {
             }
         }
     } else {
-        let db_type = match () {
+        let db_type: DatabaseType = match () {
             #[cfg(feature = "mysql")]
             () => DatabaseType::Mysql,
             #[cfg(feature = "sqlite")]
