@@ -27,7 +27,6 @@ pub fn folder_list(mut content: Vec<Folder>, url: String) -> Node<Msg> {
             } else {
                 a![
                     t.name.to_string(),
-                    attrs! {At::Href => t.name.to_string()}
                 ]
             }],
             th![&t.ftype],
