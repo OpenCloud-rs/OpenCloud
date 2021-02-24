@@ -2,17 +2,14 @@ use seed::{log, window};
 use serde::Serialize;
 
 pub async fn download(url: String, dtype: String, token: String) {
-    let mut url_string: String =
-        "http://".to_owned()
-            + &window()
-                .location()
-                .host()
-                .unwrap_or_else(|_| "127.0.0.1:8081".to_string())
-            + "/api/file/"
-            + &percent_encoding::utf8_percent_encode(
-                url.as_str(),
-                percent_encoding::NON_ALPHANUMERIC,
-            ).to_string();
+    let mut url_string: String = "http://".to_owned()
+        + &window()
+            .location()
+            .host()
+            .unwrap_or_else(|_| "127.0.0.1:8081".to_string())
+        + "/api/file/"
+        + &percent_encoding::utf8_percent_encode(url.as_str(), percent_encoding::NON_ALPHANUMERIC)
+            .to_string();
     log!(url_string);
     if dtype == "tar.gz" {
         url_string.push_str("?download=tar");
@@ -21,10 +18,7 @@ pub async fn download(url: String, dtype: String, token: String) {
     }
 
     window()
-        .open_with_url_and_target(
-            format! {"{}&token={}", url_string, token}.as_str(),
-            "blank",
-        )
+        .open_with_url_and_target(format! {"{}&token={}", url_string, token}.as_str(), "blank")
         .unwrap();
 }
 

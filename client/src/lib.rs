@@ -122,9 +122,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             } else {
                 model.token = e.clone();
                 model.state = StateApp::Logged;
-                orders
-                    .skip()
-                    .perform_cmd(get_files("".to_string(), e));
+                orders.skip().perform_cmd(get_files("".to_string(), e));
             }
         }
         Msg::Refresh => {

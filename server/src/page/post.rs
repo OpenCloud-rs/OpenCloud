@@ -97,7 +97,7 @@ pub async fn create_user(
         &mut database,
         body.name.clone(),
         body.clone().email.unwrap_or_default(),
-            body.password.clone(),
+        body.password.clone(),
     )
     .await
     {

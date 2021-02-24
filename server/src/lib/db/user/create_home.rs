@@ -11,21 +11,24 @@ pub async fn create_home(name: String) -> Result {
         Ok(_) => {
             if create_dir(format!("./home/{}/{}", name.clone(), "photo".to_string()))
                 .await
-                .is_err() && cfg!(feature = "log")
+                .is_err()
+                && cfg!(feature = "log")
             {
-                    error("Error on create photo folder")
+                error("Error on create photo folder")
             }
             if create_dir(format!("./home/{}/{}", name.clone(), "video".to_string()))
                 .await
-                .is_err() && cfg!(feature = "log")
+                .is_err()
+                && cfg!(feature = "log")
             {
-                    error("Error on create video folder")
+                error("Error on create video folder")
             }
             if create_dir(format!("./home/{}/{}", name.clone(), "music".to_string()))
                 .await
-                .is_err() && cfg!(feature = "log")
+                .is_err()
+                && cfg!(feature = "log")
             {
-                    error("Error on create music folder")
+                error("Error on create music folder")
             }
             if create_dir(format!(
                 "./home/{}/{}",
@@ -33,10 +36,10 @@ pub async fn create_home(name: String) -> Result {
                 "document".to_string()
             ))
             .await
-            .is_err() && cfg!(feature = "log")
+            .is_err()
+                && cfg!(feature = "log")
             {
-            
-                    error("Error on create document folder")
+                error("Error on create document folder")
             }
 
             Result {

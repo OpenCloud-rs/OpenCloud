@@ -203,7 +203,7 @@ pub fn inhome(path: String) -> bool {
         };
     }
     let mut result = String::new();
-    for (e,a) in split.clone().into_iter().enumerate() {
+    for (e, a) in split.clone().into_iter().enumerate() {
         if e == n && n != 0 {
             break;
         } else {
@@ -241,7 +241,8 @@ impl TraitFolder for Folder {
             name: String::from(path.trim_end_matches('/').split('/').last().unwrap()),
             ftype,
             modified: time::PrimitiveDateTime::from(
-                e.modified().unwrap_or_else(|_| std::time::SystemTime::now()),
+                e.modified()
+                    .unwrap_or_else(|_| std::time::SystemTime::now()),
             )
             .format("%d-%m-%Y %T"),
         }
