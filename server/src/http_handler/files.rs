@@ -159,7 +159,7 @@ pub async fn save_file(
 }
 
 #[delete("/file/{path:.*}")]
-pub async fn deletef(
+pub async fn delete_file(
     req: HttpRequest,
     path: web::Path<String>,
     data: web::Data<DatabasePool>,

@@ -1,3 +1,8 @@
+use crate::http_handler::{
+    default::{default_404, default_api_handler, p500},
+    files::{delete_file, get_files, save_file},
+    users::{create_user, login_user},
+};
 use crate::lib::config::Config;
 use crate::lib::db::log::create::create as create_log_db;
 use crate::lib::db::user::create::create as create_user_db;
@@ -45,6 +50,7 @@ async fn main() -> std::io::Result<()> {
                 web::scope("/api")
                     .default_service(web::to(default_api_handler))
                     .service(get_files)
+                    .service(delete_file)
                     .service(create_user)
                     .service(save_file)
                     .service(deletef)
