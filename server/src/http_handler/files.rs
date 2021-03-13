@@ -9,7 +9,7 @@ use crate::lib::{archive::*, http::get_args};
 use shared::{FType, Folder, JsonStruct};
 
 #[get("/file/{path:.*}")]
-pub async fn cli(
+pub async fn get_files(
     req: HttpRequest,
     path: web::Path<String>,
     data: web::Data<DatabasePool>,

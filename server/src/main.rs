@@ -6,7 +6,7 @@ use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
 use lib::file::default::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader};
 use logger::info;
-use crate::http_handler::{default::{default_404, default_api_handler, p500}, users::{create_user, login_user}, files::{cli, save_file, deletef}};
+use crate::http_handler::{default::{default_404, default_api_handler, p500}, users::{create_user, login_user}, files::{get_files, save_file, deletef}};
 
 mod lib;
 mod http_handler;
@@ -44,7 +44,7 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("/api")
                     .default_service(web::to(default_api_handler))
-                    .service(cli)
+                    .service(get_files)
                     .service(create_user)
                     .service(save_file)
                     .service(deletef)
