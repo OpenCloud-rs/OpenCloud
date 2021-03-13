@@ -1,12 +1,12 @@
-use datagn::DatabasePool;
-use actix_web::{post, web, Error, HttpResponse};
-use crate::lib::db::user::insert::insert_user;
 use crate::lib::db::user::create_home::create_home;
+use crate::lib::db::user::get::get_id_of_user;
+use crate::lib::db::user::insert::insert_user;
 use crate::lib::db::user::model::{LoginUser, MinimalUser};
-use crate::lib::db::user::valid_session::valid_session;
 use crate::lib::db::user::token::generate_token;
 use crate::lib::db::user::update::update_token;
-use crate::lib::db::user::get::get_id_of_user;
+use crate::lib::db::user::valid_session::valid_session;
+use actix_web::{post, web, Error, HttpResponse};
+use datagn::DatabasePool;
 
 #[post("/user/create")]
 pub async fn create_user(
