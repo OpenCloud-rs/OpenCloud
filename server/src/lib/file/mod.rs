@@ -213,7 +213,7 @@ pub fn inhome(path: String) -> bool {
     result.contains(format!("./home/{}", split[2]).as_str())
 }
 
-trait TraitFolder {
+pub trait TraitFolder {
     fn from_metadata(e: Metadata, path: String) -> Folder;
     fn error(error: String) -> Folder;
 }

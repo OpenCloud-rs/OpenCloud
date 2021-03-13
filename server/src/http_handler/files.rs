@@ -176,71 +176,56 @@ pub async fn delete_file(
     } else if let Some(e) = get_args(req).get("token") {
         String::from(e)
     } else {
-        String::new()
+        return Ok(HttpResponse::Ok().body(String::from("No token provided")));
     };
-    if e.is_empty() {
-        Ok(HttpResponse::Ok().body(String::from("No token provided")))
-    } else if valid_session(&mut database, e.clone()).await {
-        let user = get_user_by_token(&mut database, e.clone()).await.unwrap();
-        if cfg!(debug_assertions) {
-            println!("./home/{}/{}", user.name, path.0);
-        }
-        if async_std::fs::metadata(format!("./home/{}/{}", user.name, path.0))
-            .await
-            .unwrap()
-            .is_dir()
-        {
-            match async_std::fs::remove_dir_all(format!("./home/{}/{}", user.name, path.0)).await {
-                Ok(_) => {
-                    result.result = true;
-                    result.content.push(Folder {
-                        result: true,
-                        size: 0,
-                        created: String::from("0-0-0000 00:00:00"),
-                        name: "Work".to_string(),
-                        ftype: "File".to_string(),
-                        modified: String::from("0-0-0000 00:00:00"),
-                    });
-                    insert(&mut database, user.id, ActionType::Delete).await;
-                }
-                Err(e) => result.content.push(Folder {
-                    result: false,
-                    size: 0,
-                    created: String::from("0-0-0000 00:00:00"),
-                    name: e.to_string(),
-                    ftype: "Error".to_string(),
-                    modified: String::from("0-0-0000 00:00:00"),
-                }),
-            };
-        } else {
-            match async_std::fs::remove_file(format!("./home/{}/{}", user.name, path.0)).await {
-                Ok(_) => {
-                    result.result = true;
-                    result.content.push(Folder {
-                        result: true,
-                        size: 0,
-                        created: String::from("0-0-0000 00:00:00"),
-                        name: "Work".to_string(),
-                        ftype: "File".to_string(),
-                        modified: String::from("0-0-0000 00:00:00"),
-                    });
-                    insert(&mut database, user.id, ActionType::Delete).await;
-                }
-                Err(e) => result.content.push(Folder {
-                    result: false,
-                    size: 0,
-                    created: String::from("0-0-0000 00:00:00"),
-                    name: e.to_string(),
-                    ftype: "Error".to_string(),
-                    modified: String::from("0-0-0000 00:00:00"),
-                }),
-            };
-        }
-        Ok(HttpResponse::Ok()
-            .header("charset", "utf-8")
-            .header("Access-Control-Allow-Origin", "*")
-            .body(serde_json::to_string(&result).unwrap()))
-    } else {
-        Ok(HttpResponse::BadRequest().body("The token provided isn't valid"))
+
+    if !valid_session(&mut database, e.clone()).await {
+        return Ok(HttpResponse::BadRequest().body("The token provided isn't valid"));
     }
+
+    let user = get_user_by_token(&mut database, e.clone()).await.unwrap();
+    if cfg!(debug_assertions) {
+        println!("./home/{}/{}", user.name, path.0);
+    }
+    if async_std::fs::metadata(format!("./home/{}/{}", user.name, path.0))
+        .await
+        .unwrap()
+        .is_dir()
+    {
+        match async_std::fs::remove_dir_all(format!("./home/{}/{}", user.name, path.0)).await {
+            Ok(_) => {
+                result.result = true;
+                result.content.push(Folder {
+                    result: true,
+                    size: 0,
+                    created: String::from("0-0-0000 00:00:00"),
+                    name: path.0,
+                    ftype: "File".to_string(),
+                    modified: String::from("0-0-0000 00:00:00"),
+                });
+                insert(&mut database, user.id, ActionType::Delete).await;
+            }
+            Err(e) => result.content.push(Folder::error(e.to_string())),
+        };
+    } else {
+        match async_std::fs::remove_file(format!("./home/{}/{}", user.name, path.0)).await {
+            Ok(_) => {
+                result.result = true;
+                result.content.push(Folder {
+                    result: true,
+                    size: 0,
+                    created: String::from("0-0-0000 00:00:00"),
+                    name: path.0,
+                    ftype: "File".to_string(),
+                    modified: String::from("0-0-0000 00:00:00"),
+                });
+                insert(&mut database, user.id, ActionType::Delete).await;
+            }
+            Err(e) => result.content.push(Folder::error(e.to_string())),
+        };
+    }
+    Ok(HttpResponse::Ok()
+        .header("charset", "utf-8")
+        .header("Access-Control-Allow-Origin", "*")
+        .body(serde_json::to_string(&result).unwrap()))
 }
