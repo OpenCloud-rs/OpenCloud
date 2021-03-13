@@ -1,3 +1,13 @@
+use actix_web::HttpResponse;
+
+pub async fn default_api_handler() -> HttpResponse {
+    HttpResponse::BadRequest().body("Bad Usage of Api")
+}
+
+pub async fn default_404() -> HttpResponse {
+    HttpResponse::NotFound().body("Oh no, file not found")
+}
+
 use actix_web::middleware::errhandlers::ErrorHandlerResponse;
 use actix_web::Result;
 use actix_web::{dev, http};

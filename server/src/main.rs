@@ -2,20 +2,14 @@ use crate::lib::config::Config;
 use crate::lib::db::log::create::create as create_log_db;
 use crate::lib::db::user::create::create as create_user_db;
 use crate::lib::default::default;
-use crate::page::delete::deletef;
-use crate::page::get::cli;
-use crate::page::p500::p500;
-use crate::page::post::{login_user, save_file};
 use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
 use lib::file::default::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader};
 use logger::info;
-use page::{
-    get::{default_404, default_api_handler},
-    post::create_user,
-};
+use crate::http_handler::{default::{default_404, default_api_handler, p500}, users::{create_user, login_user}, files::{cli, save_file, deletef}};
+
 mod lib;
-mod page;
+mod http_handler;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
