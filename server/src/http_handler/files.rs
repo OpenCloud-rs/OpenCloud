@@ -2,12 +2,12 @@ use crate::lib::db::log::insert::insert;
 use crate::lib::db::log::model::ActionType;
 use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::valid_session::valid_session;
+use crate::lib::file::TraitFolder;
 use crate::lib::file::{get_dir, get_file_preview, Sort};
 use crate::lib::{archive::*, http::get_args};
 use actix_web::{delete, get, web, HttpRequest, HttpResponse};
 use datagn::DatabasePool;
 use shared::{FType, Folder, JsonStruct};
-use crate::lib::file::TraitFolder;
 
 #[get("/file/{path:.*}")]
 pub async fn get_files(
@@ -23,60 +23,58 @@ pub async fn get_files(
     } else if let Some(e) = get_args(req.clone()).get("token") {
         String::from(e)
     } else {
-        String::new()
+        return HttpResponse::BadRequest().body(String::from("No token provided"));
     };
 
-    if e.is_empty() {
-        result = HttpResponse::BadRequest().body(String::from("No token provided"));
-    } else if valid_session(&mut database, e.clone()).await {
-        let bvec = get_args(req.clone());
-        let user = match get_user_by_token(&mut database, e.clone()).await {
-            Some(e) => e,
-            None => {
-                return HttpResponse::BadRequest().body(String::from("Error on get user"));
-            }
-        };
-        if bvec.contains_key("download") {
-            match bvec.get("download").unwrap_or(&String::new()).as_ref() {
-                "tar.gz" | "tar" => {
-                    result = download(
-                        format!("{}/{}", user.home, path.0.clone()),
-                        ArchiveType::Targz,
-                    )
-                    .await;
-                }
-                _ => {
-                    result = download(
-                        format!("{}/{}", user.home, path.0.clone()),
-                        ArchiveType::Zip,
-                    )
-                    .await;
-                }
-            }
-        } else if bvec.contains_key("sort") {
-            match bvec.get("sort").unwrap_or(&String::new()).as_ref() {
-                "by_size" => {
-                    result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Size);
-                }
-                "by_name" => {
-                    result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
-                }
-                "by_date" => {
-                    result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Date);
-                }
-                _ => {
-                    result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Type);
-                }
-            }
-        } else if bvec.contains_key("preview") {
-            result = get_file_preview(format!("{}/{}", user.home, path.0.clone())).await
-        } else {
-            result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
+    if !valid_session(&mut database, e.clone()).await {
+        return result = HttpResponse::BadRequest().body("The token provided isn't valid");
+    };
+
+    let bvec = get_args(req.clone());
+    let user = match get_user_by_token(&mut database, e.clone()).await {
+        Some(e) => e,
+        None => {
+            return HttpResponse::BadRequest().body(String::from("Error on get user"));
         }
-        insert(&mut database, user.id, ActionType::Get).await;
+    };
+    if bvec.contains_key("download") {
+        match bvec.get("download").unwrap_or(&String::new()).as_ref() {
+            "tar.gz" | "tar" => {
+                result = download(
+                    format!("{}/{}", user.home, path.0.clone()),
+                    ArchiveType::Targz,
+                )
+                .await;
+            }
+            _ => {
+                result = download(
+                    format!("{}/{}", user.home, path.0.clone()),
+                    ArchiveType::Zip,
+                )
+                .await;
+            }
+        }
+    } else if bvec.contains_key("sort") {
+        match bvec.get("sort").unwrap_or(&String::new()).as_ref() {
+            "by_size" => {
+                result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Size);
+            }
+            "by_name" => {
+                result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
+            }
+            "by_date" => {
+                result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Date);
+            }
+            _ => {
+                result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Type);
+            }
+        }
+    } else if bvec.contains_key("preview") {
+        result = get_file_preview(format!("{}/{}", user.home, path.0.clone())).await
     } else {
-        result = HttpResponse::BadRequest().body("The token provided isn't valid")
+        result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
     }
+    insert(&mut database, user.id, ActionType::Get).await;
 
     result
 }
@@ -98,64 +96,61 @@ pub async fn save_file(
     } else if let Some(e) = get_args(req.clone()).get("token") {
         String::from(e)
     } else {
-        String::new()
+        return Ok(HttpResponse::BadRequest().body("No token provided"));
     };
     let mut database = data.get_ref().clone();
-    if e.is_empty() {
-        Ok(HttpResponse::BadRequest().body("No token provided"))
-    } else {
-        let url = format!("/{}", path.0);
-        if valid_session(&mut database, e.clone()).await {
-            let user = match get_user_by_token(&mut database, e.clone()).await {
-                Some(e) => e,
-                None => {
-                    return Ok(HttpResponse::Ok().body("Can't get user"));
-                }
-            };
-            insert(&mut database, user.id, ActionType::Upload).await;
-            let mut result = false;
-            while let Ok(Some(mut field)) = payload.try_next().await {
-                let filename = field
-                    .content_disposition()
-                    .and_then(|cd| cd.get_filename().map(ToString::to_string))
-                    .expect("Can't get field name!");
-                let filepath = format!(
-                    "./home/{}/{}/{}",
-                    user.name,
-                    url.strip_prefix("/").unwrap(),
-                    filename
-                );
 
-                if cfg!(debug_assertions) {
-                    println!(
-                    "--------------------- Url : {}, Name: {}, Path: {} ---------------------------",
-                    url, filename, filepath
-                );
-                }
-                let mut f = async_std::fs::File::create(filepath.clone()).await.unwrap();
+    if !valid_session(&mut databse, e.clone()).await {
+        return Ok(HttpResponse::BadRequest().body("The token provided isn't valid"));
+    }
 
-                while let Some(chunk) = field.next().await {
-                    match chunk {
-                        Ok(e) => {
-                            f = f.write_all(&e).await.map(|_| f).unwrap();
-                        }
-                        Err(e) => {
-                            if cfg!(features = "log") {
-                                logger::error(format!("{:?}", e));
-                            }
-                        }
+    let url = format!("/{}", path.0);
+    let user = match get_user_by_token(&mut database, e.clone()).await {
+        Some(e) => e,
+        None => {
+            return Ok(HttpResponse::Ok().body("Can't get user"));
+        }
+    };
+    insert(&mut database, user.id, ActionType::Upload).await;
+    let mut result = false;
+    while let Ok(Some(mut field)) = payload.try_next().await {
+        let filename = field
+            .content_disposition()
+            .and_then(|cd| cd.get_filename().map(ToString::to_string))
+            .expect("Can't get field name!");
+        let filepath = format!(
+            "./home/{}/{}/{}",
+            user.name,
+            url.strip_prefix("/").unwrap(),
+            filename
+        );
+
+        if cfg!(debug_assertions) {
+            println!(
+                "--------------------- Url : {}, Name: {}, Path: {} ---------------------------",
+                url, filename, filepath
+            );
+        }
+        let mut f = async_std::fs::File::create(filepath.clone()).await.unwrap();
+
+        while let Some(chunk) = field.next().await {
+            match chunk {
+                Ok(e) => {
+                    f = f.write_all(&e).await.map(|_| f).unwrap();
+                }
+                Err(e) => {
+                    if cfg!(features = "log") {
+                        logger::error(format!("{:?}", e));
                     }
                 }
-                result = true;
             }
-            if result {
-                return Ok(HttpResponse::Ok().body("The file is uploaded"));
-            } else {
-                return Ok(HttpResponse::BadRequest().body("Error on uploading the file"));
-            }
-        } else {
-            Ok(HttpResponse::BadRequest().body("The token provided isn't valid"))
         }
+        result = true;
+    }
+    if result {
+        return Ok(HttpResponse::Ok().body("The file is uploaded"));
+    } else {
+        return Ok(HttpResponse::BadRequest().body("Error on uploading the file"));
     }
 }
 
