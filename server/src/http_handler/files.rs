@@ -1,7 +1,7 @@
 use crate::lib::db::log::insert::insert;
 use crate::lib::db::log::model::ActionType;
 use crate::lib::db::user::get::get_user_by_token;
-use crate::lib::db::user::valid_session::valid_session;
+use crate::lib::db::user::valid_session::from_headers_if_valid_token_get_token;
 use crate::lib::file::TraitFolder;
 use crate::lib::file::{get_dir, get_file_preview, Sort};
 use crate::lib::{archive::*, http::get_args};
@@ -16,18 +16,12 @@ pub async fn get_files(
     data: web::Data<DatabasePool>,
 ) -> HttpResponse {
     let result;
+
     let mut database = data.get_ref().clone();
-
-    let e = if let Some(e) = req.headers().get("token") {
-        String::from(e.to_str().unwrap_or_default())
-    } else if let Some(e) = get_args(req.clone()).get("token") {
-        String::from(e)
+    let e = if let Some(token) = from_headers_if_valid_token_get_token(&mut database, req.clone()).await {
+        token
     } else {
-        return HttpResponse::BadRequest().body(String::from("No token provided"));
-    };
-
-    if !valid_session(&mut database, e.clone()).await {
-        return result = HttpResponse::BadRequest().body("The token provided isn't valid");
+        return HttpResponse::BadRequest().body("Error on token");
     };
 
     let bvec = get_args(req.clone());
@@ -91,18 +85,12 @@ pub async fn save_file(
     path: web::Path<String>,
     data: web::Data<DatabasePool>,
 ) -> Result<HttpResponse, Error> {
-    let e = if let Some(e) = req.headers().get("token") {
-        String::from(e.to_str().unwrap_or(""))
-    } else if let Some(e) = get_args(req.clone()).get("token") {
-        String::from(e)
-    } else {
-        return Ok(HttpResponse::BadRequest().body("No token provided"));
-    };
     let mut database = data.get_ref().clone();
-
-    if !valid_session(&mut databse, e.clone()).await {
-        return Ok(HttpResponse::BadRequest().body("The token provided isn't valid"));
-    }
+    let e = if let Some(token) = from_headers_if_valid_token_get_token(&mut database, req.clone()).await {
+        token
+    } else {
+        return Ok(HttpResponse::BadRequest().body("Error on token"));
+    };
 
     let url = format!("/{}", path.0);
     let user = match get_user_by_token(&mut database, e.clone()).await {
@@ -167,17 +155,11 @@ pub async fn delete_file(
         content: Vec::new(),
     };
     let mut database = data.get_ref().clone();
-    let e = if let Some(e) = req.headers().get("token") {
-        String::from(e.to_str().unwrap_or(""))
-    } else if let Some(e) = get_args(req).get("token") {
-        String::from(e)
+    let e = if let Some(token) = from_headers_if_valid_token_get_token(&mut database, req.clone()).await {
+        token
     } else {
-        return Ok(HttpResponse::Ok().body(String::from("No token provided")));
+        return Ok(HttpResponse::BadRequest().body("Error on token"));
     };
-
-    if !valid_session(&mut database, e.clone()).await {
-        return Ok(HttpResponse::BadRequest().body("The token provided isn't valid"));
-    }
 
     let user = get_user_by_token(&mut database, e.clone()).await.unwrap();
     if cfg!(debug_assertions) {
