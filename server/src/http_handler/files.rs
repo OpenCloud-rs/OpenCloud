@@ -2,7 +2,7 @@ use crate::lib::db::log::insert::insert;
 use crate::lib::db::log::model::ActionType;
 use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::valid_session::from_headers_if_valid_token_get_token;
-use crate::lib::file::TraitFolder;
+use crate::lib::file::file_trait::TraitFolder;
 use crate::lib::file::{get_dir, get_file_preview, Sort};
 use crate::lib::{archive::*, http::get_args};
 use actix_web::{delete, get, web, HttpRequest, HttpResponse};
