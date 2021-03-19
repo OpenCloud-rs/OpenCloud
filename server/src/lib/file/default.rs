@@ -9,8 +9,6 @@ flate!(pub static PACKAGE_JS: str from "../client/pkg/package.js");
 #[cfg(feature = "webclient")]
 flate!(pub static PACKAGE_BG: [u8]  from "../client/pkg/package_bg.wasm");
 #[cfg(feature = "webclient")]
-flate!(pub static BULMA_JS: str from "../client/pkg/bulma/bulma.js");
-#[cfg(feature = "webclient")]
 flate!(pub static BULMA_MIN_CSS: str from "../client/pkg/bulma/bulma.min.css");
 #[cfg(feature = "webclient")]
 flate!(pub static FILE_SVG: str from "../client/pkg/obj/file.svg");
@@ -63,18 +61,6 @@ pub async fn bulma() -> HttpResponse {
 
 #[cfg(not(feature = "webclient"))]
 pub async fn bulma() -> HttpResponse {
-    disable()
-}
-
-#[cfg(feature = "webclient")]
-pub async fn bulma_js() -> HttpResponse {
-    HttpResponse::Ok()
-        .header("Content-Type", "application/javascript")
-        .body(BULMA_JS.to_string())
-}
-
-#[cfg(not(feature = "webclient"))]
-pub async fn bulma_js() -> HttpResponse {
     disable()
 }
 

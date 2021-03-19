@@ -9,7 +9,7 @@ use crate::lib::db::user::create::create as create_user_db;
 use crate::lib::default::default;
 use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
-use lib::file::default::{bulma, bulma_js, file_svg, folder_svg, indexhtml, wasm, wasmloader};
+use lib::file::default::{bulma, file_svg, folder_svg, indexhtml, wasm, wasmloader};
 use logger::info;
 
 mod http_handler;
@@ -40,7 +40,6 @@ async fn main() -> std::io::Result<()> {
                     .service(web::resource("package.js").to(wasmloader))
                     .service(web::resource("package_bg.wasm").to(wasm))
                     .service(web::resource("bulma/bulma.min.css").to(bulma))
-                    .service(web::resource("bulma/bulma.js").to(bulma_js))
                     .service(web::resource("obj/file.svg").to(file_svg))
                     .service(web::resource("obj/folder.svg").to(folder_svg))
                     .default_service(web::to(default_404)),
