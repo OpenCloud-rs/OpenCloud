@@ -9,7 +9,6 @@ use actix_web::http::ContentEncoding;
 use actix_web::web::Bytes;
 use actix_web::HttpResponse;
 use async_std::io::ReadExt;
-use fs::Metadata;
 use logger::{error, warn};
 use shared::{FType, Folder, JsonStruct};
 use std::fs;
