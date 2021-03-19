@@ -38,18 +38,3 @@ pub fn breadcrumb(url: String) -> Node<Msg> {
                 ]
         ]
 }
-
-pub fn get_to(num: usize, vec: &Vec<&str>) -> String {
-    let mut result = String::new();
-
-    for i in vec.iter().enumerate() {
-        if i.0 == num {
-            break;
-        } else {
-            result.push_str(i.1.clone());
-        }
-    }
-
-    result
-
-}
