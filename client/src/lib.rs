@@ -84,6 +84,7 @@ pub enum Msg {
     RemoveNotification(i32),
     Connect,
     Refresh,
+    UpdatePath(String),
     ChangeState(StateApp),
     Token(String),
     ChangeRoute(String, ChangeRouteType),
@@ -144,6 +145,10 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 orders.skip().perform_cmd(refresh());
             }
         }
+        Msg::UpdatePath(e) => {
+            model.route = e;
+            orders.skip().perform_cmd(refresh());
+        },
         Msg::CallDelete(e) => {
             orders
                 .skip()
