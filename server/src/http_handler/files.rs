@@ -18,7 +18,9 @@ pub async fn get_files(
     let result;
 
     let mut database = data.get_ref().clone();
-    let e = if let Some(token) = from_headers_if_valid_token_get_token(&mut database, req.clone()).await {
+    let e = if let Some(token) =
+        from_headers_if_valid_token_get_token(&mut database, req.clone()).await
+    {
         token
     } else {
         return HttpResponse::BadRequest().body("Error on token");
@@ -86,7 +88,9 @@ pub async fn save_file(
     data: web::Data<DatabasePool>,
 ) -> Result<HttpResponse, Error> {
     let mut database = data.get_ref().clone();
-    let e = if let Some(token) = from_headers_if_valid_token_get_token(&mut database, req.clone()).await {
+    let e = if let Some(token) =
+        from_headers_if_valid_token_get_token(&mut database, req.clone()).await
+    {
         token
     } else {
         return Ok(HttpResponse::BadRequest().body("Error on token"));
@@ -155,7 +159,9 @@ pub async fn delete_file(
         content: Vec::new(),
     };
     let mut database = data.get_ref().clone();
-    let e = if let Some(token) = from_headers_if_valid_token_get_token(&mut database, req.clone()).await {
+    let e = if let Some(token) =
+        from_headers_if_valid_token_get_token(&mut database, req.clone()).await
+    {
         token
     } else {
         return Ok(HttpResponse::BadRequest().body("Error on token"));

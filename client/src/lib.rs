@@ -148,7 +148,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::UpdatePath(e) => {
             model.route = e;
             orders.skip().perform_cmd(refresh());
-        },
+        }
         Msg::CallDelete(e) => {
             orders
                 .skip()
@@ -185,7 +185,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             orders.skip().perform_cmd(refresh());
         }
         Msg::AddNotification(status, content) => model.notification.push((status, content)),
-        Msg::RemoveNotification(index) => {model.notification.remove(index as usize);},
+        Msg::RemoveNotification(index) => {
+            model.notification.remove(index as usize);
+        }
     }
 }
 

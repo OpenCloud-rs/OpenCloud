@@ -1,5 +1,5 @@
-use shared::Folder;
 use crate::lib::file::get_size_dir;
+use shared::Folder;
 use std::fs::Metadata;
 pub trait TraitFolder {
     fn from_metadata(e: Metadata, path: String) -> Folder;

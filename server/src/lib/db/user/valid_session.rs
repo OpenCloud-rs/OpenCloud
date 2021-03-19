@@ -1,6 +1,6 @@
-use datagn::DatabasePool;
-use actix_web::web::HttpRequest;
 use crate::lib::http::get_args;
+use actix_web::web::HttpRequest;
+use datagn::DatabasePool;
 
 pub async fn valid_session(data: &mut DatabasePool, token: String) -> bool {
     let mut result = false;
@@ -15,7 +15,10 @@ pub async fn valid_session(data: &mut DatabasePool, token: String) -> bool {
     result
 }
 
-pub async fn from_headers_if_valid_token_get_token(data: &mut DatabasePool, req: HttpRequest) -> Option<String> {
+pub async fn from_headers_if_valid_token_get_token(
+    data: &mut DatabasePool,
+    req: HttpRequest,
+) -> Option<String> {
     let e = if let Some(e) = &req.headers().get("token") {
         String::from(e.to_str().unwrap_or_default())
     } else if let Some(e) = get_args(req.clone()).get("token") {
@@ -29,5 +32,4 @@ pub async fn from_headers_if_valid_token_get_token(data: &mut DatabasePool, req:
     } else {
         None
     }
-
 }

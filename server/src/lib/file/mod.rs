@@ -1,8 +1,8 @@
 pub mod default;
 pub mod file_trait;
 
-use crate::lib::file::file_trait::TraitFolder;
 use crate::lib::archive::random_archive;
+use crate::lib::file::file_trait::TraitFolder;
 use actix_web::body::Body;
 use actix_web::dev::BodyEncoding;
 use actix_web::http::ContentEncoding;
