@@ -12,7 +12,7 @@ mod library;
 
 use crate::component::breadcrumb::breadcrumb;
 use crate::component::uploadfile::upload_file;
-use crate::http::get::connect::get_connect;
+use crate::http::get::connect::get_token;
 use crate::http::get::get_files::{back, get_files};
 use crate::library::lib::download;
 use library::lib::Account;
@@ -86,7 +86,7 @@ pub enum Msg {
     Refresh,
     UpdatePath(String),
     ChangeState(StateApp),
-    Token(String),
+    Token(Result<String, String>),
     ChangeRoute(String, ChangeRouteType),
     DeleteFile(Result<u16, u16>, String),
     CallDelete(String),
@@ -113,11 +113,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             InputType::Mail => model.account.mail = Some(e),
         },
         Msg::Connect => {
-            orders
-                .skip()
-                .perform_cmd(get_connect(model.clone().account));
+            orders.skip().perform_cmd(get_token(model.clone().account));
         }
-        Msg::Token(e) => {
+        Msg::Token(Ok(e)) => {
             if e == "No user was found" {
                 model.token = "No user was found".to_string();
             } else {
@@ -125,6 +123,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 model.state = StateApp::Logged;
                 orders.skip().perform_cmd(get_files("".to_string(), e));
             }
+        }
+        Msg::Token(Err(e)) => {
+            model.notification.push((false, e));
         }
         Msg::Refresh => {
             orders
@@ -192,43 +193,55 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
 }
 
 fn view(model: &Model) -> Vec<Node<Msg>> {
+    let mut notifs: Vec<Node<Msg>> = Vec::new();
+    for (n, i) in model.notification.clone().into_iter().enumerate() {
+        let n = n.try_into().unwrap_or(-1);
+        let child = match i.0 {
+            true => {
+                div![
+                    C!["mb-4 notification is-success"],
+                    button![
+                        C!["delete"],
+                        ev(Ev::Click, move |_| Msg::RemoveNotification(n))
+                    ],
+                    i.1
+                ]
+            }
+            false => {
+                div![
+                    C!["mb-4 notification is-danger"],
+                    button![
+                        C!["delete"],
+                        ev(Ev::Click, move |_| Msg::RemoveNotification(n))
+                    ],
+                    i.1
+                ]
+            }
+        };
+        notifs.push(child);
+    }
     match model.state {
         StateApp::Login => {
-            vec![div![C!["container is-align-items-center is-flex is-justify-content-center is-align-content-center"], login()]]
+            vec![div![
+                C!["container is-flex is-align-items-center"],
+                div![
+                    C!["is-flex is-flex-direction-column is-vcentered"],
+                    div![notifs],
+                    login()
+                ]
+            ]]
         }
         StateApp::SignUp => {
-            vec![
-                div![C!["container is-align-items-center is-flex is-justify-content-center is-align-content-center"], signup()]]
+            vec![div![
+                C!["container is-flex is-align-items-center"],
+                div![
+                    C!["is-flex is-flex-direction-column is-vcentered"],
+                    div![notifs],
+                    signup()
+                ]
+            ]]
         }
         StateApp::Logged => {
-            let mut notifs: Vec<Node<Msg>> = Vec::new();
-            for (n, i) in model.notification.clone().into_iter().enumerate() {
-                let n = n.try_into().unwrap_or(-1);
-                let child = match i.0 {
-                    true => {
-                        div![
-                            C!["notification is-success"],
-                            button![
-                                C!["delete"],
-                                ev(Ev::Click, move |_| Msg::RemoveNotification(n))
-                            ],
-                            i.1
-                        ]
-                    }
-                    false => {
-                        div![
-                            C!["notification is-danger"],
-                            button![
-                                C!["delete"],
-                                ev(Ev::Click, move |_| Msg::RemoveNotification(n))
-                            ],
-                            i.1
-                        ]
-                    }
-                };
-                notifs.push(child);
-            }
-
             vec![
                 div![
                     attrs! {At::Id => "wrapper"},

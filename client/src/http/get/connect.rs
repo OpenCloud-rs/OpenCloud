@@ -1,9 +1,10 @@
 use crate::library::lib::Account;
 use crate::Msg;
+use seed::log;
 use seed::prelude::{Header, Method, Request};
 use seed::window;
 
-pub async fn get_connect(account: Account) -> Msg {
+pub async fn get_token(account: Account) -> Msg {
     let ip = format!(
         "{}{}{}",
         "http://".to_owned(),
@@ -21,13 +22,18 @@ pub async fn get_connect(account: Account) -> Msg {
         .unwrap()
         .fetch()
         .await;
-    let token = match request {
-        Ok(r) => match r.text().await {
-            Ok(s) => s,
-            Err(_) => String::new(),
-        },
-        Err(_) => String::new(),
-    };
 
-    Msg::Token(token)
+    match request {
+        Ok(r) => {
+            if r.status().code == 200 {
+                match r.text().await {
+                    Ok(s) => Msg::Token(Ok(s)),
+                    Err(_) => Msg::Token(Err("Error".to_string())),
+                }
+            } else {
+                Msg::Token(Err("Error token".to_string()))
+            }
+        }
+        Err(_) => Msg::Token(Err("Error: Request Failed".to_string())),
+    }
 }
