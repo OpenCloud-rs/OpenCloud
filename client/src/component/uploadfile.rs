@@ -44,14 +44,14 @@ pub fn upload_file(file_name: String, url: &str) -> Node<Msg> {
     if cfg!(debug_assertions) {
         println!("{}", url);
     }
-    let button = if !file_name.is_empty() {
+    let button = if file_name.is_empty() {
+        span![]
+    } else {
         button![
             C!["button is-link"],
             ev(Ev::Click, |_| Msg::CallUploadFile),
             format!("Upload : {}", file_name)
         ]
-    } else {
-        span![]
     };
 
     div![div![div![
