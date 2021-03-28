@@ -14,6 +14,9 @@ pub async fn create_user(
     data: web::Data<DatabasePool>,
 ) -> Result<HttpResponse, Error> {
     let mut database = data.get_ref().clone();
+    if body.name.is_empty() || body.password.is_empty() {
+        return Ok(HttpResponse::BadRequest().body("Name or password cannot be empty"));
+    }
     match insert_user(
         &mut database,
         body.name.clone(),
@@ -26,13 +29,16 @@ pub async fn create_user(
             let e = create_home(body.name.clone()).await;
             Ok(HttpResponse::Ok().body(e.body))
         }
-        Err(_) => Ok(HttpResponse::BadRequest().body("Your request is bad")),
+        Err(_) => Ok(HttpResponse::BadRequest().body("Bad Request")),
     }
 }
 
 #[post("/user/login")]
 pub async fn login_user(body: web::Json<LoginUser>, data: web::Data<DatabasePool>) -> HttpResponse {
     let mut database = data.get_ref().clone();
+    if body.name.is_empty() || body.password.is_empty() {
+        return HttpResponse::BadRequest().body("Name or password cannot be empty");
+    }
     let token = generate_token();
     if cfg!(debug_assertions) {
         println!("name : {}, password: {}", body.name, body.password);
