@@ -37,14 +37,14 @@ pub async fn get_files(
         match bvec.get("download").unwrap_or(&String::new()).as_ref() {
             "tar.gz" | "tar" => {
                 result = download(
-                    format!("{}/{}", user.home, path.0.clone()),
+                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
                     ArchiveType::Targz,
                 )
                 .await;
             }
             _ => {
                 result = download(
-                    format!("{}/{}", user.home, path.0.clone()),
+                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
                     ArchiveType::Zip,
                 )
                 .await;
@@ -53,24 +53,24 @@ pub async fn get_files(
     } else if bvec.contains_key("sort") {
         match bvec.get("sort").unwrap_or(&String::new()).as_ref() {
             "by_size" => {
-                result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Size);
+                result = get_dir(format!("{}/{}", user.home.unwrap(), path.0.clone()), Sort::Size);
             }
             "by_name" => {
-                result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
+                result = get_dir(format!("{}/{}", user.home.unwrap(), path.0.clone()), Sort::Name);
             }
             "by_date" => {
-                result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Date);
+                result = get_dir(format!("{}/{}", user.home.unwrap(), path.0.clone()), Sort::Date);
             }
             _ => {
-                result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Type);
+                result = get_dir(format!("{}/{}", user.home.unwrap(), path.0.clone()), Sort::Type);
             }
         }
     } else if bvec.contains_key("preview") {
-        result = get_file_preview(format!("{}/{}", user.home, path.0.clone())).await
+        result = get_file_preview(format!("{}/{}", user.home.unwrap(), path.0.clone())).await
     } else {
-        result = get_dir(format!("{}/{}", user.home, path.0.clone()), Sort::Name);
+        result = get_dir(format!("{}/{}", user.home.unwrap(), path.0.clone()), Sort::Name);
     }
-    insert(&mut database, user.id, ActionType::Get).await;
+    insert(&mut database, user.id.unwrap(), ActionType::Get).await;
 
     result
 }
@@ -103,7 +103,7 @@ pub async fn save_file(
             return Ok(HttpResponse::Ok().body("Can't get user"));
         }
     };
-    insert(&mut database, user.id, ActionType::Upload).await;
+    insert(&mut database, user.id.unwrap(), ActionType::Upload).await;
     let mut result = false;
     while let Ok(Some(mut field)) = payload.try_next().await {
         let filename = field
@@ -187,7 +187,7 @@ pub async fn delete_file(
                     ftype: "File".to_string(),
                     modified: String::from("0-0-0000 00:00:00"),
                 });
-                insert(&mut database, user.id, ActionType::Delete).await;
+                insert(&mut database, user.id.unwrap(), ActionType::Delete).await;
             }
             Err(e) => result.content.push(Folder::error(e.to_string())),
         };
@@ -203,7 +203,7 @@ pub async fn delete_file(
                     ftype: "File".to_string(),
                     modified: String::from("0-0-0000 00:00:00"),
                 });
-                insert(&mut database, user.id, ActionType::Delete).await;
+                insert(&mut database, user.id.unwrap(), ActionType::Delete).await;
             }
             Err(e) => result.content.push(Folder::error(e.to_string())),
         };

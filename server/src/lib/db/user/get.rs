@@ -19,7 +19,7 @@ pub async fn get_users(database: &mut DatabasePool) -> Vec<User> {
             password: row.try_get("password").expect("Error"),
             token: row.try_get("token").unwrap_or_default(),
             email: row.try_get("email").unwrap_or_default(),
-            home: format!("./home/{}", name),
+            home: Some(format!("./home/{}", name)),
         });
     }
 
@@ -40,7 +40,7 @@ pub async fn get_user_by_token(database: &mut DatabasePool, token: String) -> Op
             password: row.try_get(2).expect("Error"),
             token: row.try_get(3).unwrap_or_default(),
             email: row.try_get(4).unwrap_or_default(),
-            home: format!("./home/{}", name),
+            home: Some(format!("./home/{}", name)),
         });
     }
 

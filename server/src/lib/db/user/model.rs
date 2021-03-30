@@ -1,24 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct User {
-    pub id: i32,
-    pub token: String,
-    pub name: String,
-    pub email: String,
-    pub password: String,
-    pub home: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MinimalUser {
+    pub id: Option<i32>,
+    pub token: Option<String>,
     pub name: String,
     pub email: Option<String>,
     pub password: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LoginUser {
-    pub name: String,
-    pub password: String,
+    pub home: Option<String>,
 }

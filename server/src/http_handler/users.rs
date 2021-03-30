@@ -1,7 +1,7 @@
 use crate::lib::db::user::create_home::create_home;
 use crate::lib::db::user::get::get_id_of_user;
 use crate::lib::db::user::insert::insert_user;
-use crate::lib::db::user::model::{LoginUser, MinimalUser};
+use crate::lib::db::user::model::User;
 use crate::lib::db::user::token::generate_token;
 use crate::lib::db::user::update::update_token;
 use crate::lib::db::user::valid_session::valid_session;
@@ -10,7 +10,7 @@ use datagn::DatabasePool;
 
 #[post("/user/create")]
 pub async fn create_user(
-    body: web::Json<MinimalUser>,
+    body: web::Json<User>,
     data: web::Data<DatabasePool>,
 ) -> Result<HttpResponse, Error> {
     let mut database = data.get_ref().clone();
@@ -34,7 +34,7 @@ pub async fn create_user(
 }
 
 #[post("/user/login")]
-pub async fn login_user(body: web::Json<LoginUser>, data: web::Data<DatabasePool>) -> HttpResponse {
+pub async fn login_user(body: web::Json<User>, data: web::Data<DatabasePool>) -> HttpResponse {
     let mut database = data.get_ref().clone();
     if body.name.is_empty() || body.password.is_empty() {
         return HttpResponse::BadRequest().body("Name or password cannot be empty");
