@@ -1,3 +1,5 @@
+#![allow(unreachable_patterns)]
+
 use datagn::database::DatabaseType;
 use logger::{error, info};
 use std::fs::{read_dir, File};
