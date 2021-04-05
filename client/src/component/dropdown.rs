@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::Msg;
 use seed::{prelude::*, *};
 use std::fmt;

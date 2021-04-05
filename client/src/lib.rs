@@ -49,7 +49,7 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
         state: StateApp::Login,
         route: "".to_string(),
         delete: (false, "".to_string()),
-        file: File::new_with_str_sequence(&JsValue::from_str(&"Hello"), "Default"),
+        file: File::new_with_str_sequence(&JsValue::from_str(&""), ""),
         notification: Vec::new(),
     }
 }
@@ -58,7 +58,7 @@ fn init(_: Url, _: &mut impl Orders<Msg>) -> Model {
 pub struct Model {
     pub api: JsonStruct,
     pub uri: String,
-    pub notification: Vec<(bool, String)>,
+    pub notification: Vec<(bool, Option<i32>, String)>,
     pub upload_toggle: component::uploadfile::State,
     pub name: String,
     pub pass: String,
@@ -80,13 +80,13 @@ pub enum InputType {
 pub enum Msg {
     Fetched(Option<JsonStruct>),
     InputChange(String, InputType),
-    AddNotification(bool, String),
+    AddNotification(bool, Option<i32>, String),
     RemoveNotification(i32),
     Connect,
     Refresh,
     UpdatePath(String),
     ChangeState(StateApp),
-    Token(Result<String, String>),
+    Token(Result<String, (Option<i32>, String)>),
     ChangeRoute(String, ChangeRouteType),
     DeleteFile(Result<u16, u16>, String),
     CallDelete(String),
@@ -103,6 +103,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
         Msg::Fetched(_) => {
             model.notification.push((
                 false,
+                None,
                 "Fetch error - Fetching folder info failed".to_string(),
             ));
         }
@@ -125,7 +126,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             }
         }
         Msg::Token(Err(e)) => {
-            model.notification.push((false, e));
+            model.notification.push((false, e.0, e.1));
         }
         Msg::Refresh => {
             orders
@@ -161,7 +162,7 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
                 .perform_cmd(download(e, "zip".to_string(), model.clone().token));
         }
         Msg::DeleteFile(result, name) => {
-            let mut re = (false, name);
+            let mut re = (false, None, name);
             if result.is_ok() {
                 re.0 = true;
                 orders.skip().perform_cmd(refresh());
@@ -185,7 +186,9 @@ fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
             log!(format! {"{} / {}",e , msg});
             orders.skip().perform_cmd(refresh());
         }
-        Msg::AddNotification(status, content) => model.notification.push((status, content)),
+        Msg::AddNotification(status, http_status, content) => {
+            model.notification.push((status, http_status, content))
+        }
         Msg::RemoveNotification(index) => {
             model.notification.remove(index as usize);
         }
@@ -198,23 +201,35 @@ fn view(model: &Model) -> Vec<Node<Msg>> {
         let n = n.try_into().unwrap_or(-1);
         let child = match i.0 {
             true => {
+                let tag: Node<Msg> = if let Some(http_status) = i.1 {
+                    span![C!["tag", "is-danger", "is-light", "mr-2"], http_status]
+                } else {
+                    span!()
+                };
                 div![
                     C!["mb-4 notification is-success"],
                     button![
                         C!["delete"],
                         ev(Ev::Click, move |_| Msg::RemoveNotification(n))
                     ],
-                    i.1
+                    tag,
+                    i.2
                 ]
             }
             false => {
+                let tag: Node<Msg> = if let Some(http_status) = i.1 {
+                    span![C!["tag", "is-danger", "is-light", "mr-2"], http_status]
+                } else {
+                    span!()
+                };
                 div![
                     C!["mb-4 notification is-danger"],
                     button![
                         C!["delete"],
                         ev(Ev::Click, move |_| Msg::RemoveNotification(n))
                     ],
-                    i.1
+                    tag,
+                    i.2
                 ]
             }
         };
