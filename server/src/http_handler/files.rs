@@ -7,6 +7,7 @@ use crate::lib::file::{get_dir, get_file_preview, Sort};
 use crate::lib::{archive::*, http::get_args};
 use actix_web::{delete, get, web, HttpRequest, HttpResponse};
 use datagn::DatabasePool;
+use logger::error;
 use shared::{FType, Folder, JsonStruct};
 
 #[get("/file/{path:.*}")]
@@ -33,18 +34,26 @@ pub async fn get_files(
             return HttpResponse::BadRequest().body(String::from("Error on get user"));
         }
     };
+    let home = if let Some(e) = user.home {
+        e
+    } else {
+        return HttpResponse::InternalServerError().body("User don't have home");
+    };
+
+    let path = path.0;
+
     if bvec.contains_key("download") {
         match bvec.get("download").unwrap_or(&String::new()).as_ref() {
             "tar.gz" | "tar" => {
                 result = download(
-                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
+                    format!("{}/{}", home, path),
                     ArchiveType::Targz,
                 )
                 .await;
             }
             _ => {
                 result = download(
-                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
+                    format!("{}/{}", home, path),
                     ArchiveType::Zip,
                 )
                 .await;
@@ -54,39 +63,42 @@ pub async fn get_files(
         match bvec.get("sort").unwrap_or(&String::new()).as_ref() {
             "by_size" => {
                 result = get_dir(
-                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
+                    format!("{}/{}", home, path),
                     Sort::Size,
                 );
             }
             "by_name" => {
                 result = get_dir(
-                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
+                    format!("{}/{}", home, path),
                     Sort::Name,
                 );
             }
             "by_date" => {
                 result = get_dir(
-                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
+                    format!("{}/{}", home, path),
                     Sort::Date,
                 );
             }
             _ => {
                 result = get_dir(
-                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
+                    format!("{}/{}", home, path),
                     Sort::Type,
                 );
             }
         }
     } else if bvec.contains_key("preview") {
-        result = get_file_preview(format!("{}/{}", user.home.unwrap(), path.0.clone())).await
+        result = get_file_preview(format!("{}/{}", home, path)).await
     } else {
         result = get_dir(
-            format!("{}/{}", user.home.unwrap(), path.0.clone()),
+            format!("{}/{}", home, path),
             Sort::Name,
         );
     }
-    insert(&mut database, user.id.unwrap(), ActionType::Get).await;
-
+    if let Some(e) = user.id {
+        insert(&mut database, e, ActionType::Get).await;
+    } else {
+        error("Can't log user");
+    }
     result
 }
 
@@ -118,7 +130,11 @@ pub async fn save_file(
             return Ok(HttpResponse::Ok().body("Can't get user"));
         }
     };
-    insert(&mut database, user.id.unwrap(), ActionType::Upload).await;
+
+    if let Some(e) = user.id {
+        insert(&mut database, e, ActionType::Upload).await;
+    }
+
     let mut result = false;
     while let Ok(Some(mut field)) = payload.try_next().await {
         let filename = field
@@ -138,12 +154,20 @@ pub async fn save_file(
                 url, filename, filepath
             );
         }
-        let mut f = async_std::fs::File::create(filepath.clone()).await.unwrap();
+        let mut f = if let Ok(e) = async_std::fs::File::create(filepath.clone()).await {
+            e
+        } else {
+            return Ok(HttpResponse::InternalServerError().body("Error on creation of file"));
+        };
 
         while let Some(chunk) = field.next().await {
             match chunk {
                 Ok(e) => {
-                    f = f.write_all(&e).await.map(|_| f).unwrap();
+                    f = if let Ok(e) = f.write_all(&e).await.map(|_| f) {
+                        e
+                    } else {
+                        return Ok(HttpResponse::InternalServerError().body("Error"));
+                    };
                 }
                 Err(e) => {
                     if cfg!(features = "log") {
@@ -202,7 +226,11 @@ pub async fn delete_file(
                     ftype: "File".to_string(),
                     modified: String::from("0-0-0000 00:00:00"),
                 });
-                insert(&mut database, user.id.unwrap(), ActionType::Delete).await;
+                if let Some(id) = user.id {
+                    insert(&mut database, id, ActionType::Delete).await;
+                } else {
+                    error("Error on log");
+                }
             }
             Err(e) => result.content.push(Folder::error(e.to_string())),
         };

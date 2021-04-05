@@ -73,8 +73,7 @@ pub fn default() -> Config {
             db_user: None,
             db_password: None,
         };
-        let mut ff = File::create("./config.yaml").unwrap();
-        println!("{}", serde_yaml::to_string(&config).unwrap());
+        if let Ok(mut ff) = File::create("./config.yaml") {
         match ff.write(serde_yaml::to_string(&config).unwrap().as_bytes()) {
             Err(why) => {
                 if cfg!(feature = "log") {
@@ -87,6 +86,7 @@ pub fn default() -> Config {
                     info("successfully wrote to config")
                 }
             }
+        }
         }
         config
     }

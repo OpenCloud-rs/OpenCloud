@@ -182,7 +182,7 @@ pub async fn get_file_preview(path: String) -> HttpResponse<Body> {
                 .header("Access-Control-Allow-Origin", "*")
                 .header("charset", "utf-8")
                 .content_type(
-                    mime_guess::from_ext(path.split('/').last().unwrap())
+                    mime_guess::from_ext(path.split('/').last().unwrap_or(""))
                         .first_or_octet_stream()
                         .to_string(),
                 )

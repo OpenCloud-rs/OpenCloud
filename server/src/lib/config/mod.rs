@@ -36,17 +36,17 @@ impl Config {
             DatabaseType::Mysql => DatabaseConfig {
                 database_type: DatabaseType::Mysql,
                 ip: self.db_ip.clone(),
-                port: self.db_port.clone().unwrap().to_string(),
-                user: self.db_user.clone().unwrap(),
-                password: self.db_password.clone().unwrap(),
+                port: self.db_port.clone().unwrap_or_default().to_string(),
+                user: self.db_user.clone().unwrap_or_default(),
+                password: self.db_password.clone().unwrap_or_default(),
             },
             #[cfg(feature = "postgres")]
             DatabaseType::Postgresql => DatabaseConfig {
                 database_type: DatabaseType::Postgresql,
                 ip: self.db_ip.clone(),
-                port: self.db_port.clone().unwrap().to_string(),
-                user: self.db_user.clone().unwrap(),
-                password: self.db_password.clone().unwrap(),
+                port: self.db_port.clone().unwrap_or_default().to_string(),
+                user: self.db_user.clone().unwrap_or_default(),
+                password: self.db_password.clone().unwrap_or_default(),
             },
         }
     }

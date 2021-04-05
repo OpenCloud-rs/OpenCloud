@@ -10,7 +10,7 @@ use crate::lib::default::default;
 use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
 use lib::file::default::{bulma, file_svg, folder_svg, indexhtml, wasm, wasmloader};
-use logger::info;
+use logger::{error, info};
 
 mod http_handler;
 mod lib;
@@ -57,7 +57,13 @@ async fn main() -> std::io::Result<()> {
             .wrap_fn(|req, srv| {
                 let fut = srv.call(req);
                 async move {
-                    let res = fut.await.unwrap();
+                    let res = if let Ok(e) = fut.await {
+                        e
+                    } else {
+                        error("error");
+                        let repserror = std::io::Error::new(std::io::ErrorKind::Other, "Error");
+                        return Err(actix_web::Error::from(repserror));
+                    };
                     let e = res.request();
                     if cfg!(feature = "log") {
                         info(format!(
