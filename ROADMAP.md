@@ -7,6 +7,4 @@ Roadmap for 1.0.0
 
 + [x] Add Support of MySql / Postgre ([Datagn](https://github.com/Rheydskey/datagn))
 
-+ Add Cargo feature for lightweight binaries
-
-+ Add Permission to user
++ [x] Add Cargo feature for lightweight binaries
