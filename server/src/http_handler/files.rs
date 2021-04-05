@@ -53,22 +53,37 @@ pub async fn get_files(
     } else if bvec.contains_key("sort") {
         match bvec.get("sort").unwrap_or(&String::new()).as_ref() {
             "by_size" => {
-                result = get_dir(format!("{}/{}", user.home.unwrap(), path.0.clone()), Sort::Size);
+                result = get_dir(
+                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
+                    Sort::Size,
+                );
             }
             "by_name" => {
-                result = get_dir(format!("{}/{}", user.home.unwrap(), path.0.clone()), Sort::Name);
+                result = get_dir(
+                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
+                    Sort::Name,
+                );
             }
             "by_date" => {
-                result = get_dir(format!("{}/{}", user.home.unwrap(), path.0.clone()), Sort::Date);
+                result = get_dir(
+                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
+                    Sort::Date,
+                );
             }
             _ => {
-                result = get_dir(format!("{}/{}", user.home.unwrap(), path.0.clone()), Sort::Type);
+                result = get_dir(
+                    format!("{}/{}", user.home.unwrap(), path.0.clone()),
+                    Sort::Type,
+                );
             }
         }
     } else if bvec.contains_key("preview") {
         result = get_file_preview(format!("{}/{}", user.home.unwrap(), path.0.clone())).await
     } else {
-        result = get_dir(format!("{}/{}", user.home.unwrap(), path.0.clone()), Sort::Name);
+        result = get_dir(
+            format!("{}/{}", user.home.unwrap(), path.0.clone()),
+            Sort::Name,
+        );
     }
     insert(&mut database, user.id.unwrap(), ActionType::Get).await;
 
