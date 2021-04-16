@@ -42,7 +42,7 @@ include-flate = {version = "0.1.3", features = ["stable"]}
 shared = {path = "../shared"}
 
 datagn = {git = "https://github.com/Rheydskey/datagn.git"}
-sqlx = {version = "0.5.1", features = ["sqlite", "runtime-async-std-rustls"]}
+sqlx = {version = "0.5.2", features = ["sqlite", "runtime-async-std-rustls"]}
 whirlpool = "0.9.0"
 
 logger = {git = "https://github.com/Rheydskey/logger", branch="master"}
