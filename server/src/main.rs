@@ -4,13 +4,12 @@ use crate::http_handler::{
     users::{create_user, login_user},
 };
 use crate::lib::config::Config;
-use crate::lib::db::log::create::create as create_log_db;
-use crate::lib::db::user::create::create as create_user_db;
 use crate::lib::default::default;
 use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
 use lib::file::default::{bulma, file_svg, folder_svg, indexhtml, wasm, wasmloader};
 use logger::{error, info};
+use crate::lib::db::create_db;
 
 mod http_handler;
 mod lib;
@@ -19,10 +18,9 @@ mod lib;
 async fn main() -> std::io::Result<()> {
     let config: Config = default();
     let mut database = config.get_db_config().to_datapool().await;
-    create_log_db(&mut database).await;
-    create_user_db(&mut database).await;
+    create_db(&mut database).await;
     let server_ip: &str = &config.get_server();
-    lib::db::user::get::get_users(&mut database).await;
+
     if cfg!(feature = "log") {
         info(format!(
             "Server listening on {}:{}",
@@ -61,8 +59,7 @@ async fn main() -> std::io::Result<()> {
                         e
                     } else {
                         error("error");
-                        let repserror = std::io::Error::new(std::io::ErrorKind::Other, "Error");
-                        return Err(actix_web::Error::from(repserror));
+                        return Err(actix_web::Error::from(std::io::Error::new(std::io::ErrorKind::Other, "Error")));
                     };
                     let e = res.request();
                     if cfg!(feature = "log") {
