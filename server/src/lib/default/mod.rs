@@ -72,6 +72,7 @@ pub fn default() -> Config {
             db_ip: String::new(),
             db_user: None,
             db_password: None,
+            db_database: None
         };
         if let Ok(mut ff) = File::create("./config.yaml") {
         match ff.write(serde_yaml::to_string(&config).unwrap().as_bytes()) {
