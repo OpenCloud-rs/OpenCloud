@@ -1,11 +1,9 @@
 use crate::lib::file::{get_file_as_byte_vec, get_file_preview};
-use actix_utils::mpsc;
 use actix_web::http::ContentEncoding;
 use actix_web::{dev::BodyEncoding, HttpResponse};
 use async_std::fs as afs;
 use logger::error;
 use std::fs::File;
-use std::io::Error;
 use std::path::PathBuf;
 use zip::write::FileOptions;
 use zip::CompressionMethod;
@@ -33,10 +31,6 @@ pub async fn download(path: String, atype: ArchiveType) -> HttpResponse {
     }
 }
 pub async fn get_zip(path: String) -> HttpResponse {
-    let (tx, rx_body) = mpsc::channel();
-    let _ = tx.send(Ok::<_, Error>(
-        get_file_as_byte_vec(path.clone(), ArchiveType::Zip).await,
-    ));
     println!("{}", path.clone());
     HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
@@ -50,14 +44,10 @@ pub async fn get_zip(path: String) -> HttpResponse {
         )
         .content_type("application/zip")
         .encoding(ContentEncoding::Gzip)
-        .streaming(rx_body)
+        .body(get_file_as_byte_vec(path.clone(), ArchiveType::Zip).await)
 }
 
 pub async fn get_tar(path: String) -> HttpResponse {
-    let (tx, rx_body) = mpsc::channel();
-    let _ = tx.send(Ok::<_, Error>(
-        get_file_as_byte_vec(path.clone(), ArchiveType::Targz).await,
-    ));
     HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("charset", "utf-8")
@@ -70,7 +60,7 @@ pub async fn get_tar(path: String) -> HttpResponse {
         )
         .content_type("application/x-tar")
         .encoding(ContentEncoding::Gzip)
-        .streaming(rx_body)
+        .body(get_file_as_byte_vec(path.clone(), ArchiveType::Targz).await)
 }
 
 async fn async_zip_archive(name: String, dir: String) -> afs::File {

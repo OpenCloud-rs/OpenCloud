@@ -2663,7 +2663,6 @@ name = "server"
 version = "0.1.0"
 dependencies = [
  "actix-multipart",
- "actix-utils",
  "actix-web",
  "async-std",
  "bytes 1.0.1",

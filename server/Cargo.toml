@@ -22,7 +22,6 @@ postgres = ["datagn/postgres"]
 [dependencies]
 actix-web = "3.3.2"
 actix-multipart = "0.3.0"
-actix-utils = "2.0.0"
 
 rand = "0.8.3"
 
