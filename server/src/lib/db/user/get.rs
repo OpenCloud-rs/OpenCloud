@@ -4,7 +4,7 @@ use datagn::DatabasePool;
 use logger::error;
 use sqlx::Row;
 
-pub async fn get_users(database: &mut DatabasePool) -> Vec<User> {
+pub async fn _get_users(database: &mut DatabasePool) -> Vec<User> {
     let response = database
         .execute_and_fetch_all("SELECT * FROM User")
         .await
