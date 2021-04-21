@@ -3,7 +3,7 @@ use crate::lib::db::log::model::ActionType;
 use crate::lib::db::user::get::get_user_by_token;
 use crate::lib::db::user::valid_session::from_headers_if_valid_token_get_token;
 use crate::lib::file::file_trait::TraitFolder;
-use crate::lib::file::{get_dir, get_file_preview, Sort};
+use crate::lib::file::{get_dir, Sort};
 use crate::lib::{archive::*, http::get_args};
 use actix_web::{delete, get, web, HttpRequest, HttpResponse};
 use datagn::DatabasePool;
@@ -16,7 +16,7 @@ pub async fn get_files(
     path: web::Path<String>,
     data: web::Data<DatabasePool>,
 ) -> HttpResponse {
-    let result;
+    let result ;
 
     let mut database = data.get_ref().clone();
     let e = if let Some(token) =
@@ -47,16 +47,31 @@ pub async fn get_files(
             "tar.gz" | "tar" => {
                 result = download(
                     format!("{}/{}", home, path),
-                    ArchiveType::Targz,
+                    DownloadEnum::Archive(ArchiveType::Targz),
+                )
+                .await;
+            }
+            "zip" => {
+                result = download(
+                    format!("{}/{}", home, path),
+                    DownloadEnum::Archive(ArchiveType::Zip),
                 )
                 .await;
             }
             _ => {
-                result = download(
-                    format!("{}/{}", home, path),
-                    ArchiveType::Zip,
-                )
-                .await;
+                if let Ok(file) = std::fs::File::open(format!("{}/{}", home, path)) {
+                    if let Ok(metadata) = file.metadata() {
+                        if metadata.is_file() {
+                            result = download(format!("{}/{}", home, path), DownloadEnum::Download).await;
+                        } else {
+                            result = HttpResponse::BadRequest().body("Bad File");
+                        }
+                    } else {
+                        result = HttpResponse::BadRequest().body("Bad File");
+                    }
+                } else {
+                    result = HttpResponse::BadRequest().body("Bad File");
+                }
             }
         }
     } else if bvec.contains_key("sort") {
@@ -87,7 +102,7 @@ pub async fn get_files(
             }
         }
     } else if bvec.contains_key("preview") {
-        result = get_file_preview(format!("{}/{}", home, path)).await
+        result = download(format!("{}/{}", home, path), DownloadEnum::Preview).await
     } else {
         result = get_dir(
             format!("{}/{}", home, path),

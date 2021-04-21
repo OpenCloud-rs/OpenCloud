@@ -8,28 +8,80 @@ use std::path::PathBuf;
 use zip::write::FileOptions;
 use zip::CompressionMethod;
 use zip_extensions::zip_create_from_directory_with_options;
+
+pub enum DownloadEnum {
+    Preview,
+    Download,
+    Archive(ArchiveType),
+}
 pub enum ArchiveType {
     Targz,
     Zip,
 }
 
-pub async fn download(path: String, atype: ArchiveType) -> HttpResponse {
-    match async_std::fs::metadata(path.clone()).await {
-        Ok(e) => {
-            if e.is_file() {
-                get_file_preview(path.clone()).await
-            } else if e.is_dir() {
-                match atype {
-                    ArchiveType::Targz => get_tar(path.clone()).await,
-                    ArchiveType::Zip => get_zip(path.clone()).await,
+pub async fn download(path: String, atype: DownloadEnum) -> HttpResponse {
+    match atype {
+        DownloadEnum::Preview => {
+            if let Ok(metadata) = async_std::fs::metadata(path.clone()).await {
+                if metadata.is_file() {
+                    get_file_preview(path.clone()).await
+                } else {
+                    return HttpResponse::Ok().body("Bad file");
                 }
             } else {
-                HttpResponse::Ok().body("No file")
+                return HttpResponse::Ok().body("Bad file");
             }
         }
-        Err(_) => HttpResponse::Ok().body("Error"),
+        DownloadEnum::Download => download_file(path.clone()).await,
+        DownloadEnum::Archive(archivetype) => {
+            if let Ok(e) = async_std::fs::metadata(path.clone()).await {
+                if e.is_dir() {
+                    return match archivetype {
+                        ArchiveType::Targz => get_tar(path.clone()).await,
+                        ArchiveType::Zip => get_zip(path.clone()).await,
+                    };
+                } else {
+                    return HttpResponse::Ok().body("Bad file");
+                }
+            } else {
+                return HttpResponse::Ok().body("No file");
+            }
+        }
     }
 }
+
+pub async fn download_file(path: String) -> HttpResponse {
+    if let Ok(e) = afs::File::open(path.clone()).await {
+        if let Ok(e) = e.metadata().await {
+            if e.is_file() {
+                let buf = afs::read(path.clone()).await.unwrap();
+                HttpResponse::Ok()
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("charset", "utf-8")
+                    .header(
+                        "Content-Disposition",
+                        format!(
+                            "attachment; filename=\"{}\"",
+                            path.clone().split('/').last().unwrap_or("file")
+                        ),
+                    )
+                    .content_type(
+                        mime_guess::from_ext(path.split('/').last().unwrap_or(""))
+                            .first_or_octet_stream()
+                            .to_string(),
+                    )
+                    .body(buf)
+            } else {
+                HttpResponse::BadRequest().body("Bad File")
+            }
+        } else {
+            HttpResponse::BadRequest().body("Bad File")
+        }
+    } else {
+        HttpResponse::BadRequest().body("Bad File")
+    }
+}
+
 pub async fn get_zip(path: String) -> HttpResponse {
     println!("{}", path.clone());
     HttpResponse::Ok()
