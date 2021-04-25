@@ -29,11 +29,5 @@ pub struct Folder {
 pub enum FType {
     File,
     Folder,
-    Error,
-}
-
-#[derive(Deserialize)]
-pub struct HTTPQuery {
-    pub rtype: String,
-    pub download: String,
+    Error
 }

@@ -34,8 +34,8 @@ pub async fn get_token(account: Account) -> Msg {
             } else {
                 Msg::Token(Err((
                     Some(r.status().code as i32),
-                    r.text().await.unwrap_or_else(|e| fetcherror_to_string(e)),
-                )))
+                    r.text().await.unwrap_or_else(fetcherror_to_string)),
+                ))
             }
         }
         Err(e) => Msg::Token(Err((None, fetcherror_to_string(e)))),
@@ -48,13 +48,13 @@ fn fetcherror_to_string(e: FetchError) -> String {
         seed::prelude::FetchError::DomException(e) => e.message(),
         seed::prelude::FetchError::PromiseError(e) => e
             .as_string()
-            .unwrap_or("Error on parse message".to_string()),
+            .unwrap_or_else(|| String::from("Error on parse message")),
         seed::prelude::FetchError::NetworkError(e) => e
             .as_string()
-            .unwrap_or("Error on parse message".to_string()),
+            .unwrap_or_else(|| String::from("Error on parse message")),
         seed::prelude::FetchError::RequestError(e) => e
             .as_string()
-            .unwrap_or("Error on parse message".to_string()),
+            .unwrap_or_else(|| String::from("Error on parse message")),
         seed::prelude::FetchError::StatusError(e) => e.code.to_string(),
     }
 }
