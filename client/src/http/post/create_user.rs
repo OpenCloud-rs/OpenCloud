@@ -2,7 +2,8 @@ use crate::{
     library::lib::{Account, SignUpAccount},
     Msg,
 };
-use seed::{prelude::*, *};
+
+use seed::window;
 
 pub async fn create_user(account: Account) -> Msg {
     let ip = format!(
@@ -19,7 +20,7 @@ pub async fn create_user(account: Account) -> Msg {
         .header("Access-Control-Allow-Origin", "*")
         .json(&SignUpAccount::from_account(account.clone()));
 
-    let e = match request.send().await {
+    match request.send().await {
         Ok(e) => match e.text().await {
             Ok(e) => e,
             Err(e) => e.to_string(),

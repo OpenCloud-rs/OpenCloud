@@ -1,4 +1,3 @@
-use seed::prelude::{Header, Method, Request};
 use seed::window;
 
 use crate::Msg;
