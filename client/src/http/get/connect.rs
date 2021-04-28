@@ -1,6 +1,5 @@
 use crate::library::lib::Account;
 use crate::Msg;
-use seed::prelude::{FetchError, Header, Method, Request};
 use seed::window;
 
 pub async fn get_token(account: Account) -> Msg {
@@ -21,17 +20,19 @@ pub async fn get_token(account: Account) -> Msg {
 
     match request.send().await {
         Ok(r) => {
-            if r.status().code == 200 {
-                match r.text().await {
-                    Ok(s) => Msg::Token(Ok(s)),
+            let status = r.status().as_u16();
+            let text = r.text();
+            if status == 200 {
+                match text.await {
+                    Ok(s) => Msg::Token(Ok(s.clone())),
                     Err(e) => {
-                        Msg::Token(Err((Some(r.status().code as i32), e.to_string())))
+                        Msg::Token(Err((Some(status as i32), e.to_string())))
                     }
                 }
             } else {
                 Msg::Token(Err((
-                    Some(r.status().code as i32),
-                    e.to_string()),
+                    Some(status as i32),
+                    text.await.unwrap_or_else(|_| String::new())),
                 ))
             }
         }
