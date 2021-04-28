@@ -14,24 +14,19 @@ pub async fn create_user(account: Account) -> Msg {
             .unwrap_or_else(|_| "127.0.0.1:8081".to_string()),
         "/api/user/create"
     );
-    log!(serde_json::to_string(&SignUpAccount::from_account(
-        account.clone()
-    )));
-    let request = Request::new(ip.as_str())
-        .method(Method::Post)
-        .header(Header::custom("Access-Control-Allow-Origin", "*"))
-        .header(Header::custom("Content-Type", "application/json"))
-        .json(&SignUpAccount::from_account(account.clone()))
-        .unwrap()
-        .fetch()
-        .await;
-    let e = match request {
+
+    let request = reqwest::Client::new().post(ip)
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Content-Type", "application/json")
+        .json(&SignUpAccount::from_account(account.clone()));
+
+    let e = match request.send().await {
         Ok(e) => match e.text().await {
             Ok(e) => e,
-            Err(_) => String::new(),
+            Err(e) => e.to_string(),
         },
-        Err(_) => String::new(),
+        Err(e) => e.to_string(),
     };
-    log!(e);
+
     Msg::Connect
 }
