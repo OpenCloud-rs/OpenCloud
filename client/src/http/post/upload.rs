@@ -1,10 +1,7 @@
 use crate::Msg;
-use seed::{
-    prelude::{web_sys::File, *},
-    *,
-};
+use seed::{*, prelude::{*, js_sys::{ArrayBuffer, Uint8Array}, web_sys::File as WebFile}};
 
-pub async fn upload_file(token: String, file: File, path: String) -> Msg {
+pub async fn upload_file(token: String, file: WebFile, path: String) -> Msg {
     let ip = format!(
         "{}{}{}{}",
         "http://".to_owned(),
@@ -16,27 +13,86 @@ pub async fn upload_file(token: String, file: File, path: String) -> Msg {
         path
     );
 
-    let formdata = web_sys::FormData::new().unwrap();
-    formdata.set_with_blob("file", &file).unwrap();
+    let name = file.name();
+    let vec_file: Vec<u8> = if let Ok(e) = JsFuture::from(file.clone().array_buffer()).await {
+        if e.is_instance_of::<ArrayBuffer>() {
+            Uint8Array::new(&e).to_vec()
+        } else {
+            Vec::new()
+        }
+    } else {
+        log!("Error");
+        Vec::new()
+    };
 
-    let request = Request::new(ip.as_str())
-        .method(Method::Post)
-        .header(Header::custom("token", token))
-        .body(formdata.into())
-        .fetch()
-        .await;
+    let file = File {
+        name,
+        data: vec_file,
+    };
 
-    match request {
+
+    let body = vec_to_multipart(file);
+    let lenght = body.len();
+
+    let request = reqwest::Client::new().post(ip)
+                                        .body(body)
+                                        .header("token", token)
+                                        .header("Content-Type", format!("mutlipart/form-data; boundary={}", BOUNDARY))
+                                        .header("Content-Length", lenght);
+    match request.send().await {
         Ok(e) => match e.text().await {
             Ok(e) => Msg::CallbackUploadFile(true, e),
             Err(e) => {
-                log!(format!("{:?}", e));
-                Msg::CallbackUploadFile(false, format! {"{:?}", e})
+                log!(format!("{:?}", e.to_string()));
+                Msg::CallbackUploadFile(false, format! {"{:?}",e.to_string()})
             }
         },
         Err(e) => {
-            log!(format!("{:?}", e));
-            Msg::CallbackUploadFile(false, format! {"{:?}", e})
+            log!(format!("{:?}", e.to_string()));
+            Msg::CallbackUploadFile(false, format! {"{:?}", e.to_string()})
         }
     }
+}
+
+pub struct File {
+    pub name: String,
+    pub data: Vec<u8>
+}
+
+impl File {
+    pub fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    pub fn data(&self) -> Vec<u8> {
+        self.data.clone()
+    }
+}
+
+const BOUNDARY: &'static str = "OPENCLOUDBINARYFILE";
+
+pub fn vec_to_multipart(file: File) -> Vec<u8> {
+    let mut multivec: Vec<u8> = Vec::new();
+    let name = file.name();
+    let rn = b"\r\n";
+
+    multivec.extend(rn);
+    multivec.extend(rn);
+    multivec.extend(format!("--{}", BOUNDARY).as_str().bytes());
+    multivec.extend(rn);
+    multivec.extend(format!("Content-Disposition: form-data; name=file; filename=\"{}\"", name).as_str().bytes());
+    multivec.extend(rn);
+    multivec.extend(format!("Content-Type: application: application/octet-stream").as_str().bytes());
+    multivec.extend(rn);
+    multivec.extend(format!("Content-Transfer-Encoding: binary").as_str().bytes());
+    multivec.extend(rn);
+    multivec.extend(rn);
+    multivec.extend(file.data());
+    multivec.extend(rn);
+    multivec.extend(format!("--{}--", BOUNDARY).as_str().bytes());
+    multivec.extend(rn);
+    multivec.extend(rn);
+
+    multivec
+
 }
