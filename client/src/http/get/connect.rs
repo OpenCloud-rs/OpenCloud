@@ -14,9 +14,9 @@ pub async fn get_token(account: Account) -> Msg {
     );
 
     let request = reqwest::Client::new()
-                            .post(ip.as_str()).json(&account)
-                            .header("Access-Control-Allow-Origin", "*")
-                            .header("Content-Type", "application/json");
+                            .post(ip.as_str())
+                            .json(&account)
+                            .header("Access-Control-Allow-Origin", "*");
 
     match request.send().await {
         Ok(r) => {

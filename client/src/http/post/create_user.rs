@@ -17,7 +17,6 @@ pub async fn create_user(account: Account) -> Msg {
 
     let request = reqwest::Client::new().post(ip)
         .header("Access-Control-Allow-Origin", "*")
-        .header("Content-Type", "application/json")
         .json(&SignUpAccount::from_account(account.clone()));
 
     let e = match request.send().await {
