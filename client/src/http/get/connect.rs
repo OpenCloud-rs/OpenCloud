@@ -13,48 +13,28 @@ pub async fn get_token(account: Account) -> Msg {
             .unwrap_or_else(|_| "127.0.0.1:8081".to_string()),
         "/api/user/login"
     );
-    let request = Request::new(ip.as_str())
-        .method(Method::Post)
-        .header(Header::custom("Access-Control-Allow-Origin", "*"))
-        .header(Header::custom("Content-Type", "application/json"))
-        .json(&account)
-        .unwrap()
-        .fetch()
-        .await;
 
-    match request {
+    let request = reqwest::Client::new()
+                            .post(ip.as_str()).json(&account)
+                            .header("Access-Control-Allow-Origin", "*")
+                            .header("Content-Type", "application/json");
+
+    match request.send().await {
         Ok(r) => {
             if r.status().code == 200 {
                 match r.text().await {
                     Ok(s) => Msg::Token(Ok(s)),
                     Err(e) => {
-                        Msg::Token(Err((Some(r.status().code as i32), fetcherror_to_string(e))))
+                        Msg::Token(Err((Some(r.status().code as i32), e.to_string())))
                     }
                 }
             } else {
                 Msg::Token(Err((
                     Some(r.status().code as i32),
-                    r.text().await.unwrap_or_else(fetcherror_to_string)),
+                    e.to_string()),
                 ))
             }
         }
-        Err(e) => Msg::Token(Err((None, fetcherror_to_string(e)))),
-    }
-}
-
-fn fetcherror_to_string(e: FetchError) -> String {
-    match e {
-        seed::prelude::FetchError::SerdeError(e) => e.to_string(),
-        seed::prelude::FetchError::DomException(e) => e.message(),
-        seed::prelude::FetchError::PromiseError(e) => e
-            .as_string()
-            .unwrap_or_else(|| String::from("Error on parse message")),
-        seed::prelude::FetchError::NetworkError(e) => e
-            .as_string()
-            .unwrap_or_else(|| String::from("Error on parse message")),
-        seed::prelude::FetchError::RequestError(e) => e
-            .as_string()
-            .unwrap_or_else(|| String::from("Error on parse message")),
-        seed::prelude::FetchError::StatusError(e) => e.code.to_string(),
+        Err(e) => Msg::Token(Err((None, e.to_string()))),
     }
 }
