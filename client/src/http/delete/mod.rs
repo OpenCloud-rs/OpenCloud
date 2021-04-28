@@ -22,6 +22,6 @@ pub async fn delete(token: String, name: String) -> Msg {
 
     match request.send().await {
         Ok(_) => Msg::DeleteFile(Ok(200), "Delete successfully".to_string()),
-        Err(_) => Msg::DeleteFile(Err(-0), "Delete unsuccessfully".to_string()),
+        Err(_) => Msg::DeleteFile(Err(0), "Delete unsuccessfully".to_string()),
     }
 }
