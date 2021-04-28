@@ -896,10 +896,9 @@ dependencies = [
 [[package]]
 name = "datagn"
 version = "0.1.0"
-source = "git+https://github.com/Rheydskey/datagn.git#3543f3094920aaecf6e1e6030fe04b3299eea2aa"
+source = "git+https://github.com/Rheydskey/datagn.git#85a0e737fe44220c6a7b0d6fc971333f776a7278"
 dependencies = [
  "async-std",
- "funty",
  "logger",
  "serde",
  "sqlx",
