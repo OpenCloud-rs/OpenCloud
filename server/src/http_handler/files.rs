@@ -221,7 +221,10 @@ pub async fn delete_file(
         return Ok(HttpResponse::BadRequest().body("Error on token"));
     };
 
-    let user = get_user_by_token(&mut database, e.clone()).await.unwrap();
+    let user = match get_user_by_token(&mut database, e.clone()).await {
+        Some(e) => e,
+        None => return Ok(HttpResponse::BadRequest().body("Can't get user")),
+    };
     if cfg!(debug_assertions) {
         println!("./home/{}/{}", user.name, path.0);
     }
