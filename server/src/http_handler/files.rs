@@ -142,7 +142,7 @@ pub async fn save_file(
     let user = match get_user_by_token(&mut database, e.clone()).await {
         Some(e) => e,
         None => {
-            return Ok(HttpResponse::Ok().body("Can't get user"));
+            return Ok(HttpResponse::BadRequest().body("Can't get user"));
         }
     };
 
