@@ -16,7 +16,7 @@ pub async fn get_files(
     path: web::Path<String>,
     data: web::Data<DatabasePool>,
 ) -> HttpResponse {
-    let result ;
+    let result;
 
     let mut database = data.get_ref().clone();
     let e = if let Some(token) =
@@ -62,7 +62,8 @@ pub async fn get_files(
                 if let Ok(file) = std::fs::File::open(format!("{}/{}", home, path)) {
                     if let Ok(metadata) = file.metadata() {
                         if metadata.is_file() {
-                            result = download(format!("{}/{}", home, path), DownloadEnum::Download).await;
+                            result = download(format!("{}/{}", home, path), DownloadEnum::Download)
+                                .await;
                         } else {
                             result = HttpResponse::BadRequest().body("Bad File");
                         }
@@ -77,37 +78,22 @@ pub async fn get_files(
     } else if bvec.contains_key("sort") {
         match bvec.get("sort").unwrap_or(&String::new()).as_ref() {
             "by_size" => {
-                result = get_dir(
-                    format!("{}/{}", home, path),
-                    Sort::Size,
-                );
+                result = get_dir(format!("{}/{}", home, path), Sort::Size);
             }
             "by_name" => {
-                result = get_dir(
-                    format!("{}/{}", home, path),
-                    Sort::Name,
-                );
+                result = get_dir(format!("{}/{}", home, path), Sort::Name);
             }
             "by_date" => {
-                result = get_dir(
-                    format!("{}/{}", home, path),
-                    Sort::Date,
-                );
+                result = get_dir(format!("{}/{}", home, path), Sort::Date);
             }
             _ => {
-                result = get_dir(
-                    format!("{}/{}", home, path),
-                    Sort::Type,
-                );
+                result = get_dir(format!("{}/{}", home, path), Sort::Type);
             }
         }
     } else if bvec.contains_key("preview") {
         result = download(format!("{}/{}", home, path), DownloadEnum::Preview).await
     } else {
-        result = get_dir(
-            format!("{}/{}", home, path),
-            Sort::Name,
-        );
+        result = get_dir(format!("{}/{}", home, path), Sort::Name);
     }
     if let Some(e) = user.id {
         insert(&mut database, e, ActionType::Get).await;

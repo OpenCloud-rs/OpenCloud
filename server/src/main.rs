@@ -4,12 +4,12 @@ use crate::http_handler::{
     users::{create_user, login_user},
 };
 use crate::lib::config::Config;
+use crate::lib::db::create_db;
 use crate::lib::default::default;
 use actix_web::{dev::Service, middleware::errhandlers::ErrorHandlers};
 use actix_web::{http, web, App, HttpServer};
 use lib::file::default::{bulma, file_svg, folder_svg, indexhtml, wasm, wasmloader};
 use logger::{error, info};
-use crate::lib::db::create_db;
 
 mod http_handler;
 mod lib;
@@ -59,7 +59,10 @@ async fn main() -> std::io::Result<()> {
                         e
                     } else {
                         error("error");
-                        return Err(actix_web::Error::from(std::io::Error::new(std::io::ErrorKind::Other, "Error")));
+                        return Err(actix_web::Error::from(std::io::Error::new(
+                            std::io::ErrorKind::Other,
+                            "Error",
+                        )));
                     };
                     let e = res.request();
                     if cfg!(feature = "log") {

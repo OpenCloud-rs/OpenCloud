@@ -72,22 +72,22 @@ pub fn default() -> Config {
             db_ip: String::new(),
             db_user: None,
             db_password: None,
-            db_database: None
+            db_database: None,
         };
         if let Ok(mut ff) = File::create("./config.yaml") {
-        match ff.write(serde_yaml::to_string(&config).unwrap().as_bytes()) {
-            Err(why) => {
-                if cfg!(feature = "log") {
-                    error(format!("couldn't write to config : {}", why.to_string()));
+            match ff.write(serde_yaml::to_string(&config).unwrap().as_bytes()) {
+                Err(why) => {
+                    if cfg!(feature = "log") {
+                        error(format!("couldn't write to config : {}", why.to_string()));
+                    }
+                    exit(1)
                 }
-                exit(1)
-            }
-            Ok(_) => {
-                if cfg!(feature = "log") {
-                    info("successfully wrote to config")
+                Ok(_) => {
+                    if cfg!(feature = "log") {
+                        info("successfully wrote to config")
+                    }
                 }
             }
-        }
         }
         config
     }

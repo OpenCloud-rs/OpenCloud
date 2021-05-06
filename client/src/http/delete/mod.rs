@@ -14,7 +14,8 @@ pub async fn delete(token: String, name: String) -> Msg {
         name
     );
 
-    let request = reqwest::Client::new().delete(ip)
+    let request = reqwest::Client::new()
+        .delete(ip)
         .header("Access-Control-Allow-Origin", "*")
         .header("Content-Type", "application/json")
         .header("Token", token.as_str());

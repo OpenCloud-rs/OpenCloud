@@ -10,7 +10,7 @@ pub struct Config {
     pub db_port: Option<i64>,
     pub db_user: Option<String>,
     pub db_password: Option<String>,
-    pub db_database: Option<String>
+    pub db_database: Option<String>,
 }
 
 impl Config {
@@ -32,7 +32,7 @@ impl Config {
                 port: String::new(),
                 user: String::new(),
                 password: String::new(),
-                database: None
+                database: None,
             },
             #[cfg(feature = "mysql")]
             DatabaseType::Mysql => DatabaseConfig {
@@ -41,7 +41,7 @@ impl Config {
                 port: self.db_port.clone().unwrap_or_default().to_string(),
                 user: self.db_user.clone().unwrap_or_default(),
                 password: self.db_password.clone().unwrap_or_default(),
-                database: self.db_database.clone()
+                database: self.db_database.clone(),
             },
             #[cfg(feature = "postgres")]
             DatabaseType::Postgresql => DatabaseConfig {
@@ -50,7 +50,7 @@ impl Config {
                 port: self.db_port.clone().unwrap_or_default().to_string(),
                 user: self.db_user.clone().unwrap_or_default(),
                 password: self.db_password.clone().unwrap_or_default(),
-                database: self.db_database.clone()
+                database: self.db_database.clone(),
             },
             #[cfg(feature = "mssql")]
             DatabaseType::Mssql => DatabaseConfig {
@@ -59,7 +59,7 @@ impl Config {
                 port: self.db_port.clone().unwrap_or_default().to_string(),
                 user: self.db_user.clone().unwrap_or_default(),
                 password: self.db_password.clone().unwrap_or_default(),
-                database: self.db_database.clone()
+                database: self.db_database.clone(),
             },
         }
     }

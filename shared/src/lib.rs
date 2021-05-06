@@ -29,5 +29,5 @@ pub struct Folder {
 pub enum FType {
     File,
     Folder,
-    Error
+    Error,
 }
