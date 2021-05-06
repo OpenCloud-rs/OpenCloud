@@ -14,9 +14,9 @@ pub async fn get_token(account: Account) -> Msg {
     );
 
     let request = reqwest::Client::new()
-                            .post(ip.as_str())
-                            .json(&account)
-                            .header("Access-Control-Allow-Origin", "*");
+        .post(ip.as_str())
+        .json(&account)
+        .header("Access-Control-Allow-Origin", "*");
 
     match request.send().await {
         Ok(r) => {
@@ -24,16 +24,14 @@ pub async fn get_token(account: Account) -> Msg {
             let text = r.text();
             if status == 200 {
                 match text.await {
-                    Ok(s) => Msg::Token(Ok(s.clone())),
-                    Err(e) => {
-                        Msg::Token(Err((Some(status as i32), e.to_string())))
-                    }
+                    Ok(s) => Msg::Token(Ok(s)),
+                    Err(e) => Msg::Token(Err((Some(status as i32), e.to_string()))),
                 }
             } else {
                 Msg::Token(Err((
                     Some(status as i32),
-                    text.await.unwrap_or_else(|_| String::new())),
-                ))
+                    text.await.unwrap_or_else(|_| String::new()),
+                )))
             }
         }
         Err(e) => Msg::Token(Err((None, e.to_string()))),
