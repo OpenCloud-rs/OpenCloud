@@ -6,12 +6,13 @@ pub struct JsonStruct {
     pub ftype: FType,
     pub content: Vec<Folder>,
 }
+
 impl Default for JsonStruct {
     fn default() -> Self {
         Self {
             result: false,
             lenght: 0,
-            ftype: FType::Error,
+            ftype: FType::Unset,
             content: Vec::new(),
         }
     }
@@ -25,9 +26,24 @@ pub struct Folder {
     pub modified: String,
     pub ftype: String,
 }
+
+impl Folder {
+    pub fn new(result: bool, name: String, size: u64, created: String, modified: String, ftype: String) -> Self {
+        Self {
+            result,
+            name,
+            size,
+            created,
+            modified,
+            ftype
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum FType {
     File,
     Folder,
     Error,
+    Unset,
 }

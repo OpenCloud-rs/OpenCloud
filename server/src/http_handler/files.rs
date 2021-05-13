@@ -192,12 +192,7 @@ pub async fn delete_file(
     path: web::Path<String>,
     data: web::Data<DatabasePool>,
 ) -> Result<HttpResponse, Error> {
-    let mut result = JsonStruct {
-        result: false,
-        lenght: 0,
-        ftype: FType::File,
-        content: Vec::new(),
-    };
+    let mut result = JsonStruct::default();
     let mut database = data.get_ref().clone();
     let e = if let Some(token) =
         from_headers_if_valid_token_get_token(&mut database, req.clone()).await
@@ -222,14 +217,14 @@ pub async fn delete_file(
         match async_std::fs::remove_dir_all(format!("./home/{}/{}", user.name, path.0)).await {
             Ok(_) => {
                 result.result = true;
-                result.content.push(Folder {
-                    result: true,
-                    size: 0,
-                    created: String::from("0-0-0000 00:00:00"),
-                    name: path.0,
-                    ftype: "File".to_string(),
-                    modified: String::from("0-0-0000 00:00:00"),
-                });
+                result.content.push(Folder::new(
+                    true,
+                    path.0,
+                    0,
+                    String::from("0-0-0000 00:00:00"),
+                    String::from("0-0-0000 00:00:00"),
+                    "File".to_string(),
+                ));
                 if let Some(id) = user.id {
                     insert(&mut database, id, ActionType::Delete).await;
                 } else {
@@ -242,14 +237,14 @@ pub async fn delete_file(
         match async_std::fs::remove_file(format!("./home/{}/{}", user.name, path.0)).await {
             Ok(_) => {
                 result.result = true;
-                result.content.push(Folder {
-                    result: true,
-                    size: 0,
-                    created: String::from("0-0-0000 00:00:00"),
-                    name: path.0,
-                    ftype: "File".to_string(),
-                    modified: String::from("0-0-0000 00:00:00"),
-                });
+                result.content.push(Folder::new(
+                    true,
+                    path.0,
+                    0,
+                    String::from("0-0-0000 00:00:00"),
+                    String::from("0-0-0000 00:00:00"),
+                    "File".to_string(),
+                ));
                 insert(&mut database, user.id.unwrap(), ActionType::Delete).await;
             }
             Err(e) => result.content.push(Folder::error(e.to_string())),
