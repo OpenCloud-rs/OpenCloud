@@ -2540,7 +2540,7 @@ dependencies = [
 [[package]]
 name = "seed"
 version = "0.8.0"
-source = "git+https://github.com/seed-rs/seed.git#938d71b6527efcd84c7d9ff37330949791b6d3a4"
+source = "git+https://github.com/seed-rs/seed.git#8e41afb06636fb85f1eec103f6db99be3b06f8d3"
 dependencies = [
  "console_error_panic_hook",
  "cookie",
