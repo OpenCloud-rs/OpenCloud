@@ -26,11 +26,9 @@ jobs:
         with:
           toolchain: stable
           override: true
-      - name: cargo make
-        uses: actions-rs/cargo@v1
-        with: 
-          command: install
-          args: cargo-make
+      - uses: davidB/rust-cargo-make@v1
+        with:
+          version: '0.33.0'
       - name: cargo test build
         uses: actions-rs/cargo@v1
         with:
