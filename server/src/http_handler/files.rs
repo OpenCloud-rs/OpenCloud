@@ -8,7 +8,7 @@ use crate::lib::{archive::*, http::get_args};
 use actix_web::{delete, get, web, HttpRequest, HttpResponse};
 use datagn::DatabasePool;
 use logger::error;
-use shared::{FType, Folder, JsonStruct};
+use shared::{Folder, JsonStruct};
 
 #[get("/file/{path:.*}")]
 pub async fn get_files(
