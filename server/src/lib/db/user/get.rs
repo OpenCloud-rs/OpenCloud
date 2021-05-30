@@ -56,24 +56,19 @@ pub async fn get_id_of_user(
     name: String,
     password: String,
 ) -> Option<i32> {
-    let query: i32 = match database
+    match database
         .execute_and_fetch_one_with_bind(
             "SELECT id FROM User WHERE name=?1 AND password=?2",
             &[name, hash_password(password)],
         )
         .await
     {
-        Ok(e) => e.try_get::<i32, &str>("id").unwrap(),
+        Ok(e) => Some(e.try_get::<i32, &str>("id").unwrap()),
         Err(e) => {
             if cfg!(feature = "log") {
                 error(format!("Error on get_id_of_user : {:?}", e));
             }
-            -1
+            None
         }
-    };
-    if query == -1 {
-        None
-    } else {
-        Some(query)
     }
 }
