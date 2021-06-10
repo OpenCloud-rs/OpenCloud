@@ -25,7 +25,7 @@ actix-multipart = "0.3.0"
 
 rand = "0.8.3"
 
-zip = "0.5.12"
+zip = "0.5.13"
 zip-extensions = "0.6.0"
 tar = "0.4.35"
 
