@@ -23,7 +23,7 @@ postgres = ["datagn/postgres"]
 actix-web = "3.3.2"
 actix-multipart = "0.3.0"
 
-rand = "0.8.3"
+rand = "0.8.4"
 
 zip = "0.5.13"
 zip-extensions = "0.6.0"
