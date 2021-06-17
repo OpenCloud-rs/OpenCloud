@@ -701,7 +701,7 @@ dependencies = [
 
 [[package]]
 name = "client"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "futures",
  "percent-encoding",
@@ -2541,7 +2541,7 @@ dependencies = [
 
 [[package]]
 name = "server"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = [
  "actix-multipart",
  "actix-web",
