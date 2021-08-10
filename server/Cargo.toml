@@ -27,7 +27,7 @@ rand = "0.8.4"
 
 zip = "0.5.13"
 zip-extensions = "0.6.1"
-tar = "0.4.35"
+tar = "0.4.36"
 
 mime_guess = "2.0.3"
 
