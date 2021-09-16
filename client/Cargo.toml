@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 seed = {git = "https://github.com/seed-rs/seed.git"}
-wasm-bindgen = "0.2.75"
+wasm-bindgen = "0.2.78"
 serde = { version = "1.0.127", features = ['derive'] }
 serde_json = {version = "1.0.64"}
 futures = "0.3.16"
