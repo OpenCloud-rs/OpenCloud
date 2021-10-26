@@ -1586,9 +1586,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.94"
+version = "0.2.105"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18794a8ad5b29321f790b55d93dfba91e125cb1a9edbd4f8e3150acc771c1a5e"
+checksum = "869d572136620d55835903746bcb5cdc54cb2851fd0aeec53220b4bb65ef3013"
 
 [[package]]
 name = "libflate"
@@ -2559,7 +2559,7 @@ dependencies = [
  "shared",
  "sqlx",
  "tar",
- "time 0.2.27",
+ "time 0.3.4",
  "tokio-stream",
  "whirlpool",
  "zip",
@@ -2989,6 +2989,15 @@ dependencies = [
  "time-macros",
  "version_check 0.9.3",
  "winapi 0.3.9",
+]
+
+[[package]]
+name = "time"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "99beeb0daeac2bd1e86ac2c21caddecb244b39a093594da1a661ec2060c7aedd"
+dependencies = [
+ "libc",
 ]
 
 [[package]]
