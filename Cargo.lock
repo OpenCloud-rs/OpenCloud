@@ -1228,9 +1228,9 @@ dependencies = [
 
 [[package]]
 name = "gloo-file"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f9fecfe46b5dc3cc46f58e98ba580cc714f2c93860796d002eb3527a465ef49"
+checksum = "d31ba1f51868ae10a0b665c6dccd5ed967486e7c17055d1c889596ee983be493"
 dependencies = [
  "futures-channel",
  "gloo-events",
@@ -1247,6 +1247,17 @@ checksum = "47204a46aaff920a1ea58b11d03dec6f704287d27561724a4631e450654a891f"
 dependencies = [
  "futures-channel",
  "futures-core",
+ "js-sys",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
+name = "gloo-utils"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3d77d28d9a6f7c384d9e40293fa11f05558bf928a993208e12528ee6633cb415"
+dependencies = [
  "js-sys",
  "wasm-bindgen",
  "web-sys",
@@ -2447,7 +2458,7 @@ dependencies = [
 [[package]]
 name = "seed"
 version = "0.8.0"
-source = "git+https://github.com/seed-rs/seed.git#531e81365d87f0c62d15f26d9455c39c3fd5f9dc"
+source = "git+https://github.com/seed-rs/seed.git#f83728fea048a1505cee48f196ce3038f49e6910"
 dependencies = [
  "console_error_panic_hook",
  "cookie",
@@ -2457,11 +2468,12 @@ dependencies = [
  "getrandom 0.2.2",
  "gloo-file",
  "gloo-timers",
+ "gloo-utils",
  "indexmap",
  "js-sys",
  "rand 0.8.4",
  "serde",
- "serde_json",
+ "serde-wasm-bindgen",
  "uuid",
  "version_check 0.9.3",
  "wasm-bindgen",
@@ -2491,6 +2503,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f03b9878abf6d14e6779d3f24f07b2cfa90352cfec4acc5aab8f1ac7f146fae8"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde-wasm-bindgen"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "618365e8e586c22123d692b72a7d791d5ee697817b65a218cdf12a98870af0f7"
+dependencies = [
+ "fnv",
+ "js-sys",
+ "serde",
+ "wasm-bindgen",
 ]
 
 [[package]]
